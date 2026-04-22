@@ -492,7 +492,7 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
             <div class="field"><label>&nbsp;</label><button class="chip" id="scanBarcodeBtn" type="button">Scan (Mobile)</button></div>
           </div>
           <div class="muted" style="margin-top:8px">Packaged food only. This layout uses inline actions only, with no sticky buttons overlapping taps.</div>
-          <div class="list" id="barcodeResultBox" style="margin-top:12px"></div>
+          <div class="list" id="barcodeResultBox"></div><div id="scannerContainer" style="display:none;margin-top:10px;"><div id="reader" style="width:100%;border-radius:12px;"></div><button class="chip" id="closeScannerBtn" type="button" style="margin-top:10px;">Close Scanner</button></div><div id="barcodeResultBox" style="margin-top:12px"></div>
 
           <div style="margin-top:22px" class="panel-title">Add Custom Food</div>
           <div class="field-grid four">
@@ -799,7 +799,13 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
 
 <script>
 const storeKey='stayfitinlife_v5_8_1_fixed';
-const todayISO=()=>new Date().toISOString().slice(0,10);
+const todayISO=()=>{
+  const d=new Date();
+  const y=d.getFullYear();
+  const m=String(d.getMonth()+1).padStart(2,'0');
+  const day=String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+};
 const humanDate=(iso)=>{ try { return new Date(iso+'T00:00:00').toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); } catch(e){ return iso; } };
 let selectedNutritionDate = todayISO();
 const getBucketByDate=(bucket, date)=>((data[bucket]||{})[date] || []);
@@ -1438,7 +1444,7 @@ function bindEvents(){
   const nPrev=document.getElementById('nutritionPrevDateBtn'); if(nPrev){ nPrev.addEventListener('click', ()=>changeNutritionDate(-1)); }
   const nNext=document.getElementById('nutritionNextDateBtn'); if(nNext){ nNext.addEventListener('click', ()=>changeNutritionDate(1)); }
   const lookupBarcodeBtn=document.getElementById('lookupBarcodeBtn'); if(lookupBarcodeBtn){ lookupBarcodeBtn.addEventListener('click', ()=>{ const code=($('barcodeInput').value||'').trim(); if(!code) return; lookupBarcodeValue(code); }); }
-  const scanBarcodeBtn=document.getElementById('scanBarcodeBtn'); if(scanBarcodeBtn){ scanBarcodeBtn.addEventListener('click', async ()=>{ const code = prompt('Enter or paste barcode number'); if(code){ $('barcodeInput').value=code.trim(); lookupBarcodeValue(code.trim()); } }); }
+  const scanBarcodeBtn=document.getElementById('scanBarcodeBtn'); if(scanBarcodeBtn){ scanBarcodeBtn.addEventListener('click', async ()=>{ const code = startScanner(); if(code){ $('barcodeInput').value=code.trim(); lookupBarcodeValue(code.trim()); } }); }
 
   $('suppSelect').addEventListener('change', updateSuppDefaults);
   $('addSuppBtn').addEventListener('click', ()=>{ const name=$('suppSelect').value; if(!name) return; data.supplementStack.unshift({name, dose:Number($('suppDose').value||1), unit:$('suppUnit').value, timing:$('suppTiming').value, reminder:$('suppReminder').value, brand:$('suppBrand').value.trim()}); $('suppDose').value=''; $('suppBrand').value=''; saveData(); });
@@ -1495,6 +1501,61 @@ function init(){
   switchTab('home');
 }
 init();
+
+let html5QrCode;
+
+function startScanner(){
+  document.getElementById("scannerContainer").style.display="block";
+  html5QrCode=new Html5Qrcode("reader");
+  Html5Qrcode.getCameras().then(devices=>{
+    if(devices.length){
+      const id=devices[0].id;
+      html5QrCode.start(id,{fps:10,qrbox:{width:250,height:150}},(txt)=>{
+        stopScanner();
+        document.getElementById("barcodeInput").value=txt;
+        lookupBarcodeValue(txt);
+        if(navigator.vibrate) navigator.vibrate(200);
+      });
+    }
+  }).catch(()=>alert("Camera not available"));
+}
+
+function stopScanner(){
+  if(html5QrCode){
+    html5QrCode.stop().then(()=>{
+      document.getElementById("scannerContainer").style.display="none";
+    });
+  }
+}
+
+</script>
+<script src="https://unpkg.com/html5-qrcode">
+let html5QrCode;
+
+function startScanner(){
+  document.getElementById("scannerContainer").style.display="block";
+  html5QrCode=new Html5Qrcode("reader");
+  Html5Qrcode.getCameras().then(devices=>{
+    if(devices.length){
+      const id=devices[0].id;
+      html5QrCode.start(id,{fps:10,qrbox:{width:250,height:150}},(txt)=>{
+        stopScanner();
+        document.getElementById("barcodeInput").value=txt;
+        lookupBarcodeValue(txt);
+        if(navigator.vibrate) navigator.vibrate(200);
+      });
+    }
+  }).catch(()=>alert("Camera not available"));
+}
+
+function stopScanner(){
+  if(html5QrCode){
+    html5QrCode.stop().then(()=>{
+      document.getElementById("scannerContainer").style.display="none";
+    });
+  }
+}
+
 </script>
 </body>
 </html>
