@@ -1,0 +1,2 @@
+Stayfitinlife V6 AI Coach integration\nIncluded:\n- Screen-aware AI Coach\n- Netlify function at netlify/functions/coach.js\n- Model routing: gpt-5.4-mini for normal screen coach requests, gpt-5.4 for deep/progress/settings review\n- Daily AI Coach cap: 5 queries/day per user\n- Remaining query counter in Coach sheet\n- Settings updated with Version V6 and Last Updated 23 April 2026\n- netlify.toml added\n
+V6.1 fix: Ask AI Coach button no longer gets overwritten by local coach rendering.
