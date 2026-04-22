@@ -1,3 +1,4 @@
+<!-- V6.3 NUTRITION BARCODE -->
 <!-- V6.1 AI BUTTON FIX -->
 <!-- V6 AI COACH ROUTING -->
 <!-- V5.9.3 WORKOUT HISTORY -->
@@ -13,7 +14,7 @@
 <meta name="theme-color" content="#07111f"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<meta name="build-version" content="v6.1-ai-button-fix"/>
+<meta name="build-version" content="v6.3-nutrition-history-barcode"/>
 <title>Stayfitinlife</title>
 <link rel="manifest" href="manifest.webmanifest"/>
 <link rel="apple-touch-icon" href="icons/icon-192.png"/>
@@ -277,6 +278,17 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
   .bottom-nav{display:grid !important}
 }
 
+
+.nutrition-top-panel{padding-bottom:14px}
+.nutrition-date-toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.nutrition-date-center{text-align:center;flex:1}
+#barcodeResultBox .list-item{align-items:flex-start}
+@media (max-width:860px){
+  .nutrition-date-toolbar{gap:8px}
+  #nutritionDateLabel{font-size:14px}
+  #barcodeResultBox .chip, #lookupBarcodeBtn, #scanBarcodeBtn{min-height:44px}
+}
+
 </style>
 </head>
 <body>
@@ -429,8 +441,34 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
       </div>
     </section>
 
-    <section class="section" id="nutrition">
-      <div class="content-grid equal">
+    
+<section class="section" id="nutrition">
+      <div class="panel nutrition-top-panel">
+        <div class="nutrition-date-toolbar">
+          <button class="chip" id="nutritionPrevDateBtn" type="button">◀</button>
+          <div class="nutrition-date-center">
+            <div class="panel-title" style="margin-bottom:8px">Nutrition History + Logging</div>
+            <div class="muted" id="nutritionDateLabel">Today</div>
+          </div>
+          <button class="chip" id="nutritionNextDateBtn" type="button">▶</button>
+        </div>
+        <div class="field-grid three" style="margin-top:12px">
+          <div class="field">
+            <label>Selected Date</label>
+            <input id="nutritionDateInput" type="date"/>
+          </div>
+          <div class="field">
+            <label>Daily Macro Summary</label>
+            <input id="nutritionMacroSummary" readonly/>
+          </div>
+          <div class="field">
+            <label>Water Summary</label>
+            <input id="nutritionWaterSummaryInput" readonly/>
+          </div>
+        </div>
+      </div>
+
+      <div class="content-grid equal" style="margin-top:16px">
         <div class="panel">
           <div class="panel-title">Nutrition Logging</div>
           <div class="field-grid">
@@ -446,6 +484,16 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
             <div class="field"><label>Preview</label><input id="foodPreview" readonly/></div>
           </div>
           <div style="margin-top:14px"><button class="primary-btn" id="addMealBtn" type="button">Add Meal Item</button></div>
+
+          <div style="margin-top:20px" class="panel-title">Barcode Scanner</div>
+          <div class="field-grid three">
+            <div class="field"><label>Barcode</label><input id="barcodeInput" inputmode="numeric" placeholder="Enter barcode"/></div>
+            <div class="field"><label>&nbsp;</label><button class="primary-btn" id="lookupBarcodeBtn" type="button">Lookup Barcode</button></div>
+            <div class="field"><label>&nbsp;</label><button class="chip" id="scanBarcodeBtn" type="button">Scan (Mobile)</button></div>
+          </div>
+          <div class="muted" style="margin-top:8px">Packaged food only. This layout uses inline actions only, with no sticky buttons overlapping taps.</div>
+          <div class="list" id="barcodeResultBox" style="margin-top:12px"></div>
+
           <div style="margin-top:22px" class="panel-title">Add Custom Food</div>
           <div class="field-grid four">
             <div class="field"><label>Food Name</label><input id="customFoodName"/></div>
@@ -459,6 +507,7 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
           </div>
           <div style="margin-top:14px"><button class="primary-btn" id="addCustomFoodBtn" type="button">Save Custom Food</button></div>
         </div>
+
         <div class="panel">
           <div class="panel-title">Water + Meal Log</div>
           <div class="quick-water">
@@ -472,7 +521,9 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
             <div class="field"><label>&nbsp;</label><button class="primary-btn" id="addWaterBtn" type="button">Add Water</button></div>
           </div>
           <div style="margin-top:12px" class="muted" id="waterSummary">0L / 3.5L</div>
-          <div style="height:16px"></div><div class="list" id="mealList"></div>
+          <div style="height:16px"></div>
+          <div class="panel-title">Meals for Selected Date</div>
+          <div class="list" id="mealList"></div>
         </div>
       </div>
     </section>
@@ -545,7 +596,7 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
             <div class="list-item">
               <div>
                 <strong>Version</strong>
-                <div class="muted" id="appVersion">V6</div>
+                <div class="muted" id="appVersion">V6.3</div>
               </div>
             </div>
             <div class="list-item">
@@ -749,6 +800,12 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
 <script>
 const storeKey='stayfitinlife_v5_8_1_fixed';
 const todayISO=()=>new Date().toISOString().slice(0,10);
+const humanDate=(iso)=>{ try { return new Date(iso+'T00:00:00').toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); } catch(e){ return iso; } };
+let selectedNutritionDate = todayISO();
+const getBucketByDate=(bucket, date)=>((data[bucket]||{})[date] || []);
+function ensureBucketByDate(bucket, date){ if(!data[bucket][date]) data[bucket][date] = []; return data[bucket][date]; }
+function addByDate(bucket, date, item){ if(!item.id) item.id = uid(); if(!item.date) item.date = date; ensureBucketByDate(bucket, date).unshift(item); }
+
 const builtInFoods=[{"name": "Roti", "cuisine": "Indian", "unit": "1 piece", "protein": 3, "carbs": 18, "fats": 1}, {"name": "Phulka", "cuisine": "Indian", "unit": "1 piece", "protein": 3, "carbs": 17, "fats": 1}, {"name": "Paratha", "cuisine": "Indian", "unit": "1 piece", "protein": 4, "carbs": 28, "fats": 8}, {"name": "Plain Rice", "cuisine": "Indian", "unit": "1 bowl", "protein": 4, "carbs": 45, "fats": 1}, {"name": "Jeera Rice", "cuisine": "Indian", "unit": "1 bowl", "protein": 4, "carbs": 45, "fats": 4}, {"name": "Dal Tadka", "cuisine": "Indian", "unit": "1 bowl", "protein": 10, "carbs": 18, "fats": 6}, {"name": "Rajma", "cuisine": "Indian", "unit": "1 bowl", "protein": 11, "carbs": 29, "fats": 4}, {"name": "Chole", "cuisine": "Indian", "unit": "1 bowl", "protein": 12, "carbs": 30, "fats": 8}, {"name": "Paneer Butter Masala", "cuisine": "Indian", "unit": "1 bowl", "protein": 13, "carbs": 12, "fats": 22}, {"name": "Paneer Lababdar", "cuisine": "Indian", "unit": "1 bowl", "protein": 14, "carbs": 14, "fats": 20}, {"name": "Kadai Paneer", "cuisine": "Indian", "unit": "1 bowl", "protein": 14, "carbs": 11, "fats": 17}, {"name": "Chicken Curry", "cuisine": "Indian", "unit": "1 bowl", "protein": 24, "carbs": 8, "fats": 15}, {"name": "Chicken Tikka", "cuisine": "Indian", "unit": "100 g", "protein": 27, "carbs": 3, "fats": 7}, {"name": "Kadai Chicken", "cuisine": "Indian", "unit": "1 bowl", "protein": 24, "carbs": 9, "fats": 14}, {"name": "Tandoori Chaap", "cuisine": "Indian", "unit": "100 g", "protein": 18, "carbs": 8, "fats": 12}, {"name": "Soya Chaap Butter Masala", "cuisine": "Indian", "unit": "1 bowl", "protein": 20, "carbs": 16, "fats": 20}, {"name": "Poha", "cuisine": "Indian", "unit": "1 bowl", "protein": 5, "carbs": 34, "fats": 6}, {"name": "Upma", "cuisine": "Indian", "unit": "1 bowl", "protein": 5, "carbs": 32, "fats": 8}, {"name": "Idli", "cuisine": "Indian", "unit": "2 pieces", "protein": 4, "carbs": 30, "fats": 1}, {"name": "Dosa", "cuisine": "Indian", "unit": "1 piece", "protein": 5, "carbs": 32, "fats": 7}, {"name": "Samosa", "cuisine": "Indian", "unit": "1 piece", "protein": 4, "carbs": 25, "fats": 12}, {"name": "Hummus", "cuisine": "Lebanese", "unit": "100 g", "protein": 8, "carbs": 14, "fats": 10}, {"name": "Shish Tawook", "cuisine": "Lebanese", "unit": "100 g", "protein": 27, "carbs": 2, "fats": 8}, {"name": "Greek Yogurt", "cuisine": "American", "unit": "100 g", "protein": 10, "carbs": 4, "fats": 0}, {"name": "Oatmeal", "cuisine": "American", "unit": "1 bowl", "protein": 6, "carbs": 27, "fats": 3}, {"name": "Scrambled Eggs", "cuisine": "American", "unit": "2 eggs", "protein": 12, "carbs": 2, "fats": 10, "eggDish": true}, {"name": "Omelette", "cuisine": "American", "unit": "2 eggs", "protein": 13, "carbs": 3, "fats": 10, "eggDish": true}, {"name": "Grilled Chicken Breast", "cuisine": "American", "unit": "100 g", "protein": 31, "carbs": 0, "fats": 4}, {"name": "Apple", "cuisine": "Fruit", "unit": "1 medium", "protein": 0, "carbs": 25, "fats": 0}, {"name": "Banana", "cuisine": "Fruit", "unit": "1 medium", "protein": 1, "carbs": 27, "fats": 0}, {"name": "Orange", "cuisine": "Fruit", "unit": "1 medium", "protein": 1, "carbs": 15, "fats": 0}, {"name": "Mango", "cuisine": "Fruit", "unit": "1 cup", "protein": 1, "carbs": 25, "fats": 0}, {"name": "Orange Juice", "cuisine": "Drinks", "unit": "250 mL", "protein": 2, "carbs": 26, "fats": 0}, {"name": "Protein Smoothie", "cuisine": "Drinks", "unit": "300 mL", "protein": 25, "carbs": 18, "fats": 4}, {"name": "Black Coffee", "cuisine": "Drinks", "unit": "1 cup", "protein": 0, "carbs": 0, "fats": 0}, {"name": "Latte", "cuisine": "Drinks", "unit": "1 cup", "protein": 8, "carbs": 12, "fats": 5}, {"name": "Masala Chai", "cuisine": "Drinks", "unit": "1 cup", "protein": 3, "carbs": 10, "fats": 3}, {"name": "Lassi", "cuisine": "Drinks", "unit": "1 glass", "protein": 8, "carbs": 22, "fats": 6}, {"name": "Whey Protein", "cuisine": "Supplement", "unit": "1 scoop", "protein": 24, "carbs": 3, "fats": 2}, {"name": "D3 + K2", "cuisine": "Supplement", "unit": "1 capsule", "protein": 0, "carbs": 0, "fats": 0}, {"name": "Gulab Jamun", "cuisine": "Cheat Meal", "unit": "2 pieces", "protein": 4, "carbs": 30, "fats": 10}, {"name": "Pizza Slice", "cuisine": "Cheat Meal", "unit": "1 slice", "protein": 12, "carbs": 33, "fats": 12}];
 const bodyParts={"All": {"group": "Mixed", "exercises": [{"name": "Bench Press", "type": "Gym", "tags": ["Push", "Chest", "Gym", "Compound"]}, {"name": "Incline Bench Press", "type": "Gym", "tags": ["Push", "Chest", "Gym", "Compound"]}, {"name": "Decline Bench Press", "type": "Gym", "tags": ["Push", "Chest", "Gym", "Compound"]}, {"name": "Incline Dumbbell Press", "type": "Gym", "tags": ["Push", "Chest", "Gym", "Compound"]}, {"name": "Flat Dumbbell Press", "type": "Gym", "tags": ["Push", "Chest", "Gym", "Compound"]}, {"name": "Decline Dumbbell Press", "type": "Gym", "tags": ["Push", "Chest", "Gym", "Compound"]}, {"name": "Machine Chest Press", "type": "Gym", "tags": ["Push", "Chest", "Gym"]}, {"name": "Smith Machine Bench Press", "type": "Gym", "tags": ["Push", "Chest", "Gym"]}, {"name": "Cable Fly", "type": "Gym", "tags": ["Push", "Chest", "Gym", "Isolation"]}, {"name": "Low To High Cable Fly", "type": "Gym", "tags": ["Push", "Chest", "Gym", "Isolation"]}, {"name": "High To Low Cable Fly", "type": "Gym", "tags": ["Push", "Chest", "Gym", "Isolation"]}, {"name": "Pec Deck Fly", "type": "Gym", "tags": ["Push", "Chest", "Gym", "Isolation"]}, {"name": "Push-up", "type": "Bodyweight", "tags": ["Push", "Chest", "Bodyweight"]}, {"name": "Wide Push-up", "type": "Bodyweight", "tags": ["Push", "Chest", "Bodyweight"]}, {"name": "Decline Push-up", "type": "Bodyweight", "tags": ["Push", "Chest", "Bodyweight"]}, {"name": "Ring Push-up", "type": "Bodyweight", "tags": ["Push", "Chest", "Bodyweight"]}, {"name": "Dip", "type": "Bodyweight", "tags": ["Push", "Chest", "Triceps", "Bodyweight"]}, {"name": "Lat Pulldown", "type": "Gym", "tags": ["Pull", "Back", "Gym", "Compound"]}, {"name": "Wide Grip Lat Pulldown", "type": "Gym", "tags": ["Pull", "Back", "Gym", "Compound"]}, {"name": "Close Grip Lat Pulldown", "type": "Gym", "tags": ["Pull", "Back", "Gym", "Compound"]}, {"name": "Neutral Grip Pulldown", "type": "Gym", "tags": ["Pull", "Back", "Gym", "Compound"]}, {"name": "Seated Cable Row", "type": "Gym", "tags": ["Pull", "Back", "Gym", "Compound"]}, {"name": "Chest Supported Row", "type": "Gym", "tags": ["Pull", "Back", "Gym", "Compound"]}, {"name": "Barbell Row", "type": "Gym", "tags": ["Pull", "Back", "Gym", "Compound"]}, {"name": "Pendlay Row", "type": "Gym", "tags": ["Pull", "Back", "Gym", "Compound"]}, {"name": "T-Bar Row", "type": "Gym", "tags": ["Pull", "Back", "Gym", "Compound"]}, {"name": "One Arm Dumbbell Row", "type": "Gym", "tags": ["Pull", "Back", "Gym", "Compound"]}, {"name": "Rack Pull", "type": "Gym", "tags": ["Pull", "Back", "Gym", "Compound"]}, {"name": "Deadlift", "type": "Gym", "tags": ["Pull", "Back", "Gym", "Compound"]}, {"name": "Straight Arm Pulldown", "type": "Gym", "tags": ["Pull", "Back", "Gym", "Isolation"]}, {"name": "Pull-up", "type": "Bodyweight", "tags": ["Pull", "Back", "Bodyweight"]}, {"name": "Chin-up", "type": "Bodyweight", "tags": ["Pull", "Biceps", "Back", "Bodyweight"]}, {"name": "Inverted Row", "type": "Bodyweight", "tags": ["Pull", "Back", "Bodyweight"]}, {"name": "Australian Pull-up", "type": "Bodyweight", "tags": ["Pull", "Back", "Bodyweight"]}, {"name": "Overhead Press", "type": "Gym", "tags": ["Push", "Shoulders", "Gym", "Compound"]}, {"name": "Seated Dumbbell Press", "type": "Gym", "tags": ["Push", "Shoulders", "Gym", "Compound"]}, {"name": "Arnold Press", "type": "Gym", "tags": ["Push", "Shoulders", "Gym", "Compound"]}, {"name": "Machine Shoulder Press", "type": "Gym", "tags": ["Push", "Shoulders", "Gym"]}, {"name": "Lateral Raise", "type": "Gym", "tags": ["Push", "Shoulders", "Gym", "Isolation"]}, {"name": "Cable Lateral Raise", "type": "Gym", "tags": ["Push", "Shoulders", "Gym", "Isolation"]}, {"name": "Rear Delt Fly", "type": "Gym", "tags": ["Pull", "Shoulders", "Gym", "Isolation"]}, {"name": "Face Pull", "type": "Gym", "tags": ["Pull", "Shoulders", "Gym", "Isolation"]}, {"name": "Upright Row", "type": "Gym", "tags": ["Pull", "Shoulders", "Gym"]}, {"name": "Pike Push-up", "type": "Bodyweight", "tags": ["Push", "Shoulders", "Bodyweight"]}, {"name": "Handstand Push-up", "type": "Bodyweight", "tags": ["Push", "Shoulders", "Bodyweight"]}, {"name": "EZ Bar Curl", "type": "Gym", "tags": ["Pull", "Biceps", "Gym", "Isolation"]}, {"name": "Barbell Curl", "type": "Gym", "tags": ["Pull", "Biceps", "Gym", "Isolation"]}, {"name": "Dumbbell Curl", "type": "Gym", "tags": ["Pull", "Biceps", "Gym", "Isolation"]}, {"name": "Alternating Dumbbell Curl", "type": "Gym", "tags": ["Pull", "Biceps", "Gym", "Isolation"]}, {"name": "Hammer Curl", "type": "Gym", "tags": ["Pull", "Biceps", "Gym", "Isolation"]}, {"name": "Incline Dumbbell Curl", "type": "Gym", "tags": ["Pull", "Biceps", "Gym", "Isolation"]}, {"name": "Preacher Curl", "type": "Gym", "tags": ["Pull", "Biceps", "Gym", "Isolation"]}, {"name": "Cable Curl", "type": "Gym", "tags": ["Pull", "Biceps", "Gym", "Isolation"]}, {"name": "Spider Curl", "type": "Gym", "tags": ["Pull", "Biceps", "Gym", "Isolation"]}, {"name": "Triceps Pushdown", "type": "Gym", "tags": ["Push", "Triceps", "Gym", "Isolation"]}, {"name": "Rope Pushdown", "type": "Gym", "tags": ["Push", "Triceps", "Gym", "Isolation"]}, {"name": "Straight Bar Pushdown", "type": "Gym", "tags": ["Push", "Triceps", "Gym", "Isolation"]}, {"name": "Overhead Triceps Extension", "type": "Gym", "tags": ["Push", "Triceps", "Gym", "Isolation"]}, {"name": "Skull Crusher", "type": "Gym", "tags": ["Push", "Triceps", "Gym", "Isolation"]}, {"name": "Close Grip Bench Press", "type": "Gym", "tags": ["Push", "Triceps", "Gym", "Compound"]}, {"name": "Bench Dip", "type": "Bodyweight", "tags": ["Push", "Triceps", "Bodyweight"]}, {"name": "Diamond Push-up", "type": "Bodyweight", "tags": ["Push", "Triceps", "Bodyweight"]}, {"name": "Back Squat", "type": "Gym", "tags": ["Legs", "Quads", "Glutes", "Gym", "Compound"]}, {"name": "Front Squat", "type": "Gym", "tags": ["Legs", "Quads", "Gym", "Compound"]}, {"name": "Hack Squat", "type": "Gym", "tags": ["Legs", "Quads", "Gym", "Compound"]}, {"name": "Pendulum Squat", "type": "Gym", "tags": ["Legs", "Quads", "Gym", "Compound"]}, {"name": "Leg Press", "type": "Gym", "tags": ["Legs", "Quads", "Gym", "Compound"]}, {"name": "Leg Extension", "type": "Gym", "tags": ["Legs", "Quads", "Gym", "Isolation"]}, {"name": "Walking Lunge", "type": "Gym", "tags": ["Legs", "Glutes", "Gym", "Compound"]}, {"name": "Smith Machine Squat", "type": "Gym", "tags": ["Legs", "Quads", "Gym", "Compound"]}, {"name": "Bodyweight Squat", "type": "Bodyweight", "tags": ["Legs", "Quads", "Bodyweight"]}, {"name": "Jump Squat", "type": "Bodyweight", "tags": ["Legs", "Quads", "Bodyweight"]}, {"name": "Step-up", "type": "Bodyweight", "tags": ["Legs", "Glutes", "Bodyweight"]}, {"name": "Bulgarian Split Squat", "type": "Bodyweight", "tags": ["Legs", "Glutes", "Quads", "Bodyweight"]}, {"name": "Romanian Deadlift", "type": "Gym", "tags": ["Legs", "Hamstrings", "Glutes", "Gym", "Compound"]}, {"name": "Stiff Leg Deadlift", "type": "Gym", "tags": ["Legs", "Hamstrings", "Gym", "Compound"]}, {"name": "Seated Leg Curl", "type": "Gym", "tags": ["Legs", "Hamstrings", "Gym", "Isolation"]}, {"name": "Lying Leg Curl", "type": "Gym", "tags": ["Legs", "Hamstrings", "Gym", "Isolation"]}, {"name": "Good Morning", "type": "Gym", "tags": ["Legs", "Hamstrings", "Gym", "Compound"]}, {"name": "Nordic Curl", "type": "Bodyweight", "tags": ["Legs", "Hamstrings", "Bodyweight"]}, {"name": "Single Leg RDL", "type": "Bodyweight", "tags": ["Legs", "Hamstrings", "Bodyweight"]}, {"name": "Hip Thrust", "type": "Gym", "tags": ["Legs", "Glutes", "Gym", "Compound"]}, {"name": "Barbell Glute Bridge", "type": "Gym", "tags": ["Legs", "Glutes", "Gym", "Compound"]}, {"name": "Cable Kickback", "type": "Gym", "tags": ["Legs", "Glutes", "Gym", "Isolation"]}, {"name": "Glute Bridge", "type": "Bodyweight", "tags": ["Legs", "Glutes", "Bodyweight"]}, {"name": "Standing Calf Raise", "type": "Gym", "tags": ["Legs", "Calves", "Gym", "Isolation"]}, {"name": "Seated Calf Raise", "type": "Gym", "tags": ["Legs", "Calves", "Gym", "Isolation"]}, {"name": "Donkey Calf Raise", "type": "Gym", "tags": ["Legs", "Calves", "Gym", "Isolation"]}, {"name": "Leg Press Calf Raise", "type": "Gym", "tags": ["Legs", "Calves", "Gym", "Isolation"]}, {"name": "Bodyweight Calf Raise", "type": "Bodyweight", "tags": ["Legs", "Calves", "Bodyweight"]}, {"name": "Single Leg Calf Raise", "type": "Bodyweight", "tags": ["Legs", "Calves", "Bodyweight"]}, {"name": "Plank", "type": "Bodyweight", "tags": ["Core", "Bodyweight"]}, {"name": "Side Plank", "type": "Bodyweight", "tags": ["Core", "Bodyweight"]}, {"name": "Hanging Leg Raise", "type": "Gym", "tags": ["Core", "Gym"]}, {"name": "Cable Crunch", "type": "Gym", "tags": ["Core", "Gym"]}, {"name": "Ab Wheel Rollout", "type": "Gym", "tags": ["Core", "Gym"]}, {"name": "Mountain Climbers", "type": "Bodyweight", "tags": ["Core", "Bodyweight"]}, {"name": "Bicycle Crunch", "type": "Bodyweight", "tags": ["Core", "Bodyweight"]}, {"name": "Russian Twist", "type": "Bodyweight", "tags": ["Core", "Bodyweight"]}]}, "Chest": {"group": "Push", "exercises": [{"name": "Bench Press", "type": "Gym", "tags": ["Push", "Chest", "Gym", "Compound"]}, {"name": "Incline Bench Press", "type": "Gym", "tags": ["Push", "Chest", "Gym", "Compound"]}, {"name": "Decline Bench Press", "type": "Gym", "tags": ["Push", "Chest", "Gym", "Compound"]}, {"name": "Incline Dumbbell Press", "type": "Gym", "tags": ["Push", "Chest", "Gym", "Compound"]}, {"name": "Flat Dumbbell Press", "type": "Gym", "tags": ["Push", "Chest", "Gym", "Compound"]}, {"name": "Decline Dumbbell Press", "type": "Gym", "tags": ["Push", "Chest", "Gym", "Compound"]}, {"name": "Machine Chest Press", "type": "Gym", "tags": ["Push", "Chest", "Gym"]}, {"name": "Smith Machine Bench Press", "type": "Gym", "tags": ["Push", "Chest", "Gym"]}, {"name": "Cable Fly", "type": "Gym", "tags": ["Push", "Chest", "Gym", "Isolation"]}, {"name": "Low To High Cable Fly", "type": "Gym", "tags": ["Push", "Chest", "Gym", "Isolation"]}, {"name": "High To Low Cable Fly", "type": "Gym", "tags": ["Push", "Chest", "Gym", "Isolation"]}, {"name": "Pec Deck Fly", "type": "Gym", "tags": ["Push", "Chest", "Gym", "Isolation"]}, {"name": "Push-up", "type": "Bodyweight", "tags": ["Push", "Chest", "Bodyweight"]}, {"name": "Wide Push-up", "type": "Bodyweight", "tags": ["Push", "Chest", "Bodyweight"]}, {"name": "Decline Push-up", "type": "Bodyweight", "tags": ["Push", "Chest", "Bodyweight"]}, {"name": "Ring Push-up", "type": "Bodyweight", "tags": ["Push", "Chest", "Bodyweight"]}, {"name": "Dip", "type": "Bodyweight", "tags": ["Push", "Chest", "Triceps", "Bodyweight"]}]}, "Back": {"group": "Pull", "exercises": [{"name": "Lat Pulldown", "type": "Gym", "tags": ["Pull", "Back", "Gym", "Compound"]}, {"name": "Wide Grip Lat Pulldown", "type": "Gym", "tags": ["Pull", "Back", "Gym", "Compound"]}, {"name": "Close Grip Lat Pulldown", "type": "Gym", "tags": ["Pull", "Back", "Gym", "Compound"]}, {"name": "Neutral Grip Pulldown", "type": "Gym", "tags": ["Pull", "Back", "Gym", "Compound"]}, {"name": "Seated Cable Row", "type": "Gym", "tags": ["Pull", "Back", "Gym", "Compound"]}, {"name": "Chest Supported Row", "type": "Gym", "tags": ["Pull", "Back", "Gym", "Compound"]}, {"name": "Barbell Row", "type": "Gym", "tags": ["Pull", "Back", "Gym", "Compound"]}, {"name": "Pendlay Row", "type": "Gym", "tags": ["Pull", "Back", "Gym", "Compound"]}, {"name": "T-Bar Row", "type": "Gym", "tags": ["Pull", "Back", "Gym", "Compound"]}, {"name": "One Arm Dumbbell Row", "type": "Gym", "tags": ["Pull", "Back", "Gym", "Compound"]}, {"name": "Rack Pull", "type": "Gym", "tags": ["Pull", "Back", "Gym", "Compound"]}, {"name": "Deadlift", "type": "Gym", "tags": ["Pull", "Back", "Gym", "Compound"]}, {"name": "Straight Arm Pulldown", "type": "Gym", "tags": ["Pull", "Back", "Gym", "Isolation"]}, {"name": "Pull-up", "type": "Bodyweight", "tags": ["Pull", "Back", "Bodyweight"]}, {"name": "Chin-up", "type": "Bodyweight", "tags": ["Pull", "Back", "Biceps", "Bodyweight"]}, {"name": "Inverted Row", "type": "Bodyweight", "tags": ["Pull", "Back", "Bodyweight"]}, {"name": "Australian Pull-up", "type": "Bodyweight", "tags": ["Pull", "Back", "Bodyweight"]}]}, "Shoulders": {"group": "Push / Pull", "exercises": [{"name": "Overhead Press", "type": "Gym", "tags": ["Push", "Shoulders", "Gym", "Compound"]}, {"name": "Seated Dumbbell Press", "type": "Gym", "tags": ["Push", "Shoulders", "Gym", "Compound"]}, {"name": "Arnold Press", "type": "Gym", "tags": ["Push", "Shoulders", "Gym", "Compound"]}, {"name": "Machine Shoulder Press", "type": "Gym", "tags": ["Push", "Shoulders", "Gym"]}, {"name": "Lateral Raise", "type": "Gym", "tags": ["Push", "Shoulders", "Gym", "Isolation"]}, {"name": "Cable Lateral Raise", "type": "Gym", "tags": ["Push", "Shoulders", "Gym", "Isolation"]}, {"name": "Rear Delt Fly", "type": "Gym", "tags": ["Pull", "Shoulders", "Gym", "Isolation"]}, {"name": "Face Pull", "type": "Gym", "tags": ["Pull", "Shoulders", "Gym", "Isolation"]}, {"name": "Upright Row", "type": "Gym", "tags": ["Pull", "Shoulders", "Gym"]}, {"name": "Pike Push-up", "type": "Bodyweight", "tags": ["Push", "Shoulders", "Bodyweight"]}, {"name": "Handstand Push-up", "type": "Bodyweight", "tags": ["Push", "Shoulders", "Bodyweight"]}]}, "Biceps": {"group": "Pull", "exercises": [{"name": "EZ Bar Curl", "type": "Gym", "tags": ["Pull", "Biceps", "Gym", "Isolation"]}, {"name": "Barbell Curl", "type": "Gym", "tags": ["Pull", "Biceps", "Gym", "Isolation"]}, {"name": "Dumbbell Curl", "type": "Gym", "tags": ["Pull", "Biceps", "Gym", "Isolation"]}, {"name": "Alternating Dumbbell Curl", "type": "Gym", "tags": ["Pull", "Biceps", "Gym", "Isolation"]}, {"name": "Hammer Curl", "type": "Gym", "tags": ["Pull", "Biceps", "Gym", "Isolation"]}, {"name": "Incline Dumbbell Curl", "type": "Gym", "tags": ["Pull", "Biceps", "Gym", "Isolation"]}, {"name": "Preacher Curl", "type": "Gym", "tags": ["Pull", "Biceps", "Gym", "Isolation"]}, {"name": "Cable Curl", "type": "Gym", "tags": ["Pull", "Biceps", "Gym", "Isolation"]}, {"name": "Spider Curl", "type": "Gym", "tags": ["Pull", "Biceps", "Gym", "Isolation"]}, {"name": "Chin-up", "type": "Bodyweight", "tags": ["Pull", "Biceps", "Back", "Bodyweight"]}]}, "Triceps": {"group": "Push", "exercises": [{"name": "Triceps Pushdown", "type": "Gym", "tags": ["Push", "Triceps", "Gym", "Isolation"]}, {"name": "Rope Pushdown", "type": "Gym", "tags": ["Push", "Triceps", "Gym", "Isolation"]}, {"name": "Straight Bar Pushdown", "type": "Gym", "tags": ["Push", "Triceps", "Gym", "Isolation"]}, {"name": "Overhead Triceps Extension", "type": "Gym", "tags": ["Push", "Triceps", "Gym", "Isolation"]}, {"name": "Skull Crusher", "type": "Gym", "tags": ["Push", "Triceps", "Gym", "Isolation"]}, {"name": "Close Grip Bench Press", "type": "Gym", "tags": ["Push", "Triceps", "Gym", "Compound"]}, {"name": "Bench Dip", "type": "Bodyweight", "tags": ["Push", "Triceps", "Bodyweight"]}, {"name": "Diamond Push-up", "type": "Bodyweight", "tags": ["Push", "Triceps", "Bodyweight"]}]}, "Quads": {"group": "Legs", "exercises": [{"name": "Back Squat", "type": "Gym", "tags": ["Legs", "Quads", "Glutes", "Gym", "Compound"]}, {"name": "Front Squat", "type": "Gym", "tags": ["Legs", "Quads", "Gym", "Compound"]}, {"name": "Hack Squat", "type": "Gym", "tags": ["Legs", "Quads", "Gym", "Compound"]}, {"name": "Pendulum Squat", "type": "Gym", "tags": ["Legs", "Quads", "Gym", "Compound"]}, {"name": "Leg Press", "type": "Gym", "tags": ["Legs", "Quads", "Gym", "Compound"]}, {"name": "Leg Extension", "type": "Gym", "tags": ["Legs", "Quads", "Gym", "Isolation"]}, {"name": "Walking Lunge", "type": "Gym", "tags": ["Legs", "Quads", "Glutes", "Gym", "Compound"]}, {"name": "Smith Machine Squat", "type": "Gym", "tags": ["Legs", "Quads", "Gym", "Compound"]}, {"name": "Bodyweight Squat", "type": "Bodyweight", "tags": ["Legs", "Quads", "Bodyweight"]}, {"name": "Jump Squat", "type": "Bodyweight", "tags": ["Legs", "Quads", "Bodyweight"]}, {"name": "Step-up", "type": "Bodyweight", "tags": ["Legs", "Quads", "Bodyweight"]}, {"name": "Bulgarian Split Squat", "type": "Bodyweight", "tags": ["Legs", "Quads", "Glutes", "Bodyweight"]}]}, "Hamstrings": {"group": "Legs", "exercises": [{"name": "Romanian Deadlift", "type": "Gym", "tags": ["Legs", "Hamstrings", "Glutes", "Gym", "Compound"]}, {"name": "Stiff Leg Deadlift", "type": "Gym", "tags": ["Legs", "Hamstrings", "Gym", "Compound"]}, {"name": "Seated Leg Curl", "type": "Gym", "tags": ["Legs", "Hamstrings", "Gym", "Isolation"]}, {"name": "Lying Leg Curl", "type": "Gym", "tags": ["Legs", "Hamstrings", "Gym", "Isolation"]}, {"name": "Good Morning", "type": "Gym", "tags": ["Legs", "Hamstrings", "Gym", "Compound"]}, {"name": "Nordic Curl", "type": "Bodyweight", "tags": ["Legs", "Hamstrings", "Bodyweight"]}, {"name": "Single Leg RDL", "type": "Bodyweight", "tags": ["Legs", "Hamstrings", "Bodyweight"]}]}, "Glutes": {"group": "Legs", "exercises": [{"name": "Hip Thrust", "type": "Gym", "tags": ["Legs", "Glutes", "Gym", "Compound"]}, {"name": "Barbell Glute Bridge", "type": "Gym", "tags": ["Legs", "Glutes", "Gym", "Compound"]}, {"name": "Cable Kickback", "type": "Gym", "tags": ["Legs", "Glutes", "Gym", "Isolation"]}, {"name": "Walking Lunge", "type": "Gym", "tags": ["Legs", "Glutes", "Gym", "Compound"]}, {"name": "Bulgarian Split Squat", "type": "Bodyweight", "tags": ["Legs", "Glutes", "Quads", "Bodyweight"]}, {"name": "Glute Bridge", "type": "Bodyweight", "tags": ["Legs", "Glutes", "Bodyweight"]}, {"name": "Step-up", "type": "Bodyweight", "tags": ["Legs", "Glutes", "Bodyweight"]}]}, "Calves": {"group": "Legs", "exercises": [{"name": "Standing Calf Raise", "type": "Gym", "tags": ["Legs", "Calves", "Gym", "Isolation"]}, {"name": "Seated Calf Raise", "type": "Gym", "tags": ["Legs", "Calves", "Gym", "Isolation"]}, {"name": "Donkey Calf Raise", "type": "Gym", "tags": ["Legs", "Calves", "Gym", "Isolation"]}, {"name": "Leg Press Calf Raise", "type": "Gym", "tags": ["Legs", "Calves", "Gym", "Isolation"]}, {"name": "Bodyweight Calf Raise", "type": "Bodyweight", "tags": ["Legs", "Calves", "Bodyweight"]}, {"name": "Single Leg Calf Raise", "type": "Bodyweight", "tags": ["Legs", "Calves", "Bodyweight"]}]}, "Core": {"group": "Core", "exercises": [{"name": "Plank", "type": "Bodyweight", "tags": ["Core", "Bodyweight"]}, {"name": "Side Plank", "type": "Bodyweight", "tags": ["Core", "Bodyweight"]}, {"name": "Hanging Leg Raise", "type": "Gym", "tags": ["Core", "Gym"]}, {"name": "Cable Crunch", "type": "Gym", "tags": ["Core", "Gym"]}, {"name": "Ab Wheel Rollout", "type": "Gym", "tags": ["Core", "Gym"]}, {"name": "Mountain Climbers", "type": "Bodyweight", "tags": ["Core", "Bodyweight"]}, {"name": "Bicycle Crunch", "type": "Bodyweight", "tags": ["Core", "Bodyweight"]}, {"name": "Russian Twist", "type": "Bodyweight", "tags": ["Core", "Bodyweight"]}]}};
 const supplementLibrary=[{"name": "Whey Protein", "unit": "scoop", "timing": "Post-workout"}, {"name": "Whey Isolate", "unit": "scoop", "timing": "Post-workout"}, {"name": "Creatine Monohydrate", "unit": "g", "timing": "Post-workout"}, {"name": "BCAA", "unit": "scoop", "timing": "Intra-workout"}, {"name": "EAA", "unit": "scoop", "timing": "Intra-workout"}, {"name": "Pre-workout", "unit": "scoop", "timing": "Pre-workout"}, {"name": "Electrolyte Powder", "unit": "scoop", "timing": "Intra-workout"}, {"name": "Fish Oil / Omega-3", "unit": "softgel", "timing": "First meal"}, {"name": "Multivitamin", "unit": "tablet", "timing": "First meal"}, {"name": "Vitamin D3", "unit": "softgel", "timing": "First meal"}, {"name": "K2", "unit": "capsule", "timing": "First meal"}, {"name": "D3 + K2", "unit": "capsule", "timing": "First meal"}, {"name": "Magnesium", "unit": "mg", "timing": "Before bed"}, {"name": "Zinc", "unit": "mg", "timing": "Before bed"}, {"name": "Ashwagandha", "unit": "capsule", "timing": "Before bed"}, {"name": "L-Carnitine", "unit": "ml", "timing": "Pre-workout"}, {"name": "Casein Protein", "unit": "scoop", "timing": "Before bed"}];
@@ -901,6 +958,73 @@ function renderCoachUsage(){
   if(!el) return;
   el.textContent = `AI Coach queries left today: ${getCoachRemainingToday()}/5`;
 }
+
+let barcodeLookupResult = null;
+const nutritionDate = ()=> selectedNutritionDate || todayISO();
+function changeNutritionDate(delta){
+  const d = new Date((nutritionDate() || todayISO()) + 'T00:00:00');
+  d.setDate(d.getDate() + delta);
+  selectedNutritionDate = d.toISOString().slice(0,10);
+  renderAll();
+}
+function renderBarcodeResult(){
+  const box = document.getElementById('barcodeResultBox');
+  if(!box) return;
+  if(!barcodeLookupResult){
+    box.innerHTML = '<div class="muted">No barcode result yet.</div>';
+    return;
+  }
+  const p = barcodeLookupResult;
+  box.innerHTML = `
+    <div class="list-item">
+      <div>
+        <strong>${p.name || 'Unknown product'}</strong>
+        ${p.brand ? `<div class="muted">${p.brand}</div>` : ''}
+        <div class="muted">Per ${p.unitLabel || '100 g'} • kcal ${p.kcal ?? 0} • P ${p.protein ?? 0} • C ${p.carbs ?? 0} • F ${p.fats ?? 0}</div>
+      </div>
+      <button class="chip" id="addBarcodeFoodBtn" type="button">Add to Meal</button>
+    </div>`;
+  const addBtn = document.getElementById('addBarcodeFoodBtn');
+  if(addBtn){
+    addBtn.addEventListener('click', ()=>{
+      addByDate('mealsByDate', nutritionDate(), {
+        meal: $('mealName').value,
+        food: p.name || 'Scanned product',
+        cuisine: 'Barcode',
+        qty: 1,
+        eggMode: '',
+        protein: Number(p.protein||0),
+        carbs: Number(p.carbs||0),
+        fats: Number(p.fats||0)
+      });
+      barcodeLookupResult = null;
+      saveData();
+    });
+  }
+}
+async function lookupBarcodeValue(barcode){
+  const box = document.getElementById('barcodeResultBox');
+  if(box) box.innerHTML = '<div class="muted">Looking up barcode…</div>';
+  try{
+    const res = await fetch('/.netlify/functions/barcode', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ barcode })
+    });
+    const result = await res.json();
+    if(result && result.ok && result.product){
+      barcodeLookupResult = result.product;
+    }else{
+      barcodeLookupResult = null;
+      if(box) box.innerHTML = `<div class="muted">${result.message || 'Product not found.'}</div>`;
+    }
+  }catch(err){
+    barcodeLookupResult = null;
+    if(box) box.innerHTML = '<div class="muted">Barcode lookup failed.</div>';
+  }
+  renderBarcodeResult();
+}
+
 
 
 function switchTab(tab){
@@ -1202,8 +1326,24 @@ function renderAll(){
       return `<div class="list-item"><div><strong>${title}</strong><div class="muted">${meta1}</div><div class="muted">${meta2}</div></div><button class="chip" onclick="delWorkout('${w.id}')" type="button">Delete</button></div>`;
     }).join('') : '<div class="muted">No workout history found for the selected filters.</div>';
   }
-  $('mealList').innerHTML = meals.length ? meals.map((m,i)=>`<div class="list-item"><div><strong>${m.meal}</strong> <span class="tag">${m.cuisine}</span>${m.eggMode?` <span class="tag">${m.eggMode}</span>`:''}<div class="muted">${m.food} • qty ${m.qty}</div><div class="muted">P ${m.protein} • C ${m.carbs} • F ${m.fats}</div></div><button class="chip" onclick="delMeal(${i})" type="button">Delete</button></div>`).join('') : '<div class="muted">No meals logged today.</div>';
-  $('waterSummary').textContent = `${water}L / ${wt}L`;
+  const nutritionMeals = getBucketByDate('mealsByDate', nutritionDate());
+  const nutritionWaterEntries = getBucketByDate('waterByDate', nutritionDate());
+  const nutritionWater = +(nutritionWaterEntries.reduce((a,b)=>a+Number(b.amount||0),0).toFixed(2));
+  const nutritionProtein = +nutritionMeals.reduce((a,b)=>a+Number(b.protein||0),0).toFixed(1);
+  const nutritionCarbs = +nutritionMeals.reduce((a,b)=>a+Number(b.carbs||0),0).toFixed(1);
+  const nutritionFats = +nutritionMeals.reduce((a,b)=>a+Number(b.fats||0),0).toFixed(1);
+  const dateInput = document.getElementById('nutritionDateInput');
+  if(dateInput) dateInput.value = nutritionDate();
+  const dateLabel = document.getElementById('nutritionDateLabel');
+  if(dateLabel) dateLabel.textContent = nutritionDate()===todayISO() ? `Today • ${humanDate(nutritionDate())}` : humanDate(nutritionDate());
+  const macroSummary = document.getElementById('nutritionMacroSummary');
+  if(macroSummary) macroSummary.value = `P ${nutritionProtein} • C ${nutritionCarbs} • F ${nutritionFats}`;
+  const waterInput = document.getElementById('nutritionWaterSummaryInput');
+  if(waterInput) waterInput.value = `${nutritionWater}L / ${wt}L`;
+
+  $('mealList').innerHTML = nutritionMeals.length ? nutritionMeals.map((m)=>`<div class="list-item"><div><strong>${m.meal}</strong> <span class="tag">${m.cuisine}</span>${m.eggMode?` <span class="tag">${m.eggMode}</span>`:''}<div class="muted">${m.food} • qty ${m.qty}</div><div class="muted">P ${m.protein} • C ${m.carbs} • F ${m.fats}</div><div class="muted">${m.date || nutritionDate()}</div></div><button class="chip" onclick="delMeal('${m.id}','${nutritionDate()}')" type="button">Delete</button></div>`).join('') : '<div class="muted">No meals logged for this date.</div>';
+  $('waterSummary').textContent = `${nutritionWater}L / ${wt}L`;
+  renderBarcodeResult();
   $('suppList').innerHTML = data.supplementStack.length ? data.supplementStack.map((s,i)=>`<div class="list-item"><div><strong>${s.name}</strong>${s.brand?` <span class="tag">${s.brand}</span>`:''}<div class="muted">${s.dose} ${s.unit} • ${s.timing}</div></div><button class="chip" onclick="delSupp(${i})" type="button">Delete</button></div>`).join('') : '<div class="muted">No supplements in stack yet.</div>';
   $('recoveryBox').innerHTML = recovery ? `<div style="font-size:54px;font-weight:800">${recovery.score}</div><div class="muted">Training focus: ${recovery.training}</div><div class="muted">Cardio plan: ${recovery.cardio}</div><div style="margin-top:10px">${recovery.tips.map(x=>'• '+x).join('<br>')}</div>` : 'No analysis yet.';
   $('weightTrend').innerHTML = latestWeight() ? `Latest: <strong>${latestWeight().value} kg</strong><br>Since start: ${ws===null?'--':ws} kg<br>Since last: ${wl===null?'--':wl} kg` : 'No entries yet.';
@@ -1289,10 +1429,17 @@ function bindEvents(){
   $('foodSearch').addEventListener('input', populateFoods);
   $('foodSelect').addEventListener('change', updateFoodMeta);
   $('eggMode').addEventListener('change', updateFoodMeta);
-  $('addMealBtn').addEventListener('click', ()=>{ const raw=allFoods().find(x=>x.name===$('foodSelect').value), food=getAdjustedFood(raw), qty=Number($('foodQty').value||0); if(!food||!qty) return; addToday('mealsByDate', {meal:$('mealName').value, food:food.name, cuisine:food.cuisine, qty, eggMode:food.modeLabel||'', protein:+(food.protein*qty).toFixed(1), carbs:+(food.carbs*qty).toFixed(1), fats:+(food.fats*qty).toFixed(1)}); $('foodQty').value=''; saveData(); });
+  $('addMealBtn').addEventListener('click', ()=>{ const raw=allFoods().find(x=>x.name===$('foodSelect').value), food=getAdjustedFood(raw), qty=Number($('foodQty').value||0); if(!food||!qty) return; addByDate('mealsByDate', nutritionDate(), {meal:$('mealName').value, food:food.name, cuisine:food.cuisine, qty, eggMode:food.modeLabel||'', protein:+(food.protein*qty).toFixed(1), carbs:+(food.carbs*qty).toFixed(1), fats:+(food.fats*qty).toFixed(1)}); $('foodQty').value=''; saveData(); });
   $('addCustomFoodBtn').addEventListener('click', ()=>{ const name=$('customFoodName').value.trim(); if(!name) return; data.customFoods.unshift({name, cuisine:$('customFoodCuisine').value, unit:$('customFoodUnit').value||'1 serving', protein:Number($('customFoodProtein').value||0), carbs:Number($('customFoodCarbs').value||0), fats:Number($('customFoodFats').value||0)}); $('customFoodName').value=''; $('customFoodUnit').value=''; $('customFoodProtein').value=''; $('customFoodCarbs').value=''; $('customFoodFats').value=''; populateCuisines(); populateFoods(); saveData(); });
-  document.querySelectorAll('[data-water]').forEach(btn=>btn.addEventListener('click', ()=>{ addToday('waterByDate', {amount:Number(btn.dataset.water)}); saveData(); }));
-  $('addWaterBtn').addEventListener('click', ()=>{ const amt=Number($('customWater').value||0); if(!amt) return; addToday('waterByDate', {amount:amt}); $('customWater').value=''; saveData(); });
+  document.querySelectorAll('[data-water]').forEach(btn=>btn.addEventListener('click', ()=>{ addByDate('waterByDate', nutritionDate(), {amount:Number(btn.dataset.water)}); saveData(); }));
+  $('addWaterBtn').addEventListener('click', ()=>{ const amt=Number($('customWater').value||0); if(!amt) return; addByDate('waterByDate', nutritionDate(), {amount:amt}); $('customWater').value=''; saveData(); });
+  
+  const nDateInput=document.getElementById('nutritionDateInput'); if(nDateInput){ nDateInput.addEventListener('change', e=>{ selectedNutritionDate = e.target.value || todayISO(); renderAll(); }); }
+  const nPrev=document.getElementById('nutritionPrevDateBtn'); if(nPrev){ nPrev.addEventListener('click', ()=>changeNutritionDate(-1)); }
+  const nNext=document.getElementById('nutritionNextDateBtn'); if(nNext){ nNext.addEventListener('click', ()=>changeNutritionDate(1)); }
+  const lookupBarcodeBtn=document.getElementById('lookupBarcodeBtn'); if(lookupBarcodeBtn){ lookupBarcodeBtn.addEventListener('click', ()=>{ const code=($('barcodeInput').value||'').trim(); if(!code) return; lookupBarcodeValue(code); }); }
+  const scanBarcodeBtn=document.getElementById('scanBarcodeBtn'); if(scanBarcodeBtn){ scanBarcodeBtn.addEventListener('click', async ()=>{ const code = prompt('Enter or paste barcode number'); if(code){ $('barcodeInput').value=code.trim(); lookupBarcodeValue(code.trim()); } }); }
+
   $('suppSelect').addEventListener('change', updateSuppDefaults);
   $('addSuppBtn').addEventListener('click', ()=>{ const name=$('suppSelect').value; if(!name) return; data.supplementStack.unshift({name, dose:Number($('suppDose').value||1), unit:$('suppUnit').value, timing:$('suppTiming').value, reminder:$('suppReminder').value, brand:$('suppBrand').value.trim()}); $('suppDose').value=''; $('suppBrand').value=''; saveData(); });
   $('addCustomSuppBtn').addEventListener('click', ()=>{ const name=$('customSuppName').value.trim(); if(!name) return; data.customSupplements.unshift({name, unit:$('customSuppUnit').value||'serving', timing:$('customSuppTiming').value||'First meal'}); $('customSuppName').value=''; $('customSuppUnit').value=''; $('customSuppTiming').value=''; populateSupps(); saveData(); });
