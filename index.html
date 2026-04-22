@@ -1,3 +1,4 @@
+<!-- V6.4.1 SCANNER UX -->
 <!-- V6.3 NUTRITION BARCODE -->
 <!-- V6.1 AI BUTTON FIX -->
 <!-- V6 AI COACH ROUTING -->
@@ -14,7 +15,7 @@
 <meta name="theme-color" content="#07111f"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<meta name="build-version" content="v6.3-nutrition-history-barcode"/>
+<meta name="build-version" content="v6.4.1-scanner-ux"/>
 <title>Stayfitinlife</title>
 <link rel="manifest" href="manifest.webmanifest"/>
 <link rel="apple-touch-icon" href="icons/icon-192.png"/>
@@ -289,6 +290,47 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
   #barcodeResultBox .chip, #lookupBarcodeBtn, #scanBarcodeBtn{min-height:44px}
 }
 
+
+.scanner-shell{
+  position:relative;
+  z-index:20;
+  border:1px solid var(--line);
+  border-radius:20px;
+  padding:12px;
+  background:rgba(255,255,255,.03);
+}
+.scanner-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  margin-bottom:10px;
+}
+.scanner-reader{
+  width:100%;
+  overflow:hidden;
+  border-radius:16px;
+  background:#000;
+  min-height:260px;
+}
+.scanner-reader video{
+  border-radius:16px;
+}
+.scanner-actions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top:10px;
+}
+#scannerContainer, #closeScannerBtn, #switchCameraBtn{
+  position:relative;
+  z-index:25;
+}
+@media (max-width:860px){
+  .scanner-reader{min-height:220px}
+  .scanner-actions .chip{min-height:44px}
+}
+
 </style>
 </head>
 <body>
@@ -492,7 +534,7 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
             <div class="field"><label>&nbsp;</label><button class="chip" id="scanBarcodeBtn" type="button">Scan (Mobile)</button></div>
           </div>
           <div class="muted" style="margin-top:8px">Packaged food only. This layout uses inline actions only, with no sticky buttons overlapping taps.</div>
-          <div class="list" id="barcodeResultBox"></div><div id="scannerContainer" style="display:none;margin-top:10px;"><div id="reader" style="width:100%;border-radius:12px;"></div><button class="chip" id="closeScannerBtn" type="button" style="margin-top:10px;">Close Scanner</button></div><div id="barcodeResultBox" style="margin-top:12px"></div>
+          <div class="list" id="barcodeResultBox"></div><div id="scannerContainer" class="scanner-shell" style="display:none;margin-top:10px;"><div class="scanner-head"><strong>Barcode Scanner</strong><span class="muted" id="scannerHint">Align barcode inside the box</span></div><div id="reader" class="scanner-reader"></div><div class="scanner-actions"><button class="chip" id="switchCameraBtn" type="button">Switch Camera</button><button class="chip" id="closeScannerBtn" type="button">Close Scanner</button></div></div><div id="barcodeResultBox" style="margin-top:12px"></div>
 
           <div style="margin-top:22px" class="panel-title">Add Custom Food</div>
           <div class="field-grid four">
@@ -596,7 +638,7 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
             <div class="list-item">
               <div>
                 <strong>Version</strong>
-                <div class="muted" id="appVersion">V6.3</div>
+                <div class="muted" id="appVersion">V6.4.1</div>
               </div>
             </div>
             <div class="list-item">
@@ -1444,7 +1486,9 @@ function bindEvents(){
   const nPrev=document.getElementById('nutritionPrevDateBtn'); if(nPrev){ nPrev.addEventListener('click', ()=>changeNutritionDate(-1)); }
   const nNext=document.getElementById('nutritionNextDateBtn'); if(nNext){ nNext.addEventListener('click', ()=>changeNutritionDate(1)); }
   const lookupBarcodeBtn=document.getElementById('lookupBarcodeBtn'); if(lookupBarcodeBtn){ lookupBarcodeBtn.addEventListener('click', ()=>{ const code=($('barcodeInput').value||'').trim(); if(!code) return; lookupBarcodeValue(code); }); }
-  const scanBarcodeBtn=document.getElementById('scanBarcodeBtn'); if(scanBarcodeBtn){ scanBarcodeBtn.addEventListener('click', async ()=>{ const code = startScanner(); if(code){ $('barcodeInput').value=code.trim(); lookupBarcodeValue(code.trim()); } }); }
+  const scanBarcodeBtn=document.getElementById('scanBarcodeBtn'); if(scanBarcodeBtn){ scanBarcodeBtn.addEventListener('click', ()=>startScanner()); }
+  const closeScannerBtn=document.getElementById('closeScannerBtn'); if(closeScannerBtn){ closeScannerBtn.addEventListener('click', ()=>stopScanner(true)); }
+  const switchCameraBtn=document.getElementById('switchCameraBtn'); if(switchCameraBtn){ switchCameraBtn.addEventListener('click', ()=>switchScannerCamera()); }
 
   $('suppSelect').addEventListener('change', updateSuppDefaults);
   $('addSuppBtn').addEventListener('click', ()=>{ const name=$('suppSelect').value; if(!name) return; data.supplementStack.unshift({name, dose:Number($('suppDose').value||1), unit:$('suppUnit').value, timing:$('suppTiming').value, reminder:$('suppReminder').value, brand:$('suppBrand').value.trim()}); $('suppDose').value=''; $('suppBrand').value=''; saveData(); });
@@ -1500,33 +1544,101 @@ function init(){
   renderAll();
   switchTab('home');
 }
+document.addEventListener('visibilitychange', ()=>{ if(document.hidden){ stopScanner(true); } });
 init();
 
-let html5QrCode;
 
-function startScanner(){
-  document.getElementById("scannerContainer").style.display="block";
-  html5QrCode=new Html5Qrcode("reader");
-  Html5Qrcode.getCameras().then(devices=>{
-    if(devices.length){
-      const id=devices[0].id;
-      html5QrCode.start(id,{fps:10,qrbox:{width:250,height:150}},(txt)=>{
-        stopScanner();
-        document.getElementById("barcodeInput").value=txt;
-        lookupBarcodeValue(txt);
-        if(navigator.vibrate) navigator.vibrate(200);
-      });
+let html5QrCode = null;
+let scannerRunning = false;
+let availableCameras = [];
+let activeCameraIndex = 0;
+
+async function stopScanner(hide=true){
+  try{
+    if(html5QrCode && scannerRunning){
+      await html5QrCode.stop();
+      scannerRunning = false;
     }
-  }).catch(()=>alert("Camera not available"));
-}
-
-function stopScanner(){
-  if(html5QrCode){
-    html5QrCode.stop().then(()=>{
-      document.getElementById("scannerContainer").style.display="none";
-    });
+  }catch(e){
+    console.warn('Stop scanner error:', e);
+  }
+  if(hide){
+    const c=document.getElementById('scannerContainer');
+    if(c) c.style.display='none';
   }
 }
+
+async function startScanner(preferredIndex=null){
+  const container = document.getElementById('scannerContainer');
+  const hint = document.getElementById('scannerHint');
+  if(container) container.style.display='block';
+  if(hint) hint.textContent = 'Starting camera…';
+
+  try{
+    if(!window.Html5Qrcode){
+      throw new Error('Scanner library not loaded');
+    }
+
+    if(!html5QrCode){
+      html5QrCode = new Html5Qrcode("reader");
+    }
+
+    // stop any previous session cleanly before restarting
+    if(scannerRunning){
+      await stopScanner(false);
+      try { html5QrCode.clear && html5QrCode.clear(); } catch(e) {}
+    }
+
+    availableCameras = await Html5Qrcode.getCameras();
+    if(!availableCameras || !availableCameras.length){
+      throw new Error('No camera found');
+    }
+
+    if(preferredIndex !== null){
+      activeCameraIndex = preferredIndex;
+    } else {
+      const rearIdx = availableCameras.findIndex(d => {
+        const label = String(d.label || '').toLowerCase();
+        return label.includes('back') || label.includes('rear') || label.includes('environment');
+      });
+      activeCameraIndex = rearIdx >= 0 ? rearIdx : Math.max(availableCameras.length - 1, 0);
+    }
+
+    const cameraId = availableCameras[activeCameraIndex].id;
+    if(hint) hint.textContent = `Using camera ${activeCameraIndex + 1} of ${availableCameras.length}`;
+
+    await html5QrCode.start(
+      cameraId,
+      { fps: 10, qrbox: { width: 250, height: 150 }, aspectRatio: 1.777 },
+      async (decodedText) => {
+        if(navigator.vibrate) navigator.vibrate(200);
+        document.getElementById("barcodeInput").value = decodedText;
+        if(hint) hint.textContent = 'Barcode detected';
+        await stopScanner(true);
+        lookupBarcodeValue(decodedText);
+      },
+      () => {}
+    );
+
+    scannerRunning = true;
+    if(hint) hint.textContent = `Align barcode inside the box • Camera ${activeCameraIndex + 1}/${availableCameras.length}`;
+  }catch(err){
+    console.error(err);
+    if(hint) hint.textContent = 'Camera failed to start';
+    alert('Camera start failed');
+    await stopScanner(true);
+  }
+}
+
+async function switchScannerCamera(){
+  if(!availableCameras || availableCameras.length < 2){
+    alert('No second camera available');
+    return;
+  }
+  const nextIndex = (activeCameraIndex + 1) % availableCameras.length;
+  await startScanner(nextIndex);
+}
+
 
 </script>
 <script src="https://unpkg.com/html5-qrcode">

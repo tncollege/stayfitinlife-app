@@ -2,3 +2,5 @@ Stayfitinlife V6 AI Coach integration\nIncluded:\n- Screen-aware AI Coach\n- Net
 V6.1 fix: Ask AI Coach button no longer gets overwritten by local coach rendering.
 
 V6.3: nutrition date history + barcode lookup UI + non-overlapping mobile-safe actions.
+
+V6.4.1 scanner UX: rear-camera preference, working close button, switch camera, safer scanner lifecycle, no overlap.
