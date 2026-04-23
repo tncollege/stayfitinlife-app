@@ -1,3 +1,5 @@
+<!-- V6.6 CALORIE ENGINE -->
+<!-- V6.5 GOAL RECOVERY SYSTEM -->
 <!-- V6.4.1 SCANNER UX -->
 <!-- V6.3 NUTRITION BARCODE -->
 <!-- V6.1 AI BUTTON FIX -->
@@ -15,7 +17,7 @@
 <meta name="theme-color" content="#07111f"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<meta name="build-version" content="v6.4.1-scanner-ux"/>
+<meta name="build-version" content="v6.6-calorie-engine-smart-deficit"/>
 <title>Stayfitinlife</title>
 <link rel="manifest" href="manifest.webmanifest"/>
 <link rel="apple-touch-icon" href="icons/icon-192.png"/>
@@ -369,6 +371,8 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
         <div class="card stat-card"><div class="stat-label">Weight Change</div><div class="stat-number" id="statProgress">--</div><div class="stat-sub">since last check-in</div></div>
       </div>
       <div class="content-grid">
+        <div class="panel"><div class="panel-title">Goal Engine</div><div class="list" id="goalEngineList"></div></div>
+        <div class="panel"><div class="panel-title">Calorie Engine</div><div class="list" id="calorieEngineHome"></div></div>
         <div class="panel">
           <div class="panel-title">Activity Rings</div>
           <div class="rings-wrap">
@@ -508,6 +512,7 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
             <input id="nutritionWaterSummaryInput" readonly/>
           </div>
         </div>
+        <div class="list" id="nutritionCalorieInsight" style="margin-top:12px"></div>
       </div>
 
       <div class="content-grid equal" style="margin-top:16px">
@@ -610,11 +615,12 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
           <div class="field-grid" style="margin-top:12px"><div class="field"><label>Aerobic Min</label><input id="recoveryAer" type="number" step="0.1"/></div></div>
           <div style="margin-top:14px"><button class="primary-btn" id="saveRecoveryBtn" type="button">Analyze & Save</button></div>
         </div>
-        <div class="panel"><div class="panel-title">Recovery Score</div><div id="recoveryBox" class="muted">No analysis yet.</div></div>
+        <div class="panel"><div class="panel-title">Recovery Score</div><div id="recoveryBox" class="muted">No analysis yet.</div><div style="height:16px"></div><div class="panel-title">Recovery Engine</div><div id="recoveryEngineBox" class="muted">No recommendation yet.</div></div>
       </div>
     </section>
 
     <section class="section" id="progress">
+      <div class="panel"><div class="panel-title">Calorie Balance</div><div class="list" id="progressCalorieBox"></div><div class="muted" style="margin-top:8px">Calories burned are estimates. Use weekly trends, not single-day precision.</div></div>
       <div class="content-grid equal">
         <div class="panel"><div class="panel-title">Weight Trend</div><div id="weightTrend" class="muted">No entries yet.</div></div>
         <div class="panel"><div class="panel-title">Hydration</div><div id="hydrationTrend" class="muted">No water logged yet.</div></div>
@@ -638,7 +644,7 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
             <div class="list-item">
               <div>
                 <strong>Version</strong>
-                <div class="muted" id="appVersion">V6.4.1</div>
+                <div class="muted" id="appVersion">V6.6</div>
               </div>
             </div>
             <div class="list-item">
@@ -656,7 +662,7 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
             <div class="list-item">
               <div>
                 <strong>AI Coach</strong>
-                <div class="muted" id="aiCoachStatus">Screen-aware routing enabled</div>
+                <div class="muted" id="aiCoachStatus">Screen-aware AI + local Goal, Recovery, and Calorie Engine enabled</div>
               </div>
             </div>
             <div class="list-item">
@@ -885,6 +891,115 @@ function weightSinceStart(){ const s=Number(data.profile.startWeight||0), c=Numb
 function weightSinceLastCheckin(){ if(data.weights.length<2) return null; return +(Number(data.weights[0].value)-Number(data.weights[1].value)).toFixed(1); }
 function totalWaterToday(){ return +(todayBucket('waterByDate').reduce((a,b)=>a+Number(b.amount||0),0).toFixed(2)); }
 
+function getGoalTargets(profile=data.profile){
+  const weight = Number(latestWeight()?.value || profile.startWeight || 70);
+  const height = Number(profile.height || 170);
+  const age = Number(profile.age || 28);
+  const sexAdj = String(profile.gender || 'Male') === 'Female' ? -161 : 5;
+  const bmr = Math.round(10*weight + 6.25*height - 5*age + sexAdj);
+  const activityMap = { 'Low':1.2, 'Moderate':1.4, 'High':1.6 };
+  const maintenance = Math.round(bmr * (activityMap[profile.activityLevel || 'Moderate'] || 1.4));
+
+  if((profile.goal || 'Fat Loss') === 'Fat Loss'){
+    return { goal:'Fat Loss', calories:Math.max(1200, maintenance - 400), protein:Math.round(weight*2.2), carbs:Math.round(weight*2.0), fats:Math.round(weight*0.8), workoutFocus:'Strength 4–5x/week + 2–4 cardio sessions', recoveryFocus:'Control fatigue and protect sleep' };
+  }
+  if((profile.goal || '') === 'Muscle Gain'){
+    return { goal:'Muscle Gain', calories:maintenance + 300, protein:Math.round(weight*2.0), carbs:Math.round(weight*3.0), fats:Math.round(weight*1.0), workoutFocus:'Progressive overload with compounds first', recoveryFocus:'Sleep and lower fatigue drive growth' };
+  }
+  return { goal:'Maintenance', calories:maintenance, protein:Math.round(weight*1.8), carbs:Math.round(weight*2.5), fats:Math.round(weight*0.9), workoutFocus:'Balanced strength and cardio', recoveryFocus:'Keep recovery stable and training quality high' };
+}
+function calculateRecoveryEngine(){
+  const r = data.recoveryLogs[0];
+  const t = getGoalTargets();
+  if(!r){
+    return { score:null, band:'No Data', training:'Add recovery inputs to get a daily recommendation.', nutrition:'Keep protein and water on target.', recoveryAction:'Log sleep, RHR, and cardio to improve guidance.', goalSummary:`Goal active: ${t.goal}` };
+  }
+  const score = Number(r.score || 0);
+  let band = 'Low';
+  if(score >= 75) band = 'High';
+  else if(score >= 60) band = 'Moderate';
+
+  let training='', nutrition='', recoveryAction='';
+  if(t.goal === 'Fat Loss'){
+    if(score >= 75){ training='Train normally and keep cardio in.'; nutrition='Hold the deficit and hit full protein target.'; recoveryAction='Keep bedtime and hydration tight.'; }
+    else if(score >= 60){ training='Moderate session today. Keep 2–3 reps in reserve.'; nutrition='Do not overcut on low recovery. Protein stays high.'; recoveryAction='Use an easier evening and extra fluids.'; }
+    else { training='Choose light cardio, steps, mobility, or reduce lifting volume.'; nutrition='Avoid an aggressive deficit on poor recovery.'; recoveryAction='Sleep extension is priority one.'; }
+  } else if(t.goal === 'Muscle Gain'){
+    if(score >= 75){ training='Good day to progress a main lift or add quality volume.'; nutrition='Use carbs around training and hit calorie target.'; recoveryAction='Protect sleep to support growth.'; }
+    else if(score >= 60){ training='Keep the session but avoid excess junk volume.'; nutrition='Stay at target calories and protein.'; recoveryAction='Lower stress and recover hard tonight.'; }
+    else { training='Back off today. Technique, pump work, or rest is smarter.'; nutrition='Do not under-eat on low recovery days.'; recoveryAction='Focus on sleep, hydration, and soreness management.'; }
+  } else {
+    if(score >= 75){ training='Train as planned with normal intensity.'; nutrition='Stay near maintenance and hit protein target.'; recoveryAction='Maintain the routine.'; }
+    else if(score >= 60){ training='Moderate training day. Keep quality high, volume controlled.'; nutrition='Stay balanced and hydrate well.'; recoveryAction='Calmer evening for better tomorrow.'; }
+    else { training='Choose lighter work, walking, or mobility.'; nutrition='Keep nutrition steady instead of chasing intensity.'; recoveryAction='Recovery-first day: sleep, hydration, low stress.'; }
+  }
+  return { score, band, training, nutrition, recoveryAction, goalSummary:`Goal active: ${t.goal}` };
+}
+
+function getActivityMet(activityType, bodyPart=''){
+  const type = String(activityType || '').toLowerCase();
+  const bp = String(bodyPart || '').toLowerCase();
+  if(type.includes('running')) return 8.0;
+  if(type.includes('walking')) return 3.5;
+  if(type.includes('cycling')) return 7.0;
+  if(type.includes('sports')) return 7.0;
+  if(type.includes('cardio')) return 6.5;
+  if(type.includes('strength')) {
+    if(bp.includes('legs') || bp.includes('full')) return 6.0;
+    return 5.5;
+  }
+  return 5.0;
+}
+function calculateCaloriesBurned(activityType, durationMin, weightKg, bodyPart=''){
+  const met = getActivityMet(activityType, bodyPart);
+  return Math.round(met * Number(weightKg || 70) * (Number(durationMin || 0) / 60));
+}
+function getTodayExerciseBurn(){
+  const weight = Number(latestWeight()?.value || data.profile.startWeight || 70);
+  return todayBucket('workoutsByDate').reduce((sum,w)=> sum + calculateCaloriesBurned(w.activityType, w.duration || 0, weight, w.bodyPart || ''), 0);
+}
+function getTodayActivityCalories(){
+  const steps = Number((data.recoveryLogs[0] && data.recoveryLogs[0].aerobicMin) || 0);
+  return Math.round(steps * 4);
+}
+function getBmrEstimate(){
+  const profile = data.profile || {};
+  const weight = Number(latestWeight()?.value || profile.startWeight || 70);
+  const height = Number(profile.height || 170);
+  const age = Number(profile.age || 28);
+  const sexAdj = String(profile.gender || 'Male') === 'Female' ? -161 : 5;
+  return Math.round(10*weight + 6.25*height - 5*age + sexAdj);
+}
+function getTodayNutritionTotals(){
+  const meals = todayBucket('mealsByDate');
+  const protein = +meals.reduce((a,b)=>a+Number(b.protein||0),0).toFixed(1);
+  const carbs = +meals.reduce((a,b)=>a+Number(b.carbs||0),0).toFixed(1);
+  const fats = +meals.reduce((a,b)=>a+Number(b.fats||0),0).toFixed(1);
+  const calories = Math.round(protein*4 + carbs*4 + fats*9);
+  return { protein, carbs, fats, calories, meals };
+}
+function getTodayCalorieEngine(){
+  const targets = getGoalTargets();
+  const intake = getTodayNutritionTotals().calories;
+  const exercise = getTodayExerciseBurn();
+  const activity = getTodayActivityCalories();
+  const bmr = getBmrEstimate();
+  const totalOut = bmr + exercise + activity;
+  const net = intake - totalOut;
+  const status = net < -150 ? 'Deficit' : net > 150 ? 'Surplus' : 'Near Maintenance';
+  let insight = '';
+  if(targets.goal === 'Fat Loss'){
+    insight = net < -250 ? 'You are likely in a useful deficit for fat loss.' : net < 150 ? 'You are near fat-loss range but can tighten intake/activity.' : 'You may be above your fat-loss target today.';
+  } else if(targets.goal === 'Muscle Gain'){
+    insight = net > 150 ? 'You are likely in a growth-supporting surplus.' : Math.abs(net) <= 150 ? 'You are close to maintenance; a small surplus may help muscle gain.' : 'You may be under-eating for muscle gain today.';
+  } else {
+    insight = Math.abs(net) <= 200 ? 'You are close to maintenance today.' : net > 0 ? 'Slight surplus today.' : 'Slight deficit today.';
+  }
+  return { intake, exercise, activity, bmr, totalOut, net, status, insight, targets };
+}
+
+
+
 function getTodayKey(){ return new Date().toISOString().slice(0,10); }
 function getCoachUsedToday(){
   const key = getTodayKey();
@@ -939,7 +1054,10 @@ function getScreenData(screen){
       weightSinceStart: weightSinceStart(),
       weightSinceLastCheckin: weightSinceLastCheckin()
     },
-    recovery
+    recovery,
+    targets: getGoalTargets(),
+    recoveryEngine: calculateRecoveryEngine(),
+    calorieEngine: getTodayCalorieEngine()
   };
   if(screen==='home') return {...base, home:{todayMeals:meals.slice(0,5), todayWorkouts:workouts.slice(0,5)}};
   if(screen==='workout') return {...base, workout:{
@@ -1071,6 +1189,15 @@ async function lookupBarcodeValue(barcode){
     if(box) box.innerHTML = '<div class="muted">Barcode lookup failed.</div>';
   }
   renderBarcodeResult();
+  const progressCalorieBox = document.getElementById('progressCalorieBox');
+  if(progressCalorieBox){
+    const ce2 = getTodayCalorieEngine();
+    progressCalorieBox.innerHTML = `
+      <div class="list-item"><div><strong>Calories In</strong><div class="muted">${ce2.intake} kcal</div></div></div>
+      <div class="list-item"><div><strong>Calories Out</strong><div class="muted">BMR ${ce2.bmr} • Activity ${ce2.activity} • Exercise ${ce2.exercise}</div></div></div>
+      <div class="list-item"><div><strong>Estimated Net</strong><div class="muted">${ce2.net > 0 ? '+' : ''}${ce2.net} kcal • ${ce2.status}</div></div></div>
+      <div class="list-item"><div><strong>Goal Context</strong><div class="muted">${ce2.insight}</div></div></div>`;
+  }
 }
 
 
@@ -1106,7 +1233,7 @@ function populateProfile(){
   const p=data.profile;
   $('profileName').value=p.name||''; $('profileAge').value=p.age||''; $('profileGender').value=p.gender||'Male';
   $('profileHeight').value=p.height||''; $('profileStartWeight').value=p.startWeight||''; $('profileGoal').value=p.goal||'Fat Loss';
-  $('profileWeighFreq').value=p.weighFreq||'Daily'; $('profileWaterTarget').value=p.waterTarget||3.5; $('profileRecoverySource').value=p.recoverySource||'Manual';
+  $('profileWeighFreq').value=p.weighFreq||'Daily'; $('profileWaterTarget').value=p.waterTarget||3.5; $('profileRecoverySource').value=p.recoverySource||'Manual'; const pa=document.getElementById('profileActivityLevel'); if(pa) pa.value=p.activityLevel||'Moderate';
   $('weightDate').value=todayISO(); $('recoverySource').value=p.recoverySource||'Manual';
 }
 
@@ -1205,7 +1332,7 @@ function analyzeRecovery(sleep,rhr,rr,aer,source){
   if(rr>17) tips.push('Watch stress and sleep quality before pushing harder.');
   if(!tips.length) tips.push('Recovery metrics look stable enough to progress gradually.');
   const score=Math.max(0, Math.min(100, Math.round((sleep/8)*35 + Math.max(0,25-rhr) + Math.min(aer,30)*1.2 + Math.max(0,18-rr)*6)));
-  return {source,score,training,cardio,tips,date:todayISO()};
+  return {source,score,training,cardio,tips,date:todayISO(),sleepHours:sleep,rhr,rr,aerobicMin:aer};
 }
 
 function coachInsights(tab, feelOverride, quickGoal){
@@ -1222,16 +1349,17 @@ function coachInsights(tab, feelOverride, quickGoal){
     if(!lines.length) lines.push('You are on track today.');
   }
   if(tab==='nutrition'){
-    if(protein<proteinTarget) lines.push('Best next foods: Paneer Bhurji, Chicken Tikka, Whey Protein, Greek Yogurt, or Protein Smoothie.');
-    if(fats>60) lines.push('Fats are already high today. Prefer leaner food choices next.');
+    const t=getGoalTargets();
+    if(protein<t.protein) lines.push(`You are ${Math.max(0, Math.round(t.protein-protein))}g below your ${t.goal.toLowerCase()} protein target.`);
+    if(carbs<t.carbs && t.goal==='Muscle Gain') lines.push('Carbs are low for muscle gain. Add easy training carbs around workout.');
+    if(fats>t.fats) lines.push('Fats are already above target. Prefer leaner food choices next.');
     if(water<waterTarget) lines.push(`Hydration is behind by ${(waterTarget-water).toFixed(1)}L.`);
-    if(!lines.length) lines.push('Nutrition looks balanced.');
+    if(!lines.length) lines.push('Nutrition is aligned with your current goal targets.');
   }
   if(tab==='workout'){
     const strength=workouts.filter(x=>x.activityType==='Strength Training'); const last=strength[0];
-    if(feel==='tired' || (recovery && recovery.score<60)) lines.push('Go lighter today. Keep RIR around 3–4.');
-    else if(feel==='fresh' && (!recovery || recovery.score>=75)) lines.push('You can push harder today. Use RIR 1–2 on main lifts.');
-    else lines.push('Moderate session recommended. Keep most work around RIR 2–3.');
+    const re=calculateRecoveryEngine();
+    lines.push(re.training);
     lines.push(last ? `Last strength work was ${last.bodyPart||'mixed'}.` : 'No strength work logged today yet.');
   }
   if(tab==='supplements'){
@@ -1307,13 +1435,14 @@ function deleteAllLocalData(){
 }
 
 function renderRings(protein, carbs, fats, water){
-  const pt=150, ct=200, ft=60, wt=Number(data.profile.waterTarget||3.5);
+  const t=getGoalTargets();
+  const pt=t.protein, ct=t.carbs, ft=t.fats, wt=Number(data.profile.waterTarget||3.5);
   $('proteinVal').textContent=`${protein}g`; $('carbVal').textContent=`${carbs}g`; $('fatVal').textContent=`${fats}g`; $('waterVal').textContent=`${water}L`;
   $('proteinSub').textContent=`${protein} / ${pt} g`; $('carbSub').textContent=`${carbs} / ${ct} g`; $('fatSub').textContent=`${fats} / ${ft} g`; $('waterSub').textContent=`${water} / ${wt} L`;
-  $('proteinRing').style.setProperty('--p', Math.min(100, Math.round((protein/pt)*100)));
-  $('carbRing').style.setProperty('--p', Math.min(100, Math.round((carbs/ct)*100)));
-  $('fatRing').style.setProperty('--p', Math.min(100, Math.round((fats/ft)*100)));
-  $('waterRing').style.setProperty('--p', Math.min(100, Math.round((water/wt)*100)));
+  $('proteinRing').style.setProperty('--p', Math.min(100, Math.round((protein/Math.max(1,pt))*100)));
+  $('carbRing').style.setProperty('--p', Math.min(100, Math.round((carbs/Math.max(1,ct))*100)));
+  $('fatRing').style.setProperty('--p', Math.min(100, Math.round((fats/Math.max(1,ft))*100)));
+  $('waterRing').style.setProperty('--p', Math.min(100, Math.round((water/Math.max(.1,wt))*100)));
 }
 
 function renderAll(){
@@ -1385,15 +1514,49 @@ function renderAll(){
   const dateLabel = document.getElementById('nutritionDateLabel');
   if(dateLabel) dateLabel.textContent = nutritionDate()===todayISO() ? `Today • ${humanDate(nutritionDate())}` : humanDate(nutritionDate());
   const macroSummary = document.getElementById('nutritionMacroSummary');
-  if(macroSummary) macroSummary.value = `P ${nutritionProtein} • C ${nutritionCarbs} • F ${nutritionFats}`;
+  const goalTargets = getGoalTargets();
+  if(macroSummary) macroSummary.value = `P ${nutritionProtein}/${goalTargets.protein} • C ${nutritionCarbs}/${goalTargets.carbs} • F ${nutritionFats}/${goalTargets.fats}`;
   const waterInput = document.getElementById('nutritionWaterSummaryInput');
   if(waterInput) waterInput.value = `${nutritionWater}L / ${wt}L`;
+  const todayCe = getTodayCalorieEngine();
+  const nci = document.getElementById('nutritionCalorieInsight');
+  if(nci){
+    nci.innerHTML = `
+      <div class="list-item"><div><strong>Calories</strong><div class="muted">Consumed ${todayCe.intake} kcal • Target ${todayCe.targets.calories} kcal</div></div></div>
+      <div class="list-item"><div><strong>Estimated Balance</strong><div class="muted">${todayCe.status} • ${todayCe.net > 0 ? '+' : ''}${todayCe.net} kcal</div></div></div>
+      <div class="list-item"><div><strong>Insight</strong><div class="muted">${todayCe.insight}</div></div></div>`;
+  }
 
   $('mealList').innerHTML = nutritionMeals.length ? nutritionMeals.map((m)=>`<div class="list-item"><div><strong>${m.meal}</strong> <span class="tag">${m.cuisine}</span>${m.eggMode?` <span class="tag">${m.eggMode}</span>`:''}<div class="muted">${m.food} • qty ${m.qty}</div><div class="muted">P ${m.protein} • C ${m.carbs} • F ${m.fats}</div><div class="muted">${m.date || nutritionDate()}</div></div><button class="chip" onclick="delMeal('${m.id}','${nutritionDate()}')" type="button">Delete</button></div>`).join('') : '<div class="muted">No meals logged for this date.</div>';
   $('waterSummary').textContent = `${nutritionWater}L / ${wt}L`;
   renderBarcodeResult();
   $('suppList').innerHTML = data.supplementStack.length ? data.supplementStack.map((s,i)=>`<div class="list-item"><div><strong>${s.name}</strong>${s.brand?` <span class="tag">${s.brand}</span>`:''}<div class="muted">${s.dose} ${s.unit} • ${s.timing}</div></div><button class="chip" onclick="delSupp(${i})" type="button">Delete</button></div>`).join('') : '<div class="muted">No supplements in stack yet.</div>';
   $('recoveryBox').innerHTML = recovery ? `<div style="font-size:54px;font-weight:800">${recovery.score}</div><div class="muted">Training focus: ${recovery.training}</div><div class="muted">Cardio plan: ${recovery.cardio}</div><div style="margin-top:10px">${recovery.tips.map(x=>'• '+x).join('<br>')}</div>` : 'No analysis yet.';
+  const t = getGoalTargets();
+  const goalList = document.getElementById('goalEngineList');
+  if(goalList){
+    goalList.innerHTML = `
+      <div class="list-item"><div><strong>${t.goal}</strong><div class="muted">Calories target: ${t.calories} kcal</div></div></div>
+      <div class="list-item"><div><strong>Macro targets</strong><div class="muted">Protein ${t.protein}g • Carbs ${t.carbs}g • Fats ${t.fats}g</div></div></div>
+      <div class="list-item"><div><strong>Workout focus</strong><div class="muted">${t.workoutFocus}</div></div></div>
+      <div class="list-item"><div><strong>Recovery focus</strong><div class="muted">${t.recoveryFocus}</div></div></div>`;
+  }
+  const re = calculateRecoveryEngine();
+  const ce = getTodayCalorieEngine();
+  const ceHome = document.getElementById('calorieEngineHome');
+  if(ceHome){
+    ceHome.innerHTML = `
+      <div class="list-item"><div><strong>${ce.status}</strong><div class="muted">${ce.insight}</div></div></div>
+      <div class="list-item"><div><strong>Consumed vs Target</strong><div class="muted">${ce.intake} / ${ce.targets.calories} kcal</div></div></div>
+      <div class="list-item"><div><strong>Exercise Burn</strong><div class="muted">${ce.exercise} kcal estimated</div></div></div>
+      <div class="list-item"><div><strong>Net Balance</strong><div class="muted">${ce.net > 0 ? '+' : ''}${ce.net} kcal</div></div></div>`;
+  }
+  const reBox = document.getElementById('recoveryEngineBox');
+  if(reBox){
+    reBox.innerHTML = re.score === null
+      ? `<div class="muted">${re.training}</div><div class="muted">${re.goalSummary}</div>`
+      : `<div><strong>Band: ${re.band}</strong></div><div class="muted">Training: ${re.training}</div><div class="muted" style="margin-top:6px">Nutrition: ${re.nutrition}</div><div class="muted" style="margin-top:6px">Recovery: ${re.recoveryAction}</div><div class="muted" style="margin-top:8px">${re.goalSummary}</div>`;
+  }
   $('weightTrend').innerHTML = latestWeight() ? `Latest: <strong>${latestWeight().value} kg</strong><br>Since start: ${ws===null?'--':ws} kg<br>Since last: ${wl===null?'--':wl} kg` : 'No entries yet.';
   $('hydrationTrend').innerHTML = `Today: <strong>${water} L</strong><br>Target: ${wt} L`;
   renderCoach();
@@ -1457,7 +1620,7 @@ function bindEvents(){
   }
 
   document.querySelectorAll('.chip[data-feel], .chip[data-goal]').forEach(btn=>btn.addEventListener('click', ()=>{ if(btn.dataset.feel) data.coachState.feel=btn.dataset.feel; saveData(); renderCoach(btn.dataset.feel, btn.dataset.goal); }));
-  $('saveProfileBtn').addEventListener('click', ()=>{ data.profile={name:$('profileName').value.trim(),age:$('profileAge').value,gender:$('profileGender').value,height:$('profileHeight').value,startWeight:$('profileStartWeight').value,goal:$('profileGoal').value,weighFreq:$('profileWeighFreq').value,waterTarget:Number($('profileWaterTarget').value||3.5),recoverySource:$('profileRecoverySource').value}; saveData(); });
+  $('saveProfileBtn').addEventListener('click', ()=>{ data.profile={name:$('profileName').value.trim(),age:$('profileAge').value,gender:$('profileGender').value,height:$('profileHeight').value,startWeight:$('profileStartWeight').value,goal:$('profileGoal').value,activityLevel:(document.getElementById('profileActivityLevel')?$('profileActivityLevel').value:'Moderate'),weighFreq:$('profileWeighFreq').value,waterTarget:Number($('profileWaterTarget').value||3.5),recoverySource:$('profileRecoverySource').value}; saveData(); });
   $('addWeightBtn').addEventListener('click', ()=>{ const val=Number($('weightValue').value||0); if(!val) return; data.weights.unshift({date:$('weightDate').value||todayISO(), value:val, type:$('weightType').value, notes:$('weightNotes').value.trim()}); $('weightValue').value=''; $('weightNotes').value=''; saveData(); });
   $('bodyPartSelect').addEventListener('change', updateBodyPartFlow);
   $('exerciseType').addEventListener('change', updateBodyPartFlow);

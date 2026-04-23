@@ -4,3 +4,7 @@ V6.1 fix: Ask AI Coach button no longer gets overwritten by local coach renderin
 V6.3: nutrition date history + barcode lookup UI + non-overlapping mobile-safe actions.
 
 V6.4.1 scanner UX: rear-camera preference, working close button, switch camera, safer scanner lifecycle, no overlap.
+
+V6.5: Cost-effective Goal Based System + Recovery Engine using local calculations first.
+
+V6.6: Calorie Engine + smart deficit UI using local MET-based estimates, goal system, and recovery engine in a cost-effective way.
