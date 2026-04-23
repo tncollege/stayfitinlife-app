@@ -1,5 +1,6 @@
-<!-- V7.1.0 STABLE DEBUG -->
-<!-- V7.1.0 HEADER COLOR THEME -->
+<!-- V7.1.1 MOBILE REFINE -->
+<!-- V7.1.1 STABLE DEBUG -->
+<!-- V7.1.1 HEADER COLOR THEME -->
 <!-- V7.0.6 PREMIUM HEADER -->
 <!-- V7.0.5 PROFILE UI FIX -->
 <!-- V7.0.4 FINAL CLEAN -->
@@ -24,7 +25,7 @@
 <meta name="theme-color" content="#07111f"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<meta name="build-version" content="v7.1.0-stable-debug"/>
+<meta name="build-version" content="v7.1.1-mobile-refine"/>
 <title>Stayfitinlife</title>
 <link rel="manifest" href="manifest.webmanifest"/>
 <link rel="apple-touch-icon" href="icons/icon-192.png"/>
@@ -604,7 +605,7 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
 }
 
 
-/* V7.1.0 stable debug */
+/* V7.1.1 stable debug */
 .desktop-hero{
   display:block;
   padding:2px 4px 14px;
@@ -715,6 +716,108 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
     position:relative;
     top:auto;
     margin:0 0 12px;
+  }
+}
+
+
+/* V7.1.1 mobile refine */
+.mobile-header{
+  gap:8px !important;
+  padding:0 0 8px !important;
+}
+.mobile-logo img{
+  width:122px !important;
+  max-width:38vw !important;
+}
+.mobile-header .hero-copy h1{
+  font-size:clamp(26px,8vw,40px) !important;
+}
+.mobile-header .hero-copy p{
+  font-size:16px !important;
+  line-height:1.15 !important;
+}
+.mobile-date{
+  font-size:13px !important;
+}
+.quick-card button{
+  cursor:pointer;
+}
+@media (max-width:860px){
+  .main{
+    padding-top:10px !important;
+    padding-left:12px !important;
+    padding-right:12px !important;
+    padding-bottom:126px !important;
+  }
+  .top-actions-floating{
+    display:grid !important;
+    grid-template-columns:1fr 1fr !important;
+    gap:10px !important;
+    margin:0 0 10px !important;
+    width:100% !important;
+  }
+  .top-actions-floating .action-btn{
+    justify-content:center !important;
+    display:flex !important;
+    align-items:center !important;
+    min-height:52px !important;
+    padding:0 14px !important;
+    font-size:16px !important;
+  }
+  .cards{
+    margin-top:12px !important;
+    gap:12px !important;
+  }
+  .stat-card{
+    min-height:120px !important;
+    padding:16px !important;
+  }
+  .stat-number{
+    font-size:46px !important;
+    margin-top:18px !important;
+  }
+  .home-rings-grid{
+    margin-top:8px !important;
+    gap:12px !important;
+  }
+  .rings-wrap{
+    gap:14px 8px !important;
+  }
+  .ring-card{
+    padding:0 !important;
+  }
+  .ring{
+    width:126px !important;
+    height:126px !important;
+  }
+  .ring-inner{
+    width:92px !important;
+    height:92px !important;
+  }
+  .ring-value{
+    font-size:20px !important;
+  }
+  .ring-name{
+    font-size:15px !important;
+    margin-top:8px !important;
+  }
+  .small-note{
+    font-size:12px !important;
+  }
+  .coach-banner{
+    margin-top:14px !important;
+    padding:14px !important;
+    display:flex !important;
+    flex-direction:column !important;
+    align-items:stretch !important;
+    gap:12px !important;
+  }
+  .coach-banner .coach-left{
+    width:100% !important;
+  }
+  .coach-banner .primary-btn{
+    width:100% !important;
+    min-width:0 !important;
   }
 }
 </style>
@@ -1060,7 +1163,7 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
             <div class="list-item">
               <div>
                 <strong>Version</strong>
-                <div class="muted" id="appVersion">V7.1.0</div>
+                <div class="muted" id="appVersion">V7.1.1</div>
               </div>
             </div>
             <div class="list-item">
@@ -2020,6 +2123,39 @@ function updateRingsSummaryUI(protein, carbs, fats, water){
   if(streak) streak.textContent = `${done} day streak`;
 }
 
+
+function moveTopActionsForMobile(){
+  const top = document.querySelector('.top-actions-floating');
+  const desktopHero = document.querySelector('.desktop-hero');
+  const mobileHeader = document.querySelector('.mobile-header');
+  const homeSection = document.getElementById('home');
+  if(!top || !homeSection) return;
+  if(window.innerWidth <= 860){
+    if(mobileHeader && top.parentElement !== mobileHeader){
+      mobileHeader.appendChild(top);
+    }
+  } else {
+    if(desktopHero && top.parentElement !== homeSection){
+      homeSection.insertBefore(top, desktopHero);
+    } else if(desktopHero && top.parentElement === homeSection && top.nextElementSibling !== desktopHero){
+      homeSection.insertBefore(top, desktopHero);
+    }
+  }
+}
+function bindQuickLog(){
+  const quick = document.getElementById('quickHomeBtn');
+  if(!quick) return;
+  quick.onclick = ()=>{
+    switchTab('workout');
+    setTimeout(()=>{
+      const el = document.getElementById('activityType') || document.getElementById('workoutDuration');
+      if(el){ try{ el.focus(); }catch(e){} }
+      const panel = document.getElementById('workout');
+      if(panel){ panel.scrollIntoView({behavior:'smooth', block:'start'}); }
+    }, 20);
+  };
+}
+
 function renderRings(protein, carbs, fats, water){
   const t=getGoalTargets();
   const pt=t.protein, ct=t.carbs, ft=t.fats, wt=Number(data.profile.waterTarget||3.5);
@@ -2351,6 +2487,9 @@ function init(){
   switchTab('home');
 }
 document.addEventListener('visibilitychange', ()=>{ if(document.hidden){ stopScanner(true); } });
+moveTopActionsForMobile();
+bindQuickLog();
+window.addEventListener('resize', moveTopActionsForMobile);
 init();
 
 
