@@ -16,3 +16,7 @@ V7.0.2 full fix: profile target fields, goal validation rendering, home engine p
 V7.0.4 final clean: fixed cheat variable order, removed stray goal-validation fragment, removed duplicate profile declarations, fixed scanner declaration, JS validated.
 
 V7.0.5 profile UI fix: added visible Activity Level, Target Weight, Target Body Fat, and Target Date fields.
+
+V7.0.6 premium header: larger logo, aligned mobile header, improved top action styling, reduced awkward top spacing.
+
+V7.0.7 header + color theme: premium header retained, semantic accents added for goal, calories, recovery, rings, nav, and CTA styling.
