@@ -8,3 +8,5 @@ V6.4.1 scanner UX: rear-camera preference, working close button, switch camera, 
 V6.5: Cost-effective Goal Based System + Recovery Engine using local calculations first.
 
 V6.6: Calorie Engine + smart deficit UI using local MET-based estimates, goal system, and recovery engine in a cost-effective way.
+
+V7 integrated UI: target weight/body fat, goal validation, cheat-meal intelligence, inactivity/re-entry mode, merged into V6.6 UI.

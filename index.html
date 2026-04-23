@@ -1,3 +1,4 @@
+<!-- V7 FULL SYSTEM INTEGRATED -->
 <!-- V6.6 CALORIE ENGINE -->
 <!-- V6.5 GOAL RECOVERY SYSTEM -->
 <!-- V6.4.1 SCANNER UX -->
@@ -17,7 +18,7 @@
 <meta name="theme-color" content="#07111f"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<meta name="build-version" content="v6.6-calorie-engine-smart-deficit"/>
+<meta name="build-version" content="v7-full-system-integrated"/>
 <title>Stayfitinlife</title>
 <link rel="manifest" href="manifest.webmanifest"/>
 <link rel="apple-touch-icon" href="icons/icon-192.png"/>
@@ -371,8 +372,8 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
         <div class="card stat-card"><div class="stat-label">Weight Change</div><div class="stat-number" id="statProgress">--</div><div class="stat-sub">since last check-in</div></div>
       </div>
       <div class="content-grid">
-        <div class="panel"><div class="panel-title">Goal Engine</div><div class="list" id="goalEngineList"></div></div>
-        <div class="panel"><div class="panel-title">Calorie Engine</div><div class="list" id="calorieEngineHome"></div></div>
+        <div class="panel"><div class="panel-title">Goal Engine</div><div class="list" id="goalEngineList"></div><div style="height:12px"></div><div class="panel-title">Goal Validation</div><div class="list" id="goalValidationBox"></div></div>
+        <div class="panel"><div class="panel-title">Calorie Engine</div><div class="list" id="calorieEngineHome"></div><div style="height:12px"></div><div class="panel-title">Re-entry Mode</div><div class="list" id="reentryBox"></div></div>
         <div class="panel">
           <div class="panel-title">Activity Rings</div>
           <div class="rings-wrap">
@@ -512,7 +513,7 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
             <input id="nutritionWaterSummaryInput" readonly/>
           </div>
         </div>
-        <div class="list" id="nutritionCalorieInsight" style="margin-top:12px"></div>
+        <div class="list" id="nutritionCalorieInsight" style="margin-top:12px"></div><div class="list" id="cheatMealBox" style="margin-top:12px"></div>
       </div>
 
       <div class="content-grid equal" style="margin-top:16px">
@@ -644,7 +645,7 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
             <div class="list-item">
               <div>
                 <strong>Version</strong>
-                <div class="muted" id="appVersion">V6.6</div>
+                <div class="muted" id="appVersion">V7</div>
               </div>
             </div>
             <div class="list-item">
@@ -662,7 +663,7 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
             <div class="list-item">
               <div>
                 <strong>AI Coach</strong>
-                <div class="muted" id="aiCoachStatus">Screen-aware AI + local Goal, Recovery, and Calorie Engine enabled</div>
+                <div class="muted" id="aiCoachStatus">Screen-aware AI + Goal Validation + Recovery + Calorie + Re-entry logic enabled</div>
               </div>
             </div>
             <div class="list-item">
@@ -891,7 +892,127 @@ function weightSinceStart(){ const s=Number(data.profile.startWeight||0), c=Numb
 function weightSinceLastCheckin(){ if(data.weights.length<2) return null; return +(Number(data.weights[0].value)-Number(data.weights[1].value)).toFixed(1); }
 function totalWaterToday(){ return +(todayBucket('waterByDate').reduce((a,b)=>a+Number(b.amount||0),0).toFixed(2)); }
 
+
+function daysBetween(a,b){
+  try{
+    const aa = new Date(a+'T00:00:00');
+    const bb = new Date(b+'T00:00:00');
+    return Math.max(1, Math.round((bb-aa)/(1000*60*60*24)));
+  }catch(e){ return 30; }
+}
+function getCurrentWeight(){
+  return Number(latestWeight()?.value || data.profile.startWeight || 0);
+}
+function getLastLoggedDate(){
+  const candidates = [];
+  if((data.weights||[]).length) candidates.push(data.weights[0].date);
+  Object.keys(data.mealsByDate||{}).forEach(d=>candidates.push(d));
+  Object.keys(data.workoutsByDate||{}).forEach(d=>candidates.push(d));
+  Object.keys(data.waterByDate||{}).forEach(d=>candidates.push(d));
+  (data.recoveryLogs||[]).forEach(r=>{ if(r.date) candidates.push(r.date); });
+  if(!candidates.length) return null;
+  return candidates.sort().slice(-1)[0];
+}
+function getInactivityState(){
+  const last = getLastLoggedDate();
+  if(!last) return { days:null, mode:'new', message:'Start by logging your first weight, meal, and workout.' };
+  const days = daysBetween(last, todayISO()) - 1;
+  if(days <= 1) return { days, mode:'active', message:'You are actively logging.' };
+  if(days <= 6) return { days, mode:'reentry', message:`You last logged ${days} day${days>1?'s':''} ago. Resume with one meal, one workout, and your current weight.` };
+  return { days, mode:'restart', message:`You last logged ${days} days ago. Restart simply today instead of trying to catch up.` };
+}
+function getWeekDatesFrom(dateIso){
+  const d = new Date(dateIso + 'T00:00:00');
+  const dates=[];
+  for(let i=0;i<7;i++){
+    const x = new Date(d);
+    x.setDate(d.getDate()-i);
+    const y=x.getFullYear(), m=String(x.getMonth()+1).padStart(2,'0'), day=String(x.getDate()).padStart(2,'0');
+    dates.push(`${y}-${m}-${day}`);
+  }
+  return dates;
+}
+function getWeeklyCheatSummary(){
+  const dates = getWeekDatesFrom(todayISO());
+  let cheatMeals = 0, cheatCalories = 0;
+  dates.forEach(d=>{
+    (data.mealsByDate?.[d] || []).forEach(m=>{
+      const isCheat = String(m.meal||'').toLowerCase()==='cheat meal' || String(m.cuisine||'').toLowerCase()==='cheat meal' || !!m.isCheatMeal;
+      if(isCheat){
+        cheatMeals += 1;
+        cheatCalories += Math.round(Number(m.protein||0)*4 + Number(m.carbs||0)*4 + Number(m.fats||0)*9);
+      }
+    });
+  });
+  let message = cheatMeals===0 ? 'No cheat meals logged this week.' : cheatMeals===1 ? 'One cheat meal this week is manageable—return to plan at the next meal.' : `${cheatMeals} cheat meals this week are slowing progress. Tighten consistency on regular meals.`;
+  return { cheatMeals, cheatCalories, message };
+}
+function validateGoalTargets(){
+  const profile = data.profile || {};
+  const currentWeight = getCurrentWeight() || Number(profile.startWeight || 0);
+  const targetWeight = Number(profile.targetWeight || 0);
+  const targetBodyFat = Number(profile.targetBodyFat || 0);
+  const targetDate = profile.targetDate || '';
+  if(!currentWeight || !targetWeight){
+    return { state:'incomplete', title:'Add target weight to activate goal validation.', summary:'The app can still guide you using your goal type.', suggestedWeight:null, suggestedDate:null };
+  }
+  const change = +(targetWeight - currentWeight).toFixed(1);
+  const days = targetDate ? daysBetween(todayISO(), targetDate) : 56;
+  const weeklyRate = +(Math.abs(change) / Math.max(1, days/7)).toFixed(2);
+
+  let state='safe', title='Goal looks realistic.', summary='Your targets are within a practical range.';
+  if(profile.goal === 'Fat Loss'){
+    if(weeklyRate > currentWeight*0.01){
+      state='unrealistic';
+      title='This fat-loss goal is too aggressive.';
+      summary='Use a safer pace of about 0.25–1.0% body weight per week.';
+    } else if(weeklyRate > currentWeight*0.007){
+      state='aggressive';
+      title='This goal is aggressive.';
+      summary='You can continue, but recommendations will stay conservative to protect recovery.';
+    }
+  }
+  if(profile.goal === 'Muscle Gain'){
+    if(weeklyRate > 0.5){
+      state='unrealistic';
+      title='This muscle-gain goal is too aggressive.';
+      summary='Most users should target about 0.1–0.5 kg gain per week.';
+    } else if(weeklyRate > 0.35){
+      state='aggressive';
+      title='This muscle-gain goal is aggressive.';
+      summary='Keep expectations realistic and prioritize training quality plus recovery.';
+    }
+  }
+  if(targetBodyFat){
+    const male = String(profile.gender||'Male') !== 'Female';
+    if((male && targetBodyFat < 8) || (!male && targetBodyFat < 16)){
+      state='unrealistic';
+      title='Target body-fat level is too low for a general recommendation.';
+      summary='Use a safer body-fat target range and protect health and recovery.';
+    } else if((male && targetBodyFat < 11) || (!male && targetBodyFat < 19)){
+      if(state==='safe'){
+        state='aggressive';
+        title='Target body-fat level is aggressive.';
+        summary='This can be difficult to sustain, so the plan will stay conservative.';
+      }
+    }
+  }
+  const suggestedWeekly = profile.goal==='Muscle Gain' ? 0.25 : 0.5;
+  const suggestedWeeks = Math.max(4, Math.ceil(Math.abs(change)/suggestedWeekly));
+  const suggestedDateObj = new Date(todayISO()+'T00:00:00');
+  suggestedDateObj.setDate(suggestedDateObj.getDate() + suggestedWeeks*7);
+  const sy = suggestedDateObj.getFullYear(), sm = String(suggestedDateObj.getMonth()+1).padStart(2,'0'), sd = String(suggestedDateObj.getDate()).padStart(2,'0');
+  return {
+    state, title, summary,
+    currentWeight, targetWeight, targetBodyFat, weeklyRate, change,
+    suggestedWeight: targetWeight,
+    suggestedDate: `${sy}-${sm}-${sd}`,
+    weeklySafeRate: suggestedWeekly
+  };
+}
 function getGoalTargets(profile=data.profile){
+  const validation = validateGoalTargets();
+
   const weight = Number(latestWeight()?.value || profile.startWeight || 70);
   const height = Number(profile.height || 170);
   const age = Number(profile.age || 28);
@@ -901,12 +1022,14 @@ function getGoalTargets(profile=data.profile){
   const maintenance = Math.round(bmr * (activityMap[profile.activityLevel || 'Moderate'] || 1.4));
 
   if((profile.goal || 'Fat Loss') === 'Fat Loss'){
-    return { goal:'Fat Loss', calories:Math.max(1200, maintenance - 400), protein:Math.round(weight*2.2), carbs:Math.round(weight*2.0), fats:Math.round(weight*0.8), workoutFocus:'Strength 4–5x/week + 2–4 cardio sessions', recoveryFocus:'Control fatigue and protect sleep' };
+    const deficit = validation.state==='unrealistic' ? 250 : validation.state==='aggressive' ? 350 : 400;
+    return { goal:'Fat Loss', calories:Math.max(1200, maintenance - deficit), protein:Math.round(weight*2.2), carbs:Math.round(weight*2.0), fats:Math.round(weight*0.8), workoutFocus: validation.state==='unrealistic' ? 'Consistency first: 3–4 strength sessions + walking/cardio, no punishment training' : 'Strength 4–5x/week + 2–4 cardio sessions', recoveryFocus:'Control fatigue and protect sleep', validationState: validation.state };
   }
   if((profile.goal || '') === 'Muscle Gain'){
-    return { goal:'Muscle Gain', calories:maintenance + 300, protein:Math.round(weight*2.0), carbs:Math.round(weight*3.0), fats:Math.round(weight*1.0), workoutFocus:'Progressive overload with compounds first', recoveryFocus:'Sleep and lower fatigue drive growth' };
+    const surplus = validation.state==='unrealistic' ? 150 : validation.state==='aggressive' ? 200 : 300;
+    return { goal:'Muscle Gain', calories:maintenance + surplus, protein:Math.round(weight*2.0), carbs:Math.round(weight*3.0), fats:Math.round(weight*1.0), workoutFocus: validation.state==='unrealistic' ? 'Train consistently and progress slowly—do not chase extreme scale changes' : 'Progressive overload with compounds first', recoveryFocus:'Sleep and lower fatigue drive growth', validationState: validation.state };
   }
-  return { goal:'Maintenance', calories:maintenance, protein:Math.round(weight*1.8), carbs:Math.round(weight*2.5), fats:Math.round(weight*0.9), workoutFocus:'Balanced strength and cardio', recoveryFocus:'Keep recovery stable and training quality high' };
+  return { goal:'Maintenance', calories:maintenance, protein:Math.round(weight*1.8), carbs:Math.round(weight*2.5), fats:Math.round(weight*0.9), workoutFocus:'Balanced strength and cardio', recoveryFocus:'Keep recovery stable and training quality high', validationState: validation.state };
 }
 function calculateRecoveryEngine(){
   const r = data.recoveryLogs[0];
@@ -1156,9 +1279,10 @@ function renderBarcodeResult(){
       addByDate('mealsByDate', nutritionDate(), {
         meal: $('mealName').value,
         food: p.name || 'Scanned product',
-        cuisine: 'Barcode',
+        cuisine: $('mealName').value==='Cheat Meal' ? 'Cheat Meal' : 'Barcode',
         qty: 1,
         eggMode: '',
+        isCheatMeal: $('mealName').value==='Cheat Meal',
         protein: Number(p.protein||0),
         carbs: Number(p.carbs||0),
         fats: Number(p.fats||0)
@@ -1233,7 +1357,7 @@ function populateProfile(){
   const p=data.profile;
   $('profileName').value=p.name||''; $('profileAge').value=p.age||''; $('profileGender').value=p.gender||'Male';
   $('profileHeight').value=p.height||''; $('profileStartWeight').value=p.startWeight||''; $('profileGoal').value=p.goal||'Fat Loss';
-  $('profileWeighFreq').value=p.weighFreq||'Daily'; $('profileWaterTarget').value=p.waterTarget||3.5; $('profileRecoverySource').value=p.recoverySource||'Manual'; const pa=document.getElementById('profileActivityLevel'); if(pa) pa.value=p.activityLevel||'Moderate';
+  $('profileWeighFreq').value=p.weighFreq||'Daily'; $('profileWaterTarget').value=p.waterTarget||3.5; $('profileRecoverySource').value=p.recoverySource||'Manual'; const pa=document.getElementById('profileActivityLevel'); if(pa) pa.value=p.activityLevel||'Moderate'; const ptw=document.getElementById('profileTargetWeight'); if(ptw) ptw.value=p.targetWeight||''; const ptbf=document.getElementById('profileTargetBodyFat'); if(ptbf) ptbf.value=p.targetBodyFat||''; const ptd=document.getElementById('profileTargetDate'); if(ptd) ptd.value=p.targetDate||'';
   $('weightDate').value=todayISO(); $('recoverySource').value=p.recoverySource||'Manual';
 }
 
@@ -1463,7 +1587,7 @@ function renderAll(){
     <div class="list-item"><div><strong>Starting weight</strong><div class="muted">${data.profile.startWeight||'--'} kg</div></div></div>
     <div class="list-item"><div><strong>Current weight</strong><div class="muted">${latestWeight()?.value||'--'} kg</div></div></div>
     <div class="list-item"><div><strong>Since start</strong><div class="muted">${ws===null?'--':(ws>0?`+${ws} kg`:`${ws} kg`)}</div></div></div>
-    <div class="list-item"><div><strong>Since last check-in</strong><div class="muted">${wl===null?'--':(wl>0?`+${wl} kg`:`${wl} kg`)}</div></div></div>`;
+    <div class="list-item"><div><strong>Since last check-in</strong><div class="muted">${wl===null?'--':(wl>0?`+${wl} kg`:`${wl} kg`)}</div></div></div><div class="list-item"><div><strong>Target</strong><div class="muted">${data.profile.targetWeight||'--'} kg • ${data.profile.targetBodyFat||'--'}% BF</div></div></div>`;
   $('weightList').innerHTML = data.weights.length ? data.weights.map((w,i)=>`<div class="list-item"><div><strong>${w.value} kg</strong><div class="muted">${w.date} • ${w.type}</div>${w.notes?`<div class="muted">${w.notes}</div>`:''}</div><button class="chip" onclick="delWeight(${i})" type="button">Delete</button></div>`).join('') : '<div class="muted">No weight entries yet.</div>';
   $('workoutList').innerHTML = workouts.length ? workouts.map((w)=> {
     const title = w.activityType==='Strength Training' ? (w.exercise || 'Unnamed exercise') : (w.activity || 'Unnamed activity');
@@ -1526,20 +1650,41 @@ function renderAll(){
       <div class="list-item"><div><strong>Estimated Balance</strong><div class="muted">${todayCe.status} • ${todayCe.net > 0 ? '+' : ''}${todayCe.net} kcal</div></div></div>
       <div class="list-item"><div><strong>Insight</strong><div class="muted">${todayCe.insight}</div></div></div>`;
   }
+  const cheatMealBox = document.getElementById('cheatMealBox');
+  if(cheatMealBox){
+    cheatMealBox.innerHTML = cheat.cheatMeals
+      ? `<div class="list-item"><div><strong>Cheat meal intelligence</strong><div class="muted">${cheat.message}</div><div class="muted">Weekly cheat calories: ${cheat.cheatCalories} kcal estimated</div></div></div><div class="list-item"><div><strong>Next action</strong><div class="muted">Return to normal meals, hydrate, and hit protein. Do not punish the next day.</div></div></div>`
+      : `<div class="list-item"><div><strong>Cheat meal intelligence</strong><div class="muted">${cheat.message}</div></div></div>`;
+  }
 
-  $('mealList').innerHTML = nutritionMeals.length ? nutritionMeals.map((m)=>`<div class="list-item"><div><strong>${m.meal}</strong> <span class="tag">${m.cuisine}</span>${m.eggMode?` <span class="tag">${m.eggMode}</span>`:''}<div class="muted">${m.food} • qty ${m.qty}</div><div class="muted">P ${m.protein} • C ${m.carbs} • F ${m.fats}</div><div class="muted">${m.date || nutritionDate()}</div></div><button class="chip" onclick="delMeal('${m.id}','${nutritionDate()}')" type="button">Delete</button></div>`).join('') : '<div class="muted">No meals logged for this date.</div>';
+  $('mealList').innerHTML = nutritionMeals.length ? nutritionMeals.map((m)=>{ const kcal=Math.round(Number(m.protein||0)*4 + Number(m.carbs||0)*4 + Number(m.fats||0)*9); const cheatTag=(String(m.meal||'').toLowerCase()==='cheat meal' || String(m.cuisine||'').toLowerCase()==='cheat meal' || m.isCheatMeal)?' <span class="tag">Cheat</span>':''; return `<div class="list-item"><div><strong>${m.meal}</strong> <span class="tag">${m.cuisine}</span>${cheatTag}${m.eggMode?` <span class="tag">${m.eggMode}</span>`:''}<div class="muted">${m.food} • qty ${m.qty}</div><div class="muted">P ${m.protein} • C ${m.carbs} • F ${m.fats} • ${kcal} kcal</div><div class="muted">${m.date || nutritionDate()}</div></div><button class="chip" onclick="delMeal('${m.id}','${nutritionDate()}')" type="button">Delete</button></div>`; }).join('') : '<div class="muted">No meals logged for this date.</div>';
   $('waterSummary').textContent = `${nutritionWater}L / ${wt}L`;
   renderBarcodeResult();
   $('suppList').innerHTML = data.supplementStack.length ? data.supplementStack.map((s,i)=>`<div class="list-item"><div><strong>${s.name}</strong>${s.brand?` <span class="tag">${s.brand}</span>`:''}<div class="muted">${s.dose} ${s.unit} • ${s.timing}</div></div><button class="chip" onclick="delSupp(${i})" type="button">Delete</button></div>`).join('') : '<div class="muted">No supplements in stack yet.</div>';
   $('recoveryBox').innerHTML = recovery ? `<div style="font-size:54px;font-weight:800">${recovery.score}</div><div class="muted">Training focus: ${recovery.training}</div><div class="muted">Cardio plan: ${recovery.cardio}</div><div style="margin-top:10px">${recovery.tips.map(x=>'• '+x).join('<br>')}</div>` : 'No analysis yet.';
+  const gv = validateGoalTargets();
+  const reentry = getInactivityState();
+  const cheat = getWeeklyCheatSummary();
   const t = getGoalTargets();
   const goalList = document.getElementById('goalEngineList');
   if(goalList){
+    const currentWeight = getCurrentWeight() || Number(data.profile.startWeight||0);
+    const targetWeight = Number(data.profile.targetWeight||0);
+    const progressText = (currentWeight && targetWeight) ? `${Math.abs((currentWeight-targetWeight).toFixed(1))} kg remaining` : 'Add target weight for progress tracking';
     goalList.innerHTML = `
       <div class="list-item"><div><strong>${t.goal}</strong><div class="muted">Calories target: ${t.calories} kcal</div></div></div>
       <div class="list-item"><div><strong>Macro targets</strong><div class="muted">Protein ${t.protein}g • Carbs ${t.carbs}g • Fats ${t.fats}g</div></div></div>
+      <div class="list-item"><div><strong>Target outcome</strong><div class="muted">${data.profile.targetWeight||'--'} kg • ${data.profile.targetBodyFat||'--'}% BF • ${progressText}</div></div></div>
       <div class="list-item"><div><strong>Workout focus</strong><div class="muted">${t.workoutFocus}</div></div></div>
       <div class="list-item"><div><strong>Recovery focus</strong><div class="muted">${t.recoveryFocus}</div></div></div>`;
+  }
+  const goalValidationBox = document.getElementById('goalValidationBox');
+  if(goalValidationBox){
+    goalValidationBox.innerHTML = `
+      <div class="list-item"><div><strong>${gv.title}</strong><div class="muted">${gv.summary}</div></div></div>
+      <div class="list-item"><div><strong>Status</strong><div class="muted">${gv.state.toUpperCase()}</div></div></div>
+      ${gv.currentWeight ? `<div class="list-item"><div><strong>Rate</strong><div class="muted">${gv.weeklyRate||'--'} kg/week estimated</div></div></div>` : ''}
+      ${gv.suggestedDate ? `<div class="list-item"><div><strong>Safer suggestion</strong><div class="muted">${gv.suggestedWeight||'--'} kg by ${gv.suggestedDate}</div></div></div>` : ''}`;
   }
   const re = calculateRecoveryEngine();
   const ce = getTodayCalorieEngine();
@@ -1551,13 +1696,21 @@ function renderAll(){
       <div class="list-item"><div><strong>Exercise Burn</strong><div class="muted">${ce.exercise} kcal estimated</div></div></div>
       <div class="list-item"><div><strong>Net Balance</strong><div class="muted">${ce.net > 0 ? '+' : ''}${ce.net} kcal</div></div></div>`;
   }
+  const reentryBox = document.getElementById('reentryBox');
+  if(reentryBox){
+    reentryBox.innerHTML = reentry.mode==='active'
+      ? '<div class="list-item"><div><strong>Active</strong><div class="muted">You are actively logging. Keep the routine.</div></div></div>'
+      : `<div class="list-item"><div><strong>${reentry.mode==='restart' ? 'Welcome Back' : 'Resume Plan'}</strong><div class="muted">${reentry.message}</div></div></div><div class="list-item"><div><strong>Next step</strong><div class="muted">Log weight, first meal, and one workout today.</div></div></div>`;
+  }
   const reBox = document.getElementById('recoveryEngineBox');
   if(reBox){
     reBox.innerHTML = re.score === null
       ? `<div class="muted">${re.training}</div><div class="muted">${re.goalSummary}</div>`
       : `<div><strong>Band: ${re.band}</strong></div><div class="muted">Training: ${re.training}</div><div class="muted" style="margin-top:6px">Nutrition: ${re.nutrition}</div><div class="muted" style="margin-top:6px">Recovery: ${re.recoveryAction}</div><div class="muted" style="margin-top:8px">${re.goalSummary}</div>`;
   }
-  $('weightTrend').innerHTML = latestWeight() ? `Latest: <strong>${latestWeight().value} kg</strong><br>Since start: ${ws===null?'--':ws} kg<br>Since last: ${wl===null?'--':wl} kg` : 'No entries yet.';
+  const cw = latestWeight()?.value || '--';
+  const tw = data.profile.targetWeight || '--';
+  $('weightTrend').innerHTML = latestWeight() ? `Latest: <strong>${cw} kg</strong><br>Target: ${tw} kg<br>Since start: ${ws===null?'--':ws} kg<br>Since last: ${wl===null?'--':wl} kg` : 'No entries yet.';
   $('hydrationTrend').innerHTML = `Today: <strong>${water} L</strong><br>Target: ${wt} L`;
   renderCoach();
 }
@@ -1620,7 +1773,13 @@ function bindEvents(){
   }
 
   document.querySelectorAll('.chip[data-feel], .chip[data-goal]').forEach(btn=>btn.addEventListener('click', ()=>{ if(btn.dataset.feel) data.coachState.feel=btn.dataset.feel; saveData(); renderCoach(btn.dataset.feel, btn.dataset.goal); }));
-  $('saveProfileBtn').addEventListener('click', ()=>{ data.profile={name:$('profileName').value.trim(),age:$('profileAge').value,gender:$('profileGender').value,height:$('profileHeight').value,startWeight:$('profileStartWeight').value,goal:$('profileGoal').value,activityLevel:(document.getElementById('profileActivityLevel')?$('profileActivityLevel').value:'Moderate'),weighFreq:$('profileWeighFreq').value,waterTarget:Number($('profileWaterTarget').value||3.5),recoverySource:$('profileRecoverySource').value}; saveData(); });
+  $('saveProfileBtn').addEventListener('click', ()=>{
+    data.profile={name:$('profileName').value.trim(),age:$('profileAge').value,gender:$('profileGender').value,height:$('profileHeight').value,startWeight:$('profileStartWeight').value,goal:$('profileGoal').value,activityLevel:(document.getElementById('profileActivityLevel')?$('profileActivityLevel').value:'Moderate'),targetWeight:Number((document.getElementById('profileTargetWeight')?$('profileTargetWeight').value:0)||0),targetBodyFat:Number((document.getElementById('profileTargetBodyFat')?$('profileTargetBodyFat').value:0)||0),targetDate:(document.getElementById('profileTargetDate')?$('profileTargetDate').value:''),weighFreq:$('profileWeighFreq').value,waterTarget:Number($('profileWaterTarget').value||3.5),recoverySource:$('profileRecoverySource').value};
+    saveData();
+    const gv = validateGoalTargets();
+    if(gv.state==='aggressive') alert('Goal saved. It is aggressive, so suggestions will stay conservative.');
+    if(gv.state==='unrealistic') alert('Goal saved, but it is unrealistic. The app will guide you with a safer plan.');
+  });
   $('addWeightBtn').addEventListener('click', ()=>{ const val=Number($('weightValue').value||0); if(!val) return; data.weights.unshift({date:$('weightDate').value||todayISO(), value:val, type:$('weightType').value, notes:$('weightNotes').value.trim()}); $('weightValue').value=''; $('weightNotes').value=''; saveData(); });
   $('bodyPartSelect').addEventListener('change', updateBodyPartFlow);
   $('exerciseType').addEventListener('change', updateBodyPartFlow);
@@ -1640,7 +1799,7 @@ function bindEvents(){
   $('foodSearch').addEventListener('input', populateFoods);
   $('foodSelect').addEventListener('change', updateFoodMeta);
   $('eggMode').addEventListener('change', updateFoodMeta);
-  $('addMealBtn').addEventListener('click', ()=>{ const raw=allFoods().find(x=>x.name===$('foodSelect').value), food=getAdjustedFood(raw), qty=Number($('foodQty').value||0); if(!food||!qty) return; addByDate('mealsByDate', nutritionDate(), {meal:$('mealName').value, food:food.name, cuisine:food.cuisine, qty, eggMode:food.modeLabel||'', protein:+(food.protein*qty).toFixed(1), carbs:+(food.carbs*qty).toFixed(1), fats:+(food.fats*qty).toFixed(1)}); $('foodQty').value=''; saveData(); });
+  $('addMealBtn').addEventListener('click', ()=>{ const raw=allFoods().find(x=>x.name===$('foodSelect').value), food=getAdjustedFood(raw), qty=Number($('foodQty').value||0); if(!food||!qty) return; addByDate('mealsByDate', nutritionDate(), {meal:$('mealName').value, food:food.name, cuisine:food.cuisine, qty, eggMode:food.modeLabel||'', isCheatMeal: ($('mealName').value==='Cheat Meal' || food.cuisine==='Cheat Meal'), protein:+(food.protein*qty).toFixed(1), carbs:+(food.carbs*qty).toFixed(1), fats:+(food.fats*qty).toFixed(1)}); $('foodQty').value=''; saveData(); });
   $('addCustomFoodBtn').addEventListener('click', ()=>{ const name=$('customFoodName').value.trim(); if(!name) return; data.customFoods.unshift({name, cuisine:$('customFoodCuisine').value, unit:$('customFoodUnit').value||'1 serving', protein:Number($('customFoodProtein').value||0), carbs:Number($('customFoodCarbs').value||0), fats:Number($('customFoodFats').value||0)}); $('customFoodName').value=''; $('customFoodUnit').value=''; $('customFoodProtein').value=''; $('customFoodCarbs').value=''; $('customFoodFats').value=''; populateCuisines(); populateFoods(); saveData(); });
   document.querySelectorAll('[data-water]').forEach(btn=>btn.addEventListener('click', ()=>{ addByDate('waterByDate', nutritionDate(), {amount:Number(btn.dataset.water)}); saveData(); }));
   $('addWaterBtn').addEventListener('click', ()=>{ const amt=Number($('customWater').value||0); if(!amt) return; addByDate('waterByDate', nutritionDate(), {amount:amt}); $('customWater').value=''; saveData(); });
