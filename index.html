@@ -1,6 +1,7 @@
-<!-- V7.1.1 MOBILE REFINE -->
-<!-- V7.1.1 STABLE DEBUG -->
-<!-- V7.1.1 HEADER COLOR THEME -->
+<!-- V7.1.2 WORDMARK REFINED -->
+<!-- V7.1.2 MOBILE REFINE -->
+<!-- V7.1.2 STABLE DEBUG -->
+<!-- V7.1.2 HEADER COLOR THEME -->
 <!-- V7.0.6 PREMIUM HEADER -->
 <!-- V7.0.5 PROFILE UI FIX -->
 <!-- V7.0.4 FINAL CLEAN -->
@@ -25,7 +26,7 @@
 <meta name="theme-color" content="#07111f"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<meta name="build-version" content="v7.1.1-mobile-refine"/>
+<meta name="build-version" content="v7.1.2-wordmark-refined"/>
 <title>Stayfitinlife</title>
 <link rel="manifest" href="manifest.webmanifest"/>
 <link rel="apple-touch-icon" href="icons/icon-192.png"/>
@@ -605,7 +606,7 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
 }
 
 
-/* V7.1.1 stable debug */
+/* V7.1.2 stable debug */
 .desktop-hero{
   display:block;
   padding:2px 4px 14px;
@@ -720,7 +721,7 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
 }
 
 
-/* V7.1.1 mobile refine */
+/* V7.1.2 mobile refine */
 .mobile-header{
   gap:8px !important;
   padding:0 0 8px !important;
@@ -820,6 +821,130 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
     min-width:0 !important;
   }
 }
+
+
+/* V7.1.2 wordmark refined */
+.wordmark{
+  font-size:clamp(20px,2vw,28px);
+  font-weight:900;
+  letter-spacing:.08em;
+  line-height:1;
+  background:linear-gradient(90deg, #e8eefc 0%, #67e8f9 28%, #34d399 52%, #a78bfa 78%, #f8fafc 100%);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+  text-transform:uppercase;
+}
+.wordmark-tag{
+  margin-top:6px;
+  font-size:10px;
+  letter-spacing:.22em;
+  color:rgba(255,255,255,.48);
+  text-transform:uppercase;
+  white-space:nowrap;
+}
+.desktop-wordmark{
+  margin-bottom:14px;
+}
+.mobile-logo{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  margin:0 0 2px;
+}
+.mobile-logo img{display:none !important;}
+.home-topbar-left,
+.mobile-header-left{
+  align-items:flex-start !important;
+}
+.rings-wrap{
+  gap:16px 10px !important;
+}
+.ring{
+  width:118px !important;
+  height:118px !important;
+  background:
+    radial-gradient(circle at center, rgba(13,25,55,.96) 46%, transparent 47%),
+    conic-gradient(from 270deg, var(--c) calc(var(--p,0) * 1%), rgba(255,255,255,.08) 0) !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.05),
+    0 0 0 10px rgba(255,255,255,.02),
+    0 12px 28px rgba(0,0,0,.18) !important;
+}
+.ring-inner{
+  width:86px !important;
+  height:86px !important;
+  background:linear-gradient(180deg, rgba(16,31,67,.98), rgba(8,18,44,.98)) !important;
+  border:1px solid rgba(255,255,255,.06) !important;
+}
+.ring-value{
+  font-size:19px !important;
+  font-weight:850 !important;
+}
+.ring-name{
+  font-size:14px !important;
+  font-weight:700 !important;
+}
+#proteinSub,#carbSub,#fatSub,#waterSub{
+  font-size:12px !important;
+  line-height:1.2 !important;
+}
+.rings-summary-panel{
+  padding:16px !important;
+}
+.rings-summary-panel .summary-meter{
+  box-shadow:0 0 0 8px rgba(255,255,255,.02);
+}
+.top-actions-floating .action-btn{
+  box-shadow:0 12px 24px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.08) !important;
+}
+@media (max-width:860px){
+  .desktop-wordmark{display:none;}
+  .mobile-logo{
+    margin-bottom:8px;
+  }
+  .wordmark{
+    font-size:28px;
+    letter-spacing:.05em;
+  }
+  .wordmark-tag{
+    font-size:9px;
+    letter-spacing:.18em;
+  }
+  .mobile-header{
+    padding-top:2px !important;
+  }
+  .mobile-header .hero-copy h1{
+    font-size:clamp(24px,7.5vw,38px) !important;
+    margin-top:0 !important;
+  }
+  .mobile-header .hero-copy p{
+    font-size:15px !important;
+  }
+  .top-actions-floating{
+    margin-top:2px !important;
+  }
+  .rings-wrap{
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+    justify-items:center;
+  }
+  .ring{
+    width:112px !important;
+    height:112px !important;
+  }
+  .ring-inner{
+    width:82px !important;
+    height:82px !important;
+  }
+  .panel-title{
+    font-size:20px !important;
+  }
+}
+@media (min-width:861px){
+  .desktop-wordmark .wordmark{
+    font-size:24px;
+  }
+}
 </style>
 </head>
 <body>
@@ -849,6 +974,7 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
     </div>
     <section class="section active" id="home">
       <div class="desktop-hero">
+        <div class="desktop-wordmark"><div class="wordmark">STAYFITINLIFE</div><div class="wordmark-tag">TRAIN • FUEL • RECOVER • EVOLVE</div></div>
         <h1 id="welcomeTitle">Dashboard</h1>
         <div class="sub" id="welcomeSubtitle">Good morning, there! 👋</div>
         <div class="date" id="todayDateLine">Today</div>
@@ -856,7 +982,7 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
 
       <div class="mobile-header">
         <div class="mobile-header-left">
-          <div class="mobile-logo"><img src="logo-full.png" alt="Stayfitinlife logo"/></div>
+          <div class="mobile-logo"><div class="wordmark">STAYFITINLIFE</div><div class="wordmark-tag">TRAIN • FUEL • RECOVER • EVOLVE</div></div>
           <div class="hero-copy"><h1 id="welcomeTitleMobile">Dashboard</h1><p id="welcomeSubtitleMobile"></p></div>
           <div class="mobile-date" id="todayDateLineMobile">Today</div>
         </div>
@@ -1163,7 +1289,7 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
             <div class="list-item">
               <div>
                 <strong>Version</strong>
-                <div class="muted" id="appVersion">V7.1.1</div>
+                <div class="muted" id="appVersion">V7.1.2</div>
               </div>
             </div>
             <div class="list-item">
