@@ -1,9 +1,10 @@
-<!-- V7.2.1 WORDMARK GRADIENT -->
-<!-- V7.2.1 PREMIUM LAYOUT -->
-<!-- V7.2.1 WORDMARK REFINED -->
-<!-- V7.2.1 MOBILE REFINE -->
-<!-- V7.2.1 STABLE DEBUG -->
-<!-- V7.2.1 HEADER COLOR THEME -->
+<!-- V7.2.2 SPACING RING FIX -->
+<!-- V7.2.2 WORDMARK GRADIENT -->
+<!-- V7.2.2 PREMIUM LAYOUT -->
+<!-- V7.2.2 WORDMARK REFINED -->
+<!-- V7.2.2 MOBILE REFINE -->
+<!-- V7.2.2 STABLE DEBUG -->
+<!-- V7.2.2 HEADER COLOR THEME -->
 <!-- V7.0.6 PREMIUM HEADER -->
 <!-- V7.0.5 PROFILE UI FIX -->
 <!-- V7.0.4 FINAL CLEAN -->
@@ -28,7 +29,7 @@
 <meta name="theme-color" content="#07111f"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<meta name="build-version" content="v7.2.1-wordmark-gradient"/>
+<meta name="build-version" content="v7.2.2-spacing-ring-fix"/>
 <title>Stayfitinlife</title>
 <link rel="manifest" href="manifest.webmanifest"/>
 <link rel="apple-touch-icon" href="icons/icon-192.png"/>
@@ -608,7 +609,7 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
 }
 
 
-/* V7.2.1 stable debug */
+/* V7.2.2 stable debug */
 .desktop-hero{
   display:block;
   padding:2px 4px 14px;
@@ -723,7 +724,7 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
 }
 
 
-/* V7.2.1 mobile refine */
+/* V7.2.2 mobile refine */
 .mobile-header{
   gap:8px !important;
   padding:0 0 8px !important;
@@ -825,7 +826,7 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
 }
 
 
-/* V7.2.1 wordmark refined */
+/* V7.2.2 wordmark refined */
 .wordmark{
   font-weight:900;
   letter-spacing:.08em;
@@ -949,7 +950,7 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
 }
 
 
-/* V7.2.1 Premium Layout */
+/* V7.2.2 Premium Layout */
 
 .logo img{display:none !important;}
 
@@ -1015,6 +1016,218 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
   font-weight:800;
 }
 
+
+
+/* V7.2.2 spacing + ring crash fix */
+.main{
+  padding:18px 20px 110px !important;
+}
+.section.active{
+  display:block;
+  margin-top:0 !important;
+  padding-top:0 !important;
+}
+.desktop-hero{
+  padding:0 2px 14px !important;
+  margin:0 !important;
+}
+.desktop-hero-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:18px;
+}
+.desktop-hero-left{
+  min-width:0;
+}
+.desktop-hero h1{
+  margin:0 0 4px !important;
+  font-size:clamp(30px,4.2vw,58px);
+  line-height:1;
+  letter-spacing:-.04em;
+}
+.desktop-hero .sub{
+  margin:0;
+  font-size:clamp(18px,1.6vw,28px);
+  color:rgba(255,255,255,.92);
+  font-weight:800;
+}
+.desktop-hero .date{
+  margin-top:8px;
+  font-size:14px;
+  color:rgba(255,255,255,.6);
+}
+.desktop-hero-right{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  gap:12px;
+}
+.top-actions-inline{
+  display:flex;
+  gap:12px;
+}
+.mobile-only-actions{display:none;}
+.mobile-header{
+  display:none;
+}
+.wordmark{
+  font-weight:900;
+  letter-spacing:.08em;
+  line-height:1;
+  background:linear-gradient(90deg, #00E5FF 0%, #00FFA3 30%, #7C6CFF 65%, #C084FC 100%);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+  text-transform:uppercase;
+  text-shadow:0 0 12px rgba(0,229,255,.16), 0 0 24px rgba(124,108,255,.10);
+}
+.logo .wordmark{font-size:20px;margin-top:8px}
+.wordmark-tag{
+  margin-top:6px;
+  font-size:10px;
+  letter-spacing:.22em;
+  color:rgba(255,255,255,.52);
+  text-transform:uppercase;
+  white-space:nowrap;
+}
+.rings-wrap{
+  display:grid !important;
+  grid-template-columns:repeat(2, minmax(0,1fr));
+  justify-items:center;
+  align-items:center;
+  gap:16px 12px !important;
+}
+.ring-card{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-start;
+}
+.ring{
+  width:110px !important;
+  height:110px !important;
+  border-radius:50% !important;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:conic-gradient(var(--c) calc(var(--p,0)*1%), rgba(255,255,255,.08) 0) !important;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.05), 0 0 0 10px rgba(255,255,255,.02), 0 12px 28px rgba(0,0,0,.18) !important;
+}
+.ring-inner{
+  width:80px !important;
+  height:80px !important;
+  border-radius:50% !important;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#0b1732 !important;
+  border:1px solid rgba(255,255,255,.06);
+}
+.ring-value{
+  font-size:18px;
+  font-weight:800;
+}
+.home-rings-grid{
+  display:grid;
+  grid-template-columns:1.15fr .85fr;
+  gap:16px;
+  margin-top:10px !important;
+}
+.cards{
+  margin-top:14px !important;
+}
+.content-grid.home-after-rings{
+  margin-top:16px !important;
+}
+.quick-card{display:none !important;}
+@media (max-width:860px){
+  .main{
+    padding:10px 12px 126px !important;
+  }
+  .desktop-hero{display:none;}
+  .mobile-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:14px;
+    padding:0 0 8px !important;
+    margin:0 !important;
+  }
+  .mobile-header-left{
+    flex:1;
+    min-width:0;
+    align-items:flex-start;
+  }
+  .mobile-header-right{
+    flex:0 0 auto;
+    display:flex;
+    justify-content:flex-end;
+  }
+  .mobile-logo{
+    text-align:right;
+    margin:0 !important;
+  }
+  .mobile-logo .wordmark{
+    font-size:24px;
+    letter-spacing:.04em;
+  }
+  .mobile-logo .wordmark-tag{
+    font-size:9px;
+    letter-spacing:.15em;
+  }
+  .mobile-header .hero-copy{
+    padding:0 !important;
+  }
+  .mobile-header .hero-copy h1{
+    font-size:clamp(24px,7.5vw,38px) !important;
+    margin:0 0 4px !important;
+    line-height:1.02;
+  }
+  .mobile-header .hero-copy p{
+    font-size:15px !important;
+    margin:0;
+    line-height:1.2;
+    font-weight:800;
+    color:rgba(255,255,255,.92);
+  }
+  .mobile-date{
+    margin-top:8px;
+    font-size:13px !important;
+    color:rgba(255,255,255,.64);
+  }
+  .mobile-only-actions{
+    display:grid !important;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin:0 0 12px !important;
+    width:100%;
+  }
+  .mobile-only-actions .action-btn{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:52px;
+    padding:0 14px;
+    font-size:16px;
+  }
+  .home-rings-grid{
+    grid-template-columns:1fr !important;
+    gap:12px !important;
+    margin-top:8px !important;
+  }
+  .rings-wrap{
+    gap:14px 8px !important;
+  }
+  .ring{
+    width:112px !important;
+    height:112px !important;
+  }
+  .ring-inner{
+    width:82px !important;
+    height:82px !important;
+  }
+}
 </style>
 </head>
 <body>
@@ -1037,25 +1250,42 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
   </aside>
 
   <main class="main">
-    <div class="top-actions-floating">
-      <button class="action-btn" id="exportBtn" type="button">Export</button>
-      <label class="action-btn" for="importFile" style="display:inline-flex;align-items:center" tabindex="0">Import</label>
-      <input id="importFile" type="file" accept="application/json" class="hidden"/>
-    </div>
+    
     <section class="section active" id="home">
       <div class="desktop-hero">
-        <div class="desktop-wordmark"><div class="wordmark">STAYFITINLIFE</div><div class="wordmark-tag">TRAIN • FUEL • RECOVER • EVOLVE</div></div>
-        <h1 id="welcomeTitle">Dashboard</h1>
-        <div class="sub" id="welcomeSubtitle">Good morning, there! 👋</div>
-        <div class="date" id="todayDateLine">Today</div>
+        <div class="desktop-hero-top">
+          <div class="desktop-hero-left">
+            <h1 id="welcomeTitle">Dashboard</h1>
+            <div class="sub" id="welcomeSubtitle">Good morning, there! 👋</div>
+            <div class="date" id="todayDateLine">📅 Today</div>
+          </div>
+          <div class="desktop-hero-right">
+            <div class="desktop-wordmark"><div class="wordmark">STAYFITINLIFE</div><div class="wordmark-tag">TRAIN • FUEL • RECOVER • EVOLVE</div></div>
+            <div class="top-actions-inline">
+              <button class="action-btn" id="exportBtn" type="button">Export</button>
+              <label class="action-btn" for="importFile" style="display:inline-flex;align-items:center;justify-content:center" tabindex="0">Import</label>
+              <input id="importFile" type="file" accept="application/json" class="hidden"/>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="mobile-header premium-mobile-header">
         <div class="mobile-header-left">
-          <div class="mobile-logo"><div class="wordmark">STAYFITINLIFE</div><div class="wordmark-tag">TRAIN • FUEL • RECOVER • EVOLVE</div></div>
-          <div class="hero-copy"><h1 id="welcomeTitleMobile">Dashboard</h1><p id="welcomeSubtitleMobile"></p></div>
-          <div class="mobile-date" id="todayDateLineMobile">Today</div>
+          <div class="hero-copy">
+            <h1 id="welcomeTitleMobile">Dashboard</h1>
+            <p id="welcomeSubtitleMobile">Good morning, there! 👋</p>
+            <div class="mobile-date" id="todayDateLineMobile">📅 Today</div>
+          </div>
         </div>
+        <div class="mobile-header-right">
+          <div class="mobile-logo"><div class="wordmark">STAYFITINLIFE</div><div class="wordmark-tag">TRAIN • FUEL • RECOVER • EVOLVE</div></div>
+        </div>
+      </div>
+      <div class="top-actions-floating mobile-only-actions">
+        <button class="action-btn" id="exportBtnMobile" type="button">Export</button>
+        <label class="action-btn" for="importFileMobile" style="display:inline-flex;align-items:center;justify-content:center" tabindex="0">Import</label>
+        <input id="importFileMobile" type="file" accept="application/json" class="hidden"/>
       </div>
 
       <div class="home-rings-grid home-rings-first">
@@ -1063,12 +1293,33 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
           <div class="panel-title">Today's Progress</div>
           <div class="small-note" style="margin-top:-6px;margin-bottom:10px">Complete your rings daily</div>
           <div class="rings-wrap">
-            <div class="ring-card"><div class="ring" id="proteinRing" style="--c:var(--green)"><div class="ring-inner"><div class="ring-value-wrap"><span class="ring-value">0</span></div></div></div><div class="ring-name">Protein</div><div class="small-note" id="proteinSub">0 / 150 g</div></div>
-            <div class="ring-card"><div class="ring" id="carbRing" style="--c:var(--purple)"><div class="ring-inner"><div class="ring-value-wrap"><span class="ring-value">0</span></div></div></div><div class="ring-name">Carbs</div><div class="small-note" id="carbSub">0 / 200 g</div></div>
-            <div class="ring-card"><div class="ring" id="fatRing" style="--c:var(--blue)"><div class="ring-inner"><div class="ring-value-wrap"><span class="ring-value">0</span></div></div></div><div class="ring-name">Fats</div><div class="small-note" id="fatSub">0 / 60 g</div></div>
-            <div class="ring-card"><div class="ring" id="waterRing" style="--c:var(--cyan)"><div class="ring-inner"><div class="ring-value-wrap"><span class="ring-value">0</span></div></div></div><div class="ring-name">Water</div><div class="small-note" id="waterSub">0 / 3.5 L</div></div>
+            <div class="ring-card">
+              <div class="ring" id="proteinRing" style="--c:var(--green)">
+                <div class="ring-inner"><span class="ring-value" id="proteinVal">0g</span></div>
+              </div>
+              <div class="ring-name">Protein</div><div class="small-note" id="proteinSub">0 / 150 g</div>
+            </div>
+            <div class="ring-card">
+              <div class="ring" id="carbRing" style="--c:var(--purple)">
+                <div class="ring-inner"><span class="ring-value" id="carbVal">0g</span></div>
+              </div>
+              <div class="ring-name">Carbs</div><div class="small-note" id="carbSub">0 / 200 g</div>
+            </div>
+            <div class="ring-card">
+              <div class="ring" id="fatRing" style="--c:var(--blue)">
+                <div class="ring-inner"><span class="ring-value" id="fatVal">0g</span></div>
+              </div>
+              <div class="ring-name">Fats</div><div class="small-note" id="fatSub">0 / 60 g</div>
+            </div>
+            <div class="ring-card">
+              <div class="ring" id="waterRing" style="--c:var(--cyan)">
+                <div class="ring-inner"><span class="ring-value" id="waterVal">0L</span></div>
+              </div>
+              <div class="ring-name">Water</div><div class="small-note" id="waterSub">0 / 3.5 L</div>
+            </div>
           </div>
         </div>
+
         <div class="panel rings-summary-panel">
           <div class="panel-title">Rings Summary</div>
           <div class="summary-big">
@@ -1094,7 +1345,14 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
         <div class="panel"><div class="panel-title">Calorie Engine</div><div class="list" id="calorieEngineHome"></div><div style="height:12px"></div><div class="panel-title">Re-entry Mode</div><div class="list" id="reentryBox"></div></div>
         <div class="panel"><div class="panel-title">Weight + Recovery</div><div class="list" id="weightSummary"></div></div>
       </div>
-      <div class="coach-banner" style="margin-top:16px"><div class="coach-left"><div class="coach-icon">🧠</div><div><div style="font-size:20px;font-weight:800">AI Coach</div><div class="muted">Need guidance? Ask the coach for this screen.</div></div></div><button class="primary-btn" id="openCoachHome" type="button">Ask Coach AI</button></div>
+
+      <div class="coach-banner" style="margin-top:16px">
+        <div class="coach-left">
+          <div class="coach-icon">🧠</div>
+          <div><div style="font-size:20px;font-weight:800">AI Coach</div><div class="muted">Need guidance? Ask the coach for this screen.</div></div>
+        </div>
+        <button class="primary-btn" id="openCoachHome" type="button">Ask Coach AI</button>
+      </div>
     </section>
 
     <section class="section" id="profile">
@@ -1359,7 +1617,7 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
             <div class="list-item">
               <div>
                 <strong>Version</strong>
-                <div class="muted" id="appVersion">V7.2.1</div>
+                <div class="muted" id="appVersion">V7.2.2</div>
               </div>
             </div>
             <div class="list-item">
@@ -2341,26 +2599,24 @@ function moveTopActionsForMobile(){
 function bindQuickLog(){
   const quick = document.getElementById('quickHomeBtn');
   if(!quick) return;
-  quick.onclick = ()=>{
-    switchTab('workout');
-    setTimeout(()=>{
-      const el = document.getElementById('activityType') || document.getElementById('workoutDuration');
-      if(el){ try{ el.focus(); }catch(e){} }
-      const panel = document.getElementById('workout');
-      if(panel){ panel.scrollIntoView({behavior:'smooth', block:'start'}); }
-    }, 20);
-  };
+
 }
 
 function renderRings(protein, carbs, fats, water){
   const t=getGoalTargets();
   const pt=t.protein, ct=t.carbs, ft=t.fats, wt=Number(data.profile.waterTarget||3.5);
-  $('proteinVal').textContent=`${protein}g`; $('carbVal').textContent=`${carbs}g`; $('fatVal').textContent=`${fats}g`; $('waterVal').textContent=`${water}L`;
-  $('proteinSub').textContent=`${protein} / ${pt} g`; $('carbSub').textContent=`${carbs} / ${ct} g`; $('fatSub').textContent=`${fats} / ${ft} g`; $('waterSub').textContent=`${water} / ${wt} L`;
-  $('proteinRing').style.setProperty('--p', Math.min(100, Math.round((protein/Math.max(1,pt))*100)));
-  $('carbRing').style.setProperty('--p', Math.min(100, Math.round((carbs/Math.max(1,ct))*100)));
-  $('fatRing').style.setProperty('--p', Math.min(100, Math.round((fats/Math.max(1,ft))*100)));
-  $('waterRing').style.setProperty('--p', Math.min(100, Math.round((water/Math.max(0.1,wt))*100)));
+  const pv=document.getElementById('proteinVal'); if(pv) pv.textContent=`${protein}g`;
+  const cv=document.getElementById('carbVal'); if(cv) cv.textContent=`${carbs}g`;
+  const fv=document.getElementById('fatVal'); if(fv) fv.textContent=`${fats}g`;
+  const wv=document.getElementById('waterVal'); if(wv) wv.textContent=`${water}L`;
+  const ps=document.getElementById('proteinSub'); if(ps) ps.textContent=`${protein} / ${pt} g`;
+  const cs=document.getElementById('carbSub'); if(cs) cs.textContent=`${carbs} / ${ct} g`;
+  const fs=document.getElementById('fatSub'); if(fs) fs.textContent=`${fats} / ${ft} g`;
+  const ws=document.getElementById('waterSub'); if(ws) ws.textContent=`${water} / ${wt} L`;
+  const pr=document.getElementById('proteinRing'); if(pr) pr.style.setProperty('--p', Math.min(100, Math.round((protein/Math.max(1,pt))*100)));
+  const cr=document.getElementById('carbRing'); if(cr) cr.style.setProperty('--p', Math.min(100, Math.round((carbs/Math.max(1,ct))*100)));
+  const fr=document.getElementById('fatRing'); if(fr) fr.style.setProperty('--p', Math.min(100, Math.round((fats/Math.max(1,ft))*100)));
+  const wr=document.getElementById('waterRing'); if(wr) wr.style.setProperty('--p', Math.min(100, Math.round((water/Math.max(0.1,wt))*100)));
   updateRingsSummaryUI(protein, carbs, fats, water);
 }
 
@@ -2632,7 +2888,9 @@ function bindEvents(){
   $('addSuppBtn').addEventListener('click', ()=>{ const name=$('suppSelect').value; if(!name) return; data.supplementStack.unshift({name, dose:Number($('suppDose').value||1), unit:$('suppUnit').value, timing:$('suppTiming').value, reminder:$('suppReminder').value, brand:$('suppBrand').value.trim()}); $('suppDose').value=''; $('suppBrand').value=''; saveData(); });
   $('addCustomSuppBtn').addEventListener('click', ()=>{ const name=$('customSuppName').value.trim(); if(!name) return; data.customSupplements.unshift({name, unit:$('customSuppUnit').value||'serving', timing:$('customSuppTiming').value||'First meal'}); $('customSuppName').value=''; $('customSuppUnit').value=''; $('customSuppTiming').value=''; populateSupps(); saveData(); });
   $('saveRecoveryBtn').addEventListener('click', ()=>{ data.recoveryLogs.unshift(analyzeRecovery($('recoverySleep').value,$('recoveryRhr').value,$('recoveryRr').value,$('recoveryAer').value,$('recoverySource').value)); $('recoverySleep').value=''; $('recoveryRhr').value=''; $('recoveryRr').value=''; $('recoveryAer').value=''; saveData(); });
-  $('exportBtn').addEventListener('click', ()=>{ const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}), url=URL.createObjectURL(blob), a=document.createElement('a'); a.href=url; a.download='stayfitinlife-backup.json'; a.click(); URL.revokeObjectURL(url); });
+  const doExport = ()=>{ const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}), url=URL.createObjectURL(blob), a=document.createElement('a'); a.href=url; a.download='stayfitinlife-backup.json'; a.click(); URL.revokeObjectURL(url); };
+  if(document.getElementById('exportBtn')) $('exportBtn').addEventListener('click', doExport);
+  if(document.getElementById('exportBtnMobile')) $('exportBtnMobile').addEventListener('click', doExport);
   $('importFile').addEventListener('change', async e=>{ const f=e.target.files[0]; if(!f) return; try{ data={...defaultData, ...JSON.parse(await f.text())}; saveData(); }catch(err){ alert('Import failed'); } });
 
   const settingsExportBtn = document.getElementById('settingsExportBtn');
