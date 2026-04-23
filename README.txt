@@ -20,3 +20,5 @@ V7.0.5 profile UI fix: added visible Activity Level, Target Weight, Target Body 
 V7.0.6 premium header: larger logo, aligned mobile header, improved top action styling, reduced awkward top spacing.
 
 V7.0.7 header + color theme: premium header retained, semantic accents added for goal, calories, recovery, rings, nav, and CTA styling.
+
+V7.0.8 rings priority layout: dashboard greeting with name, top rings hero, rings summary, metric cards below, Ask Coach AI inline and sidebar placements, desktop/mobile hierarchy aligned to mockup.

@@ -1,3 +1,4 @@
+<!-- V7.0.9 RINGS PRIORITY -->
 <!-- V7.0.7 HEADER COLOR THEME -->
 <!-- V7.0.6 PREMIUM HEADER -->
 <!-- V7.0.5 PROFILE UI FIX -->
@@ -23,7 +24,7 @@
 <meta name="theme-color" content="#07111f"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<meta name="build-version" content="v7.0.7-header-color-theme"/>
+<meta name="build-version" content="v7.0.9-pixel-refine"/>
 <title>Stayfitinlife</title>
 <link rel="manifest" href="manifest.webmanifest"/>
 <link rel="apple-touch-icon" href="icons/icon-192.png"/>
@@ -601,6 +602,394 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
     text-shadow:none;
   }
 }
+
+
+/* V7.0.9 rings priority dashboard */
+.home-topbar{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:18px;
+  margin:0 0 14px;
+}
+.home-topbar-left{
+  display:flex;
+  align-items:flex-start;
+  gap:16px;
+  min-width:0;
+  flex:1;
+}
+.home-greeting{
+  min-width:0;
+}
+.home-greeting h1{
+  margin:0;
+  font-size:clamp(34px,4vw,72px);
+  line-height:1;
+  letter-spacing:-0.045em;
+}
+.home-greeting .greet-line{
+  font-size:clamp(18px,1.6vw,30px);
+  color:rgba(255,255,255,.86);
+  margin-top:4px;
+  font-weight:700;
+}
+.home-greeting .date-line{
+  margin-top:8px;
+  color:rgba(255,255,255,.6);
+  font-size:14px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.date-dot{
+  width:8px;height:8px;border-radius:999px;background:rgba(255,255,255,.28);display:inline-block
+}
+.home-topbar-right{
+  width:min(360px, 30vw);
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.mini-highlight{
+  border:1px solid rgba(139,92,246,.22);
+  border-radius:18px;
+  padding:14px 16px;
+  background:linear-gradient(180deg, rgba(139,92,246,.08), rgba(255,255,255,.02));
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+}
+.mini-highlight-left{
+  display:flex;align-items:flex-start;gap:10px
+}
+.highlight-icon{
+  width:28px;height:28px;border-radius:10px;display:flex;align-items:center;justify-content:center;
+  background:rgba(245,158,11,.12); color:#fbbf24; font-size:16px;
+}
+.highlight-title{font-size:14px;color:rgba(255,255,255,.92);font-weight:700}
+.highlight-sub{font-size:13px;color:rgba(255,255,255,.62);margin-top:2px}
+.sparkline{
+  width:92px;height:32px;position:relative;opacity:.92
+}
+.sparkline svg{width:100%;height:100%}
+.rings-hero-grid{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 340px;
+  gap:16px;
+  margin-bottom:16px;
+}
+.rings-hero{
+  padding:18px 20px 14px;
+  border:1px solid rgba(96,165,250,.18);
+  background:linear-gradient(180deg, rgba(96,165,250,.04), rgba(255,255,255,.015));
+}
+.rings-hero-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:12px;
+}
+.rings-hero-head .title{
+  font-size:18px;
+  font-weight:800;
+}
+.rings-hero-head .sub{
+  margin-top:4px;
+  color:rgba(255,255,255,.62);
+  font-size:14px;
+}
+.rings-cta{
+  border:1px solid rgba(139,92,246,.26);
+  background:rgba(139,92,246,.08);
+  color:#c4b5fd;
+  padding:11px 18px;
+  border-radius:16px;
+  font-weight:700;
+}
+.rings-row{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:22px;
+  align-items:start;
+}
+.ring-stat{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:10px;
+}
+.ring-shell{
+  width:148px;height:148px;border-radius:999px;display:grid;place-items:center;
+  background:
+    radial-gradient(farthest-side, #08142f 74%, transparent 75% 100%),
+    conic-gradient(var(--ring-color) calc(var(--p)*1%), rgba(255,255,255,.08) 0);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.05), 0 0 24px color-mix(in srgb, var(--ring-color) 20%, transparent);
+}
+.ring-core{
+  width:112px;height:112px;border-radius:999px;background:rgba(9,19,43,.96);
+  border:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;flex-direction:column;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.03);
+}
+.ring-core .val{font-size:24px;font-weight:800}
+.ring-core .goal{font-size:12px;color:rgba(255,255,255,.52);margin-top:2px}
+.ring-label{font-size:16px;font-weight:700}
+.ring-pct{font-size:15px;font-weight:800}
+.ring-protein{--ring-color:#22a8ff}
+.ring-carbs{--ring-color:#fb923c}
+.ring-fats{--ring-color:#8b5cf6}
+.ring-water{--ring-color:#22d3ee}
+.rings-summary{
+  padding:18px 18px 16px;
+}
+.rings-summary-title{font-size:17px;font-weight:800;margin-bottom:12px}
+.summary-row{
+  display:flex;align-items:center;gap:14px;margin-bottom:14px
+}
+.summary-circle{
+  width:84px;height:84px;border-radius:999px;display:grid;place-items:center;
+  background:
+    radial-gradient(farthest-side, #08142f 74%, transparent 75% 100%),
+    conic-gradient(#22c55e calc(var(--summary-p, 50)*1%), rgba(255,255,255,.08) 0);
+}
+.summary-circle-inner{
+  width:62px;height:62px;border-radius:999px;background:#0b1732;border:1px solid rgba(255,255,255,.06);
+  display:flex;align-items:center;justify-content:center;flex-direction:column;font-weight:800
+}
+.summary-circle-inner span:last-child{font-size:12px;color:rgba(255,255,255,.5);font-weight:600}
+.summary-good{color:#22c55e;font-weight:800;font-size:17px}
+.summary-copy{color:rgba(255,255,255,.64);font-size:14px;line-height:1.4}
+.streak-row{display:flex;align-items:center;gap:10px;color:rgba(255,255,255,.75);font-size:14px}
+.metrics-grid-top{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:16px;
+  margin-bottom:16px;
+}
+.metric-card{
+  position:relative;
+  padding:20px;
+}
+.metric-icon-badge{
+  width:52px;height:52px;border-radius:16px;display:flex;align-items:center;justify-content:center;
+  font-size:24px;font-weight:800;margin-bottom:14px
+}
+.metric-card:nth-child(1) .metric-icon-badge{background:rgba(34,197,94,.15);color:#4ade80}
+.metric-card:nth-child(2) .metric-icon-badge{background:rgba(139,92,246,.16);color:#a78bfa}
+.metric-card:nth-child(3) .metric-icon-badge{background:rgba(251,113,133,.16);color:#fb7185}
+.metric-card:nth-child(4) .metric-icon-badge{background:rgba(96,165,250,.16);color:#60a5fa}
+.metric-kicker{font-size:14px;color:rgba(255,255,255,.7);margin-bottom:6px}
+.metric-main{
+  font-size:22px;font-weight:900;display:flex;align-items:baseline;gap:8px
+}
+.metric-subcopy{font-size:14px;color:rgba(255,255,255,.62);margin-top:4px}
+.metric-bar{
+  height:4px;border-radius:999px;background:rgba(255,255,255,.07);margin-top:14px;overflow:hidden
+}
+.metric-bar span{display:block;height:100%;border-radius:999px}
+.metric-card:nth-child(1) .metric-bar span{background:#22c55e}
+.metric-card:nth-child(2) .metric-bar span{background:#8b5cf6}
+.metric-card:nth-child(3) .metric-bar span{background:#fb7185}
+.metric-card:nth-child(4) .metric-bar span{background:#60a5fa}
+
+.dashboard-main-grid{
+  display:grid;
+  grid-template-columns:1.05fr 1.1fr .95fr;
+  gap:16px;
+}
+.dashboard-stack{display:flex;flex-direction:column;gap:16px}
+
+.ask-coach-inline{
+  margin-top:18px;
+  display:flex;
+  justify-content:flex-end;
+}
+.ask-coach-inline .primary-btn{
+  border-radius:18px;
+  min-width:180px;
+}
+.coach-side-card{
+  padding:18px;
+  border:1px solid rgba(139,92,246,.22);
+  background:linear-gradient(180deg, rgba(139,92,246,.06), rgba(255,255,255,.02));
+}
+.coach-side-card .t1{color:#a78bfa;font-size:14px;font-weight:800}
+.coach-side-card .t2{font-size:15px;color:rgba(255,255,255,.82);line-height:1.45;margin-top:8px}
+.coach-side-card .primary-btn{margin-top:18px;width:100%}
+#coachFab{display:none !important}
+
+@media (max-width:1200px){
+  .rings-hero-grid{grid-template-columns:1fr}
+  .home-topbar{flex-direction:column}
+  .home-topbar-right{width:100%}
+  .dashboard-main-grid{grid-template-columns:1fr}
+}
+@media (max-width:860px){
+  .mobile-header{display:none !important}
+  .home-topbar{
+    flex-direction:column;
+    gap:12px;
+    margin-bottom:12px;
+  }
+  .home-topbar-left{
+    flex-direction:column;
+    gap:10px;
+  }
+  .home-greeting h1{
+    font-size:clamp(30px, 10vw, 52px);
+  }
+  .home-greeting .greet-line{
+    font-size:18px;
+  }
+  .home-topbar-right{
+    width:100%;
+  }
+  .rings-row{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:14px 10px;
+  }
+  .ring-shell{
+    width:128px;height:128px;
+  }
+  .ring-core{
+    width:96px;height:96px;
+  }
+  .metrics-grid-top{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:12px;
+  }
+  .dashboard-main-grid{
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+  }
+  .summary-row{
+    align-items:flex-start;
+  }
+  .rings-summary{order:2}
+  .rings-hero{order:1}
+  .ask-coach-inline{
+    justify-content:stretch;
+  }
+  .ask-coach-inline .primary-btn{
+    width:100%;
+  }
+}
+@media (max-width:560px){
+  .rings-hero{
+    padding:16px 14px 12px;
+  }
+  .rings-hero-head{
+    flex-direction:column;
+    align-items:flex-start;
+  }
+  .rings-cta{
+    width:100%;
+    text-align:center;
+  }
+  .ring-shell{
+    width:116px;height:116px;
+  }
+  .ring-core{
+    width:88px;height:88px;
+  }
+  .ring-core .val{font-size:22px}
+  .metrics-grid-top{
+    grid-template-columns:1fr 1fr;
+  }
+}
+
+
+/* V7.0.9 Pixel Perfect Refinement */
+
+/* Header alignment */
+.home-topbar{
+  align-items:center;
+}
+.home-topbar-left{
+  align-items:center;
+}
+.home-greeting h1{
+  font-size:clamp(32px,3.5vw,64px);
+}
+.home-greeting .greet-line{
+  margin-top:2px;
+}
+
+/* Tighten spacing */
+.rings-hero{
+  padding:16px 18px 12px;
+}
+.rings-row{
+  gap:18px;
+}
+
+/* Ring visual refinement */
+.ring-shell{
+  box-shadow:0 0 18px rgba(255,255,255,.05), 0 0 32px var(--ring-color);
+}
+.ring-core{
+  background:#0b1732;
+}
+
+/* Summary alignment */
+.rings-summary{
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+}
+
+/* Metric cards consistency */
+.metric-card{
+  padding:18px;
+  border-radius:20px;
+}
+.metric-main{
+  font-size:20px;
+}
+.metric-subcopy{
+  font-size:13px;
+}
+
+/* Grid balance */
+.dashboard-main-grid{
+  grid-template-columns:1fr 1fr 0.9fr;
+}
+
+/* Coach card emphasis */
+.coach-side-card{
+  border:1px solid rgba(139,92,246,.35);
+  box-shadow:0 0 20px rgba(139,92,246,.15);
+}
+
+/* Buttons polish */
+.primary-btn{
+  border-radius:16px;
+  letter-spacing:.3px;
+}
+.action-btn{
+  border-radius:16px;
+}
+
+/* Mobile refinement */
+@media (max-width:860px){
+  .home-greeting h1{
+    font-size:28px;
+  }
+  .rings-row{
+    gap:12px;
+  }
+  .ring-shell{
+    width:110px;
+    height:110px;
+  }
+  .ring-core{
+    width:84px;
+    height:84px;
+  }
+}
 </style>
 </head>
 <body>
@@ -629,33 +1018,157 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
       <input id="importFile" type="file" accept="application/json" class="hidden"/>
     </div>
     <section class="section active" id="home">
-      <div class="mobile-header">
-        <div class="mobile-header-left">
-          <div class="mobile-logo"><img src="logo-full.png" alt="Stayfitinlife logo"/></div>
-          <div class="hero-copy"><h1 id="welcomeTitle">Dashboard</h1><p id="welcomeSubtitle"></p></div>
-        </div>
-      </div>
-      <div class="cards">
-        <div class="card stat-card"><div class="stat-label">Meals</div><div class="stat-number" id="statMeals">0</div><div class="stat-sub">logged today</div></div>
-        <div class="card stat-card"><div class="stat-label">Strength Sets</div><div class="stat-number" id="statSets">0</div><div class="stat-sub">sets today</div></div>
-        <div class="card stat-card"><div class="stat-label">Recovery</div><div class="stat-number" id="statRecovery">--</div><div class="stat-sub" id="recoverySummary">No recovery yet</div></div>
-        <div class="card stat-card"><div class="stat-label">Weight Change</div><div class="stat-number" id="statProgress">--</div><div class="stat-sub">since last check-in</div></div>
-      </div>
-      <div class="content-grid">
-        <div class="panel"><div class="panel-title">Goal Engine</div><div class="list" id="goalEngineList"></div><div style="height:12px"></div><div class="panel-title">Goal Validation</div><div class="list" id="goalValidationBox"></div></div>
-        <div class="panel"><div class="panel-title">Calorie Engine</div><div class="list" id="calorieEngineHome"></div><div style="height:12px"></div><div class="panel-title">Re-entry Mode</div><div class="list" id="reentryBox"></div></div>
-        <div class="panel">
-          <div class="panel-title">Activity Rings</div>
-          <div class="rings-wrap">
-            <div class="ring-card"><div class="ring" id="proteinRing" style="--c:var(--green)"><div class="ring-inner"><div><span class="ring-value" id="proteinVal">0g</span></div></div></div><div class="ring-name">Protein</div><div class="small-note" id="proteinSub">0 / 150 g</div></div>
-            <div class="ring-card"><div class="ring" id="carbRing" style="--c:var(--purple)"><div class="ring-inner"><div><span class="ring-value" id="carbVal">0g</span></div></div></div><div class="ring-name">Carbs</div><div class="small-note" id="carbSub">0 / 200 g</div></div>
-            <div class="ring-card"><div class="ring" id="fatRing" style="--c:var(--blue)"><div class="ring-inner"><div><span class="ring-value" id="fatVal">0g</span></div></div></div><div class="ring-name">Fats</div><div class="small-note" id="fatSub">0 / 60 g</div></div>
-            <div class="ring-card"><div class="ring" id="waterRing" style="--c:var(--cyan)"><div class="ring-inner"><div><span class="ring-value" id="waterVal">0L</span></div></div></div><div class="ring-name">Water</div><div class="small-note" id="waterSub">0 / 3.5 L</div></div>
+      <div class="home-topbar">
+        <div class="home-topbar-left">
+          <div class="home-greeting">
+            <h1 id="welcomeTitle">Dashboard</h1>
+            <div class="greet-line" id="welcomeGreeting">Good evening, Himanshu! 👋</div>
+            <div class="date-line"><span>📅</span><span id="todayDateLine">Today</span></div>
           </div>
         </div>
-        <div class="panel"><div class="panel-title">Weight + Recovery</div><div class="list" id="weightSummary"></div></div>
+        <div class="home-topbar-right">
+          <div class="top-actions-floating">
+            <button class="action-btn" id="exportBtn" type="button">Export</button>
+            <button class="action-btn" id="importBtn" type="button">Import</button>
+          </div>
+          <div class="mini-highlight">
+            <div class="mini-highlight-left">
+              <div class="highlight-icon">⭐</div>
+              <div>
+                <div class="highlight-title">Consistency today wins tomorrow.</div>
+                <div class="highlight-sub">Keep your main habits alive.</div>
+              </div>
+            </div>
+            <div class="sparkline">
+              <svg viewBox="0 0 100 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M4 28 L16 22 L28 26 L40 18 L52 23 L64 12 L76 17 L88 7 L96 10" stroke="#8b5cf6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="coach-banner" style="margin-top:16px"><div class="coach-left"><div class="coach-icon">🧠</div><div><div style="font-size:20px;font-weight:800">AI Coach</div><div class="muted">Need guidance? Ask the coach for this screen.</div></div></div><button class="primary-btn" id="openCoachHome" type="button">Ask Coach</button></div>
+
+      <div class="rings-hero-grid">
+        <div class="panel rings-hero">
+          <div class="rings-hero-head">
+            <div>
+              <div class="title">Today's Progress</div>
+              <div class="sub">Complete your rings daily</div>
+            </div>
+            <button class="rings-cta" type="button" data-tab="nutrition">View Nutrition</button>
+          </div>
+          <div class="rings-row">
+            <div class="ring-stat">
+              <div class="ring-shell ring-protein" id="proteinRing">
+                <div class="ring-core">
+                  <div class="val" id="proteinVal">0g</div>
+                  <div class="goal" id="proteinGoalText">/150g</div>
+                </div>
+              </div>
+              <div class="ring-label">Protein</div>
+              <div class="ring-pct" id="proteinPctText">0%</div>
+            </div>
+            <div class="ring-stat">
+              <div class="ring-shell ring-carbs" id="carbRing">
+                <div class="ring-core">
+                  <div class="val" id="carbVal">0g</div>
+                  <div class="goal" id="carbGoalText">/200g</div>
+                </div>
+              </div>
+              <div class="ring-label">Carbs</div>
+              <div class="ring-pct" id="carbPctText">0%</div>
+            </div>
+            <div class="ring-stat">
+              <div class="ring-shell ring-fats" id="fatRing">
+                <div class="ring-core">
+                  <div class="val" id="fatVal">0g</div>
+                  <div class="goal" id="fatGoalText">/60g</div>
+                </div>
+              </div>
+              <div class="ring-label">Fats</div>
+              <div class="ring-pct" id="fatPctText">0%</div>
+            </div>
+            <div class="ring-stat">
+              <div class="ring-shell ring-water" id="waterRing">
+                <div class="ring-core">
+                  <div class="val" id="waterVal">0L</div>
+                  <div class="goal" id="waterGoalText">/3.5L</div>
+                </div>
+              </div>
+              <div class="ring-label">Water</div>
+              <div class="ring-pct" id="waterPctText">0%</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel rings-summary">
+          <div class="rings-summary-title">Rings Summary</div>
+          <div class="summary-row">
+            <div class="summary-circle" id="ringsSummaryCircle">
+              <div class="summary-circle-inner">
+                <span id="ringsCompletedText">0/4</span>
+                <span>done</span>
+              </div>
+            </div>
+            <div>
+              <div class="summary-good" id="ringsStatusText">Getting started</div>
+              <div class="summary-copy" id="ringsSummaryText">Log your meals and water to build momentum today.</div>
+            </div>
+          </div>
+          <div class="streak-row"><span>🔥</span><span id="ringsStreakText">0 day streak</span></div>
+        </div>
+      </div>
+
+      <div class="metrics-grid-top">
+        <div class="panel metric-card">
+          <div class="metric-icon-badge">🍽️</div>
+          <div class="metric-kicker">Meals</div>
+          <div class="metric-main"><span id="homeMealsVal">0</span></div>
+          <div class="metric-subcopy">logged today</div>
+          <div class="metric-bar"><span id="homeMealsBar" style="width:0%"></span></div>
+        </div>
+        <div class="panel metric-card">
+          <div class="metric-icon-badge">🏋️</div>
+          <div class="metric-kicker">Strength Sets</div>
+          <div class="metric-main"><span id="homeStrengthVal">0</span></div>
+          <div class="metric-subcopy">sets today</div>
+          <div class="metric-bar"><span id="homeStrengthBar" style="width:0%"></span></div>
+        </div>
+        <div class="panel metric-card">
+          <div class="metric-icon-badge">💓</div>
+          <div class="metric-kicker">Recovery</div>
+          <div class="metric-main"><span id="homeRecoveryVal">--</span><span id="homeRecoveryBandText" style="font-size:16px"></span></div>
+          <div class="metric-subcopy" id="homeRecoverySub">No recovery yet</div>
+          <div class="metric-bar"><span id="homeRecoveryBar" style="width:0%"></span></div>
+        </div>
+        <div class="panel metric-card">
+          <div class="metric-icon-badge">⚖️</div>
+          <div class="metric-kicker">Weight Change</div>
+          <div class="metric-main"><span id="homeWeightVal">--</span></div>
+          <div class="metric-subcopy">since last check-in</div>
+          <div class="metric-bar"><span id="homeWeightBar" style="width:0%"></span></div>
+        </div>
+      </div>
+
+      <div class="dashboard-main-grid">
+        <div class="dashboard-stack">
+          <div class="panel"><div class="panel-title">Goal Engine</div><div class="list" id="goalEngineList"></div><div class="ask-coach-inline"><button class="primary-btn" type="button" id="askCoachInlineBtn">Ask Coach AI</button></div></div>
+          <div class="panel"><div class="panel-title">Re-entry Mode</div><div class="list" id="reentryBox"></div></div>
+        </div>
+        <div class="dashboard-stack">
+          <div class="panel"><div class="panel-title">Goal Validation</div><div class="list" id="goalValidationBox"></div></div>
+          <div class="panel"><div class="panel-title">Activity Insights</div><div class="list" id="activityInsightsBox"></div></div>
+        </div>
+        <div class="dashboard-stack">
+          <div class="panel"><div class="panel-title">Calorie Engine</div><div class="list" id="calorieEngineHome"></div></div>
+          <div class="panel"><div class="panel-title">Recovery Snapshot</div><div class="list" id="recoverySnapshotBox"></div></div>
+          <div class="coach-side-card">
+            <div class="t1">Need guidance?</div>
+            <div class="t2">Chat with your AI Coach for personalized advice anytime, anywhere.</div>
+            <button class="primary-btn" type="button" id="askCoachSidebarBtn">Ask Coach AI</button>
+          </div>
+        </div>
+      </div>
     </section>
 
     <section class="section" id="profile">
@@ -920,208 +1433,13 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
             <div class="list-item">
               <div>
                 <strong>Version</strong>
-                <div class="muted" id="appVersion">V7.0.7</div>
+                <div class="muted" id="appVersion">V7.0.9</div>
               </div>
             </div>
             <div class="list-item">
               <div>
                 <strong>Last Updated</strong>
-                <div class="muted" id="appLastUpdated">23 April 2026</div>
-              </div>
-            </div>
-            <div class="list-item">
-              <div>
-                <strong>Publisher</strong>
-                <div class="muted" id="companyNameAbout">Himanshu Kaushik</div>
-              </div>
-            </div>
-            <div class="list-item">
-              <div>
-                <strong>AI Coach</strong>
-                <div class="muted" id="aiCoachStatus">Screen-aware AI + Goal Validation + Recovery + Calorie + Re-entry logic enabled</div>
-              </div>
-            </div>
-            <div class="list-item">
-              <div>
-                <strong>Support</strong>
-                <div class="muted" id="supportEmail">support@stayfitinlife.com</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="panel">
-          <div class="panel-title">Quick Actions</div>
-          <div class="list">
-            <div class="list-item">
-              <div>
-                <strong>Export all data</strong>
-                <div class="muted">Download your current app data as a JSON backup file.</div>
-              </div>
-              <button class="chip" id="settingsExportBtn" type="button">Export</button>
-            </div>
-
-            <div class="list-item">
-              <div>
-                <strong>Import backup</strong>
-                <div class="muted">Restore app data from a previous backup file.</div>
-              </div>
-              <label class="chip" for="settingsImportFile" style="display:inline-flex;align-items:center;cursor:pointer;">Import</label>
-              <input id="settingsImportFile" type="file" accept="application/json" class="hidden"/>
-            </div>
-
-            <div class="list-item">
-              <div>
-                <strong>Delete all local data</strong>
-                <div class="muted">Permanently clears profile, workouts, meals, supplements, recovery, and progress data from this device.</div>
-              </div>
-              <button class="chip" id="deleteAllDataBtn" type="button">Delete</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="content-grid equal" style="margin-top:16px;">
-        <div class="panel">
-          <div class="panel-title">Privacy Policy</div>
-          <div class="muted" style="line-height:1.7;">
-            <p><strong>Last updated:</strong> <span id="privacyUpdated">23 April 2026</span></p>
-
-            <p>
-              Stayfitinlife respects your privacy. This app may store personal wellness
-              information such as your name, age, body measurements, weight entries,
-              workout logs, meal logs, hydration records, supplement tracking, and
-              recovery-related inputs.
-            </p>
-
-            <p>
-              In the current version of the app, your data is stored locally on your
-              device/browser unless you manually export and share it.
-            </p>
-
-            <p>
-              Stayfitinlife does not sell your data and does not intentionally share
-              your personal data with third parties for advertising purposes.
-            </p>
-
-            <p>
-              If cloud sync, login, integrations, or analytics are added in future
-              versions, this policy will be updated to reflect those changes.
-            </p>
-
-            <p>
-              For privacy-related questions or support, contact
-              <span id="privacyEmail">support@stayfitinlife.com</span>.
-            </p>
-          </div>
-        </div>
-
-        <div class="panel">
-          <div class="panel-title">Terms & Conditions</div>
-          <div class="muted" style="line-height:1.7;">
-            <p><strong>Last updated:</strong> <span id="termsUpdated">23 April 2026</span></p>
-
-            <p>
-              By using Stayfitinlife, you agree to use the app for lawful personal fitness,
-              wellness, and tracking purposes only.
-            </p>
-
-            <p>
-              Stayfitinlife is provided for informational and self-tracking purposes.
-              It is not a medical device and does not provide medical diagnosis,
-              treatment, or emergency services.
-            </p>
-
-            <p>
-              You are responsible for the accuracy of the information entered into the app
-              and for decisions you make based on the app’s suggestions or summaries.
-            </p>
-
-            <p>
-              Exercise, diet, supplementation, and recovery decisions should be made
-              with appropriate professional guidance where needed.
-            </p>
-
-            <p>
-              All branding, design, and app content belong to
-              <span id="companyNameTerms">Himanshu Kaushik</span> unless otherwise stated.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div class="content-grid equal" style="margin-top:16px;">
-        <div class="panel">
-          <div class="panel-title">Health & Data Disclaimer</div>
-          <div class="muted" style="line-height:1.7;">
-            <p>
-              Stayfitinlife is not a substitute for professional medical advice,
-              diagnosis, or treatment.
-            </p>
-            <p>
-              Always consult a qualified physician or healthcare professional before
-              making major changes to your training, nutrition, supplements, or health routine.
-            </p>
-            <p>
-              Calorie estimates, macro estimates, workout suggestions, recovery scores,
-              and coaching insights are general guidance only and may not be accurate
-              for every user.
-            </p>
-            <p>
-              Use supplements responsibly and according to manufacturer instructions
-              or medical advice where applicable.
-            </p>
-          </div>
-        </div>
-
-        <div class="panel">
-          <div class="panel-title">Contact & Support</div>
-          <div class="muted" style="line-height:1.7;">
-            <p><strong>App name:</strong> Stayfitinlife</p>
-            <p><strong>Support email:</strong> <span id="contactEmail">support@stayfitinlife.com</span></p>
-            <p><strong>Publisher:</strong> <span id="companyNameContact">Himanshu Kaushik</span></p>
-            <p><strong>Country:</strong> <span id="companyCountry">India</span></p>
-            <p>
-              For bugs, feature requests, privacy concerns, or data questions,
-              contact support by email.
-            </p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-  </main>
-</div>
-
-<div class="bottom-nav">
-  <button class="active" data-tab="home">🏠<br>Home</button>
-  <button data-tab="workout">🏋️<br>Workout</button>
-  <button data-tab="nutrition">🍽<br>Nutrition</button>
-  <button data-tab="supplements">💊<br>Supps</button>
-  <button data-tab="settings">⚙️<br>Settings</button>
-  <button id="mobileCoachBtn" type="button">🧠<br>Coach</button>
-</div>
-
-<button id="coachBtn" type="button">🧠</button>
-<div id="coachSheet">
-  <div class="sheet-head">
-    <div><div style="font-size:22px;font-weight:800">Coach Insights</div><div class="muted" id="coachContextLabel">For this screen</div></div>
-    <button class="action-btn" id="closeCoachBtn" type="button" style="padding:10px 14px;font-size:14px">Close</button>
-  </div>
-  <div id="coachUsageInfo" class="muted" style="margin-bottom:8px"></div>
-<div style="margin-bottom:10px;display:flex;gap:8px;flex-wrap:wrap"><button class="chip" id="askCoachAiBtn" type="button">Ask AI Coach</button><button class="chip" id="askCoachDeepBtn" type="button">Deep Review</button></div>
-<div id="coachModelInfo" class="muted" style="margin-bottom:6px"></div>
-<div id="coachOutput" class="muted"></div>
-  <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
-    <button class="chip" data-feel="fresh" type="button">Fresh</button>
-    <button class="chip" data-feel="normal" type="button">Normal</button>
-    <button class="chip" data-feel="tired" type="button">Tired</button>
-    <button class="chip" data-goal="protein" type="button">Need Protein</button>
-    <button class="chip" data-goal="recovery" type="button">Need Recovery</button>
-  </div>
-</div>
-
-<script>
+      
 const storeKey='stayfitinlife_v5_8_1_fixed';
 const todayISO=()=>{
   const d=new Date();
@@ -1308,6 +1626,27 @@ function getGoalTargets(profile=data.profile){
 }
 function calculateRecoveryEngine(){
   const r = data.recoveryLogs[0];
+  const greetEl = document.getElementById('welcomeGreeting');
+  if(greetEl) greetEl.textContent = `${getGreetingByTime()}, ${getGreetingName()}! 👋`;
+  const dateLine = document.getElementById('todayDateLine');
+  if(dateLine) dateLine.textContent = formatTodayLong();
+
+  const todayMealsCount = todayBucket('mealsByDate').length;
+  const strengthEntries = todayBucket('workoutsByDate').filter(x=>String(x.activityType||'').includes('Strength'));
+  const strengthSets = strengthEntries.reduce((a,b)=>a+Number(b.sets||0),0);
+  const recoveryNow = data.recoveryLogs[0];
+  const homeMealsVal = document.getElementById('homeMealsVal'); if(homeMealsVal) homeMealsVal.textContent = String(todayMealsCount);
+  const homeMealsBar = document.getElementById('homeMealsBar'); if(homeMealsBar) homeMealsBar.style.width = `${Math.min(100, todayMealsCount*25)}%`;
+  const homeStrengthVal = document.getElementById('homeStrengthVal'); if(homeStrengthVal) homeStrengthVal.textContent = String(strengthSets);
+  const homeStrengthBar = document.getElementById('homeStrengthBar'); if(homeStrengthBar) homeStrengthBar.style.width = `${Math.min(100, strengthSets*5)}%`;
+  const homeRecoveryVal = document.getElementById('homeRecoveryVal'); if(homeRecoveryVal) homeRecoveryVal.textContent = recoveryNow ? String(recoveryNow.score) : '--';
+  const homeRecoveryBandText = document.getElementById('homeRecoveryBandText'); if(homeRecoveryBandText) homeRecoveryBandText.textContent = recoveryNow ? (Number(recoveryNow.score)>=75?'High':Number(recoveryNow.score)>=60?'Moderate':'Low') : '';
+  const homeRecoverySub = document.getElementById('homeRecoverySub'); if(homeRecoverySub) homeRecoverySub.textContent = recoveryNow ? 'Readiness today' : 'No recovery yet';
+  const homeRecoveryBar = document.getElementById('homeRecoveryBar'); if(homeRecoveryBar) homeRecoveryBar.style.width = `${Math.max(0, Math.min(100, Number(recoveryNow?.score||0)))}%`;
+  const wl2 = weightChangeFromLast();
+  const homeWeightVal = document.getElementById('homeWeightVal'); if(homeWeightVal) homeWeightVal.textContent = wl2===null ? '--' : `${wl2>0?'+':''}${wl2} kg`;
+  const homeWeightBar = document.getElementById('homeWeightBar'); if(homeWeightBar) homeWeightBar.style.width = `${wl2===null?0:Math.min(100, Math.abs(wl2)*20)}%`;
+
   const t = getGoalTargets();
   if(!r){
     return { score:null, band:'No Data', training:'Add recovery inputs to get a daily recommendation.', nutrition:'Keep protein and water on target.', recoveryAction:'Log sleep, RHR, and cardio to improve guidance.', goalSummary:`Goal active: ${t.goal}` };
@@ -1836,16 +2175,73 @@ function deleteAllLocalData(){
   alert("All local data has been deleted.");
 }
 
+
+function getGreetingName(){
+  const name = String(data.profile?.name || '').trim();
+  return name || 'there';
+}
+function getGreetingByTime(){
+  const hr = new Date().getHours();
+  if(hr < 12) return 'Good morning';
+  if(hr < 17) return 'Good afternoon';
+  return 'Good evening';
+}
+function formatTodayLong(){
+  return new Date().toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric', year:'numeric' });
+}
+function getRingsSummaryData(protein, carbs, fats, water){
+  const t = getGoalTargets();
+  const wt = Number(data.profile.waterTarget || 3.5);
+  const p1 = protein >= t.protein;
+  const p2 = carbs >= Math.round(t.carbs * 0.8);
+  const p3 = fats >= Math.round(t.fats * 0.8);
+  const p4 = water >= wt;
+  const done = [p1,p2,p3,p4].filter(Boolean).length;
+  const pct = Math.round((done/4)*100);
+  let title = 'Getting started';
+  let copy = 'Log your meals and water to build momentum today.';
+  if(done >= 3){ title = 'On track'; copy = "Keep going! You're building great habits."; }
+  else if(done >= 2){ title = 'Good progress'; copy = 'You are moving well—finish the remaining rings.'; }
+  return { done, pct, title, copy };
+}
+
+
 function renderRings(protein, carbs, fats, water){
   const t=getGoalTargets();
   const pt=t.protein, ct=t.carbs, ft=t.fats, wt=Number(data.profile.waterTarget||3.5);
-  $('proteinVal').textContent=`${protein}g`; $('carbVal').textContent=`${carbs}g`; $('fatVal').textContent=`${fats}g`; $('waterVal').textContent=`${water}L`;
-  $('proteinSub').textContent=`${protein} / ${pt} g`; $('carbSub').textContent=`${carbs} / ${ct} g`; $('fatSub').textContent=`${fats} / ${ft} g`; $('waterSub').textContent=`${water} / ${wt} L`;
-  $('proteinRing').style.setProperty('--p', Math.min(100, Math.round((protein/Math.max(1,pt))*100)));
-  $('carbRing').style.setProperty('--p', Math.min(100, Math.round((carbs/Math.max(1,ct))*100)));
-  $('fatRing').style.setProperty('--p', Math.min(100, Math.round((fats/Math.max(1,ft))*100)));
-  $('waterRing').style.setProperty('--p', Math.min(100, Math.round((water/Math.max(.1,wt))*100)));
+  const pp = Math.min(100, Math.round((protein/Math.max(1,pt))*100));
+  const cp = Math.min(100, Math.round((carbs/Math.max(1,ct))*100));
+  const fp = Math.min(100, Math.round((fats/Math.max(1,ft))*100));
+  const wp = Math.min(100, Math.round((water/Math.max(.1,wt))*100));
+
+  const proteinVal = document.getElementById('proteinVal'); if(proteinVal) proteinVal.textContent=`${protein}g`;
+  const carbVal = document.getElementById('carbVal'); if(carbVal) carbVal.textContent=`${carbs}g`;
+  const fatVal = document.getElementById('fatVal'); if(fatVal) fatVal.textContent=`${fats}g`;
+  const waterVal = document.getElementById('waterVal'); if(waterVal) waterVal.textContent=`${water}L`;
+
+  const proteinGoalText = document.getElementById('proteinGoalText'); if(proteinGoalText) proteinGoalText.textContent=`/${pt}g`;
+  const carbGoalText = document.getElementById('carbGoalText'); if(carbGoalText) carbGoalText.textContent=`/${ct}g`;
+  const fatGoalText = document.getElementById('fatGoalText'); if(fatGoalText) fatGoalText.textContent=`/${ft}g`;
+  const waterGoalText = document.getElementById('waterGoalText'); if(waterGoalText) waterGoalText.textContent=`/${wt}L`;
+
+  const proteinPctText = document.getElementById('proteinPctText'); if(proteinPctText) proteinPctText.textContent=`${pp}%`;
+  const carbPctText = document.getElementById('carbPctText'); if(carbPctText) carbPctText.textContent=`${cp}%`;
+  const fatPctText = document.getElementById('fatPctText'); if(fatPctText) fatPctText.textContent=`${fp}%`;
+  const waterPctText = document.getElementById('waterPctText'); if(waterPctText) waterPctText.textContent=`${wp}%`;
+
+  const proteinRing = document.getElementById('proteinRing'); if(proteinRing) proteinRing.style.setProperty('--p', pp);
+  const carbRing = document.getElementById('carbRing'); if(carbRing) carbRing.style.setProperty('--p', cp);
+  const fatRing = document.getElementById('fatRing'); if(fatRing) fatRing.style.setProperty('--p', fp);
+  const waterRing = document.getElementById('waterRing'); if(waterRing) waterRing.style.setProperty('--p', wp);
+
+  const rs = getRingsSummaryData(protein, carbs, fats, water);
+  const circle = document.getElementById('ringsSummaryCircle'); if(circle) circle.style.setProperty('--summary-p', rs.pct);
+  const completed = document.getElementById('ringsCompletedText'); if(completed) completed.textContent = `${rs.done}/4`;
+  const status = document.getElementById('ringsStatusText'); if(status) status.textContent = rs.title;
+  const summary = document.getElementById('ringsSummaryText'); if(summary) summary.textContent = rs.copy;
+  const streak = document.getElementById('ringsStreakText'); if(streak) streak.textContent = `${Math.max(0, Math.min(7, rs.done + (todayBucket('mealsByDate').length ? 1 : 0)))} day streak`;
 }
+
 
 function renderAll(){
   populateProfile();
@@ -1951,12 +2347,32 @@ function renderAll(){
     const targetWeight = Number(data.profile.targetWeight||0);
     const progressText = (currentWeight && targetWeight) ? `${Math.abs((currentWeight-targetWeight).toFixed(1))} kg remaining` : 'Add target weight for progress tracking';
     goalList.innerHTML = `
-      <div class="list-item"><div><strong>${t.goal}</strong><div class="muted">Calories target: ${t.calories} kcal</div></div></div>
+      <div class="list-item"><div><strong>Goal</strong><div class="muted">${t.goal}<br>Calories target: ${t.calories} kcal</div></div></div>
       <div class="list-item"><div><strong>Macro targets</strong><div class="muted">Protein ${t.protein}g • Carbs ${t.carbs}g • Fats ${t.fats}g</div></div></div>
       <div class="list-item"><div><strong>Target outcome</strong><div class="muted">${data.profile.targetWeight||'--'} kg • ${data.profile.targetBodyFat||'--'}% BF • ${progressText}</div></div></div>
       <div class="list-item"><div><strong>Workout focus</strong><div class="muted">${t.workoutFocus}</div></div></div>
       <div class="list-item"><div><strong>Recovery focus</strong><div class="muted">${t.recoveryFocus}</div></div></div>`;
   }
+  const activityInsightsBox = document.getElementById('activityInsightsBox');
+  if(activityInsightsBox){
+    const workoutsToday = todayBucket('workoutsByDate').length;
+    const activeTime = todayBucket('workoutsByDate').reduce((a,b)=>a+Number(b.duration||0),0);
+    activityInsightsBox.innerHTML = `
+      <div class="list-item"><div><strong>Workouts</strong><div class="muted">${workoutsToday} today</div></div></div>
+      <div class="list-item"><div><strong>Avg. Steps</strong><div class="muted">${Math.round((Number(data.recoveryLogs?.[0]?.aerobicMin||0))*120)} steps</div></div></div>
+      <div class="list-item"><div><strong>Active Time</strong><div class="muted">${activeTime} mins</div></div></div>`;
+  }
+
+  const recoverySnapshotBox = document.getElementById('recoverySnapshotBox');
+  if(recoverySnapshotBox){
+    const rr = data.recoveryLogs?.[0] || {};
+    recoverySnapshotBox.innerHTML = `
+      <div class="list-item"><div><strong>Score</strong><div class="muted">${rr.score || '--'} / 100</div></div></div>
+      <div class="list-item"><div><strong>HRV</strong><div class="muted">${rr.rr ? rr.rr + ' ms' : '--'}</div></div></div>
+      <div class="list-item"><div><strong>Resting HR</strong><div class="muted">${rr.rhr ? rr.rhr + ' bpm' : '--'}</div></div></div>
+      <div class="list-item"><div><strong>Sleep</strong><div class="muted">${rr.sleepHours ? rr.sleepHours + ' hrs' : '--'}</div></div></div>`;
+  }
+
   const goalValidationBox = document.getElementById('goalValidationBox');
   if(goalValidationBox){
     goalValidationBox.innerHTML = `
@@ -2003,6 +2419,10 @@ function renderAll(){
 
 function bindEvents(){
   document.querySelectorAll('[data-tab]').forEach(btn=>btn.addEventListener('click', ()=>switchTab(btn.dataset.tab)));
+  const ringsCta=document.querySelector('.rings-cta'); if(ringsCta){ ringsCta.addEventListener('click', ()=>switchTab('nutrition')); }
+  const askCoachInlineBtn=document.getElementById('askCoachInlineBtn'); if(askCoachInlineBtn){ askCoachInlineBtn.addEventListener('click', ()=>switchTab('coach')); }
+  const askCoachSidebarBtn=document.getElementById('askCoachSidebarBtn'); if(askCoachSidebarBtn){ askCoachSidebarBtn.addEventListener('click', ()=>switchTab('coach')); }
+
   $('quickHomeBtn').addEventListener('click', ()=>switchTab('home'));
   $('openCoachHome').addEventListener('click', openCoach);
   $('coachBtn').addEventListener('click', openCoach);
@@ -2100,6 +2520,168 @@ function bindEvents(){
   $('foodSelect').addEventListener('change', updateFoodMeta);
   $('eggMode').addEventListener('change', updateFoodMeta);
   $('addMealBtn').addEventListener('click', ()=>{ const raw=allFoods().find(x=>x.name===$('foodSelect').value), food=getAdjustedFood(raw), qty=Number($('foodQty').value||0); if(!food||!qty) return; addByDate('mealsByDate', nutritionDate(), {meal:$('mealName').value, food:food.name, cuisine:food.cuisine, qty, eggMode:food.modeLabel||'', isCheatMeal: ($('mealName').value==='Cheat Meal' || food.cuisine==='Cheat Meal'), protein:+(food.protein*qty).toFixed(1), carbs:+(food.carbs*qty).toFixed(1), fats:+(food.fats*qty).toFixed(1)}); $('foodQty').value=''; saveData(); });
+  $('addCustomFoodBtn').addEventListener('click', ()=>{ const name=$('customFoodName').value.trim(); if(!name) return; data.customFoods.unshift({name, cuisine:$('customFoodCuisine').value, unit:$('customFoodUnit').value||'1 serving', protein:Number($('customFoodProtein').value||0), carbs:Number($('customFoodCarbs').value||0), fats:Number($('customFoodFats').value||0)}); $('customFoodName').value=''; $('customFoodUnit').value=''; $('customFoodProtein').value=''; $('customFoodCarbs').value=''; $('customFoodFats').value=''; populateCuisines(); populateFoods(); saveData(); });
+  document.querySelectorAll('[data-water]').forEach(btn=>btn.addEventListener('click', ()=>{ addByDate('waterByDate', nutritionDate(), {amount:Number(btn.dataset.water)}); saveData(); }));
+  $('addWaterBtn').addEventListener('click', ()=>{ const amt=Number($('customWater').value||0); if(!amt) return; addByDate('waterByDate', nutritionDate(), {amount:amt}); $('customWater').value=''; saveData(); });
+  
+  const nDateInput=document.getElementById('nutritionDateInput'); if(nDateInput){ nDateInput.addEventListener('change', e=>{ selectedNutritionDate = e.target.value || todayISO(); renderAll(); }); }
+  const nPrev=document.getElementById('nutritionPrevDateBtn'); if(nPrev){ nPrev.addEventListener('click', ()=>changeNutritionDate(-1)); }
+  const nNext=document.getElementById('nutritionNextDateBtn'); if(nNext){ nNext.addEventListener('click', ()=>changeNutritionDate(1)); }
+  const lookupBarcodeBtn=document.getElementById('lookupBarcodeBtn'); if(lookupBarcodeBtn){ lookupBarcodeBtn.addEventListener('click', ()=>{ const code=($('barcodeInput').value||'').trim(); if(!code) return; lookupBarcodeValue(code); }); }
+  const scanBarcodeBtn=document.getElementById('scanBarcodeBtn'); if(scanBarcodeBtn){ scanBarcodeBtn.addEventListener('click', ()=>startScanner()); }
+  const closeScannerBtn=document.getElementById('closeScannerBtn'); if(closeScannerBtn){ closeScannerBtn.addEventListener('click', ()=>stopScanner(true)); }
+  const switchCameraBtn=document.getElementById('switchCameraBtn'); if(switchCameraBtn){ switchCameraBtn.addEventListener('click', ()=>switchScannerCamera()); }
+
+  $('suppSelect').addEventListener('change', updateSuppDefaults);
+  $('addSuppBtn').addEventListener('click', ()=>{ const name=$('suppSelect').value; if(!name) return; data.supplementStack.unshift({name, dose:Number($('suppDose').value||1), unit:$('suppUnit').value, timing:$('suppTiming').value, reminder:$('suppReminder').value, brand:$('suppBrand').value.trim()}); $('suppDose').value=''; $('suppBrand').value=''; saveData(); });
+  $('addCustomSuppBtn').addEventListener('click', ()=>{ const name=$('customSuppName').value.trim(); if(!name) return; data.customSupplements.unshift({name, unit:$('customSuppUnit').value||'serving', timing:$('customSuppTiming').value||'First meal'}); $('customSuppName').value=''; $('customSuppUnit').value=''; $('customSuppTiming').value=''; populateSupps(); saveData(); });
+  $('saveRecoveryBtn').addEventListener('click', ()=>{ data.recoveryLogs.unshift(analyzeRecovery($('recoverySleep').value,$('recoveryRhr').value,$('recoveryRr').value,$('recoveryAer').value,$('recoverySource').value)); $('recoverySleep').value=''; $('recoveryRhr').value=''; $('recoveryRr').value=''; $('recoveryAer').value=''; saveData(); });
+  $('exportBtn').addEventListener('click', ()=>{ const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}), url=URL.createObjectURL(blob), a=document.createElement('a'); a.href=url; a.download='stayfitinlife-backup.json'; a.click(); URL.revokeObjectURL(url); });
+  $('importFile').addEventListener('change', async e=>{ const f=e.target.files[0]; if(!f) return; try{ data={...defaultData, ...JSON.parse(await f.text())}; saveData(); }catch(err){ alert('Import failed'); } });
+
+  const settingsExportBtn = document.getElementById('settingsExportBtn');
+  if(settingsExportBtn){
+    settingsExportBtn.addEventListener('click', ()=>{
+      const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');
+      a.href=url;
+      a.download='stayfitinlife-backup.json';
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+  }
+
+  const settingsImportFile = document.getElementById('settingsImportFile');
+  if(settingsImportFile){
+    settingsImportFile.addEventListener('change', async e=>{
+      const f=e.target.files[0];
+      if(!f) return;
+      try{
+        data={...defaultData, ...JSON.parse(await f.text())};
+        saveData();
+        alert('Backup imported successfully.');
+      }catch(err){
+        alert('Import failed.');
+      }
+    });
+  }
+
+  const deleteAllDataBtn = document.getElementById('deleteAllDataBtn');
+  if(deleteAllDataBtn){
+    deleteAllDataBtn.addEventListener('click', deleteAllLocalData);
+  }
+}
+
+function init(){
+  data = loadData();
+  populateProfile();
+  populateBodyParts();
+  populateCuisines();
+  populateFoods();
+  populateSupps();
+  updateActivityBlocks();
+  bindEvents();
+  bindSidebarToggle();
+  renderAll();
+  switchTab('home');
+}
+document.addEventListener('visibilitychange', ()=>{ if(document.hidden){ stopScanner(true); } });
+init();
+
+
+let html5QrCode = null;
+let scannerRunning = false;
+let availableCameras = [];
+let activeCameraIndex = 0;
+
+async function stopScanner(hide=true){
+  try{
+    if(html5QrCode && scannerRunning){
+      await html5QrCode.stop();
+      scannerRunning = false;
+    }
+  }catch(e){
+    console.warn('Stop scanner error:', e);
+  }
+  if(hide){
+    const c=document.getElementById('scannerContainer');
+    if(c) c.style.display='none';
+  }
+}
+
+async function startScanner(preferredIndex=null){
+  const container = document.getElementById('scannerContainer');
+  const hint = document.getElementById('scannerHint');
+  if(container) container.style.display='block';
+  if(hint) hint.textContent = 'Starting camera…';
+
+  try{
+    if(!window.Html5Qrcode){
+      throw new Error('Scanner library not loaded');
+    }
+
+    if(!html5QrCode){
+      html5QrCode = new Html5Qrcode("reader");
+    }
+
+    // stop any previous session cleanly before restarting
+    if(scannerRunning){
+      await stopScanner(false);
+      try { html5QrCode.clear && html5QrCode.clear(); } catch(e) {}
+    }
+
+    availableCameras = await Html5Qrcode.getCameras();
+    if(!availableCameras || !availableCameras.length){
+      throw new Error('No camera found');
+    }
+
+    if(preferredIndex !== null){
+      activeCameraIndex = preferredIndex;
+    } else {
+      const rearIdx = availableCameras.findIndex(d => {
+        const label = String(d.label || '').toLowerCase();
+        return label.includes('back') || label.includes('rear') || label.includes('environment');
+      });
+      activeCameraIndex = rearIdx >= 0 ? rearIdx : Math.max(availableCameras.length - 1, 0);
+    }
+
+    const cameraId = availableCameras[activeCameraIndex].id;
+    if(hint) hint.textContent = `Using camera ${activeCameraIndex + 1} of ${availableCameras.length}`;
+
+    await html5QrCode.start(
+      cameraId,
+      { fps: 10, qrbox: { width: 250, height: 150 }, aspectRatio: 1.777 },
+      async (decodedText) => {
+        if(navigator.vibrate) navigator.vibrate(200);
+        document.getElementById("barcodeInput").value = decodedText;
+        if(hint) hint.textContent = 'Barcode detected';
+        await stopScanner(true);
+        lookupBarcodeValue(decodedText);
+      },
+      () => {}
+    );
+
+    scannerRunning = true;
+    if(hint) hint.textContent = `Align barcode inside the box • Camera ${activeCameraIndex + 1}/${availableCameras.length}`;
+  }catch(err){
+    console.error(err);
+    if(hint) hint.textContent = 'Camera failed to start';
+    alert('Camera start failed');
+    await stopScanner(true);
+  }
+}
+
+async function switchScannerCamera(){
+  if(!availableCameras || availableCameras.length < 2){
+    alert('No second camera available');
+    return;
+  }
+  const nextIndex = (activeCameraIndex + 1) % availableCameras.length;
+  await startScanner(nextIndex);
+}
+
+.modeLabel||'', isCheatMeal: ($('mealName').value==='Cheat Meal' || food.cuisine==='Cheat Meal'), protein:+(food.protein*qty).toFixed(1), carbs:+(food.carbs*qty).toFixed(1), fats:+(food.fats*qty).toFixed(1)}); $('foodQty').value=''; saveData(); });
   $('addCustomFoodBtn').addEventListener('click', ()=>{ const name=$('customFoodName').value.trim(); if(!name) return; data.customFoods.unshift({name, cuisine:$('customFoodCuisine').value, unit:$('customFoodUnit').value||'1 serving', protein:Number($('customFoodProtein').value||0), carbs:Number($('customFoodCarbs').value||0), fats:Number($('customFoodFats').value||0)}); $('customFoodName').value=''; $('customFoodUnit').value=''; $('customFoodProtein').value=''; $('customFoodCarbs').value=''; $('customFoodFats').value=''; populateCuisines(); populateFoods(); saveData(); });
   document.querySelectorAll('[data-water]').forEach(btn=>btn.addEventListener('click', ()=>{ addByDate('waterByDate', nutritionDate(), {amount:Number(btn.dataset.water)}); saveData(); }));
   $('addWaterBtn').addEventListener('click', ()=>{ const amt=Number($('customWater').value||0); if(!amt) return; addByDate('waterByDate', nutritionDate(), {amount:amt}); $('customWater').value=''; saveData(); });
