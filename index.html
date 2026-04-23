@@ -1,3 +1,4 @@
+<!-- V7.0.2 FULL FIX -->
 <!-- V7 FULL SYSTEM INTEGRATED -->
 <!-- V6.6 CALORIE ENGINE -->
 <!-- V6.5 GOAL RECOVERY SYSTEM -->
@@ -18,7 +19,7 @@
 <meta name="theme-color" content="#07111f"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<meta name="build-version" content="v7-full-system-integrated"/>
+<meta name="build-version" content="v7.0.2-full-fix"/>
 <title>Stayfitinlife</title>
 <link rel="manifest" href="manifest.webmanifest"/>
 <link rel="apple-touch-icon" href="icons/icon-192.png"/>
@@ -334,6 +335,38 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
   .scanner-actions .chip{min-height:44px}
 }
 
+
+@media (max-width:1024px) and (pointer:coarse){
+  .menu-btn{
+    top:calc(18px + env(safe-area-inset-top)) !important;
+    left:16px !important;
+    padding:12px 14px !important;
+    border-radius:16px !important;
+    z-index:60 !important;
+  }
+  .main{
+    padding-top:calc(88px + env(safe-area-inset-top)) !important;
+  }
+  .brand img{
+    margin-top:8px !important;
+    max-width:130px !important;
+    height:auto !important;
+  }
+}
+@media (max-width:760px){
+  .field-grid{grid-template-columns:1fr !important}
+}
+
+
+#goalEngineList:empty::before,
+#goalValidationBox:empty::before,
+#calorieEngineHome:empty::before,
+#reentryBox:empty::before,
+#profileGoalValidation:empty::before{
+  content:"Loading…";
+  color:rgba(255,255,255,.55);
+}
+
 </style>
 </head>
 <body>
@@ -403,7 +436,8 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
             <div class="field"><label>Water Target (L)</label><input id="profileWaterTarget" type="number" step="0.1"/></div>
             <div class="field"><label>Recovery Source</label><select id="profileRecoverySource"><option>Manual</option><option>WHOOP</option><option>Apple Watch (future native)</option></select></div>
           </div>
-          <div style="margin-top:14px"><button class="primary-btn" id="saveProfileBtn" type="button">Save Profile</button></div>
+          <div class="list" id="profileGoalValidation" style="margin-top:12px"></div>
+<div style="margin-top:14px"><button class="primary-btn" id="saveProfileBtn" type="button">Save Profile</button></div>
         </div>
         <div class="panel">
           <div class="panel-title">Weight Check-in</div>
@@ -645,7 +679,7 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
             <div class="list-item">
               <div>
                 <strong>Version</strong>
-                <div class="muted" id="appVersion">V7</div>
+                <div class="muted" id="appVersion">V7.0.2</div>
               </div>
             </div>
             <div class="list-item">
@@ -1167,7 +1201,10 @@ function getScreenData(screen){
       height: data.profile.height || '',
       startWeight: data.profile.startWeight || '',
       waterTarget: data.profile.waterTarget || 3.5,
-      recoverySource: data.profile.recoverySource || 'Manual'
+      recoverySource: data.profile.recoverySource || 'Manual',
+      targetWeight: data.profile.targetWeight || '',
+      targetBodyFat: data.profile.targetBodyFat || '',
+      targetDate: data.profile.targetDate || ''
     },
     summary: {
       protein, carbs, fats, water,
@@ -1357,7 +1394,7 @@ function populateProfile(){
   const p=data.profile;
   $('profileName').value=p.name||''; $('profileAge').value=p.age||''; $('profileGender').value=p.gender||'Male';
   $('profileHeight').value=p.height||''; $('profileStartWeight').value=p.startWeight||''; $('profileGoal').value=p.goal||'Fat Loss';
-  $('profileWeighFreq').value=p.weighFreq||'Daily'; $('profileWaterTarget').value=p.waterTarget||3.5; $('profileRecoverySource').value=p.recoverySource||'Manual'; const pa=document.getElementById('profileActivityLevel'); if(pa) pa.value=p.activityLevel||'Moderate'; const ptw=document.getElementById('profileTargetWeight'); if(ptw) ptw.value=p.targetWeight||''; const ptbf=document.getElementById('profileTargetBodyFat'); if(ptbf) ptbf.value=p.targetBodyFat||''; const ptd=document.getElementById('profileTargetDate'); if(ptd) ptd.value=p.targetDate||'';
+  $('profileWeighFreq').value=p.weighFreq||'Daily'; $('profileWaterTarget').value=p.waterTarget||3.5; $('profileRecoverySource').value=p.recoverySource||'Manual'; const pa=document.getElementById('profileActivityLevel'); if(pa) pa.value=p.activityLevel||'Moderate'; const ptw=document.getElementById('profileTargetWeight'); if(ptw) ptw.value=p.targetWeight||''; const ptbf=document.getElementById('profileTargetBodyFat'); if(ptbf) ptbf.value=p.targetBodyFat||''; const ptd=document.getElementById('profileTargetDate'); if(ptd) ptd.value=p.targetDate||''; const ptw=document.getElementById('profileTargetWeight'); if(ptw) ptw.value=p.targetWeight||''; const ptbf=document.getElementById('profileTargetBodyFat'); if(ptbf) ptbf.value=p.targetBodyFat||''; const ptd=document.getElementById('profileTargetDate'); if(ptd) ptd.value=p.targetDate||'';
   $('weightDate').value=todayISO(); $('recoverySource').value=p.recoverySource||'Manual';
 }
 
@@ -1667,6 +1704,7 @@ function renderAll(){
   const cheat = getWeeklyCheatSummary();
   const t = getGoalTargets();
   const goalList = document.getElementById('goalEngineList');
+  
   if(goalList){
     const currentWeight = getCurrentWeight() || Number(data.profile.startWeight||0);
     const targetWeight = Number(data.profile.targetWeight||0);
@@ -1684,6 +1722,15 @@ function renderAll(){
       <div class="list-item"><div><strong>${gv.title}</strong><div class="muted">${gv.summary}</div></div></div>
       <div class="list-item"><div><strong>Status</strong><div class="muted">${gv.state.toUpperCase()}</div></div></div>
       ${gv.currentWeight ? `<div class="list-item"><div><strong>Rate</strong><div class="muted">${gv.weeklyRate||'--'} kg/week estimated</div></div></div>` : ''}
+      ${gv.suggestedDate ? `<div class="list-item"><div><strong>Safer suggestion</strong><div class="muted">${gv.suggestedWeight||'--'} kg by ${gv.suggestedDate}</div></div></div>` : ''}`;
+  }
+  const profileGoalValidation = document.getElementById('profileGoalValidation');
+  if(profileGoalValidation){
+    profileGoalValidation.innerHTML = `
+      <div class="list-item"><div><strong>${gv.title}</strong><div class="muted">${gv.summary}</div></div></div>
+      <div class="list-item"><div><strong>Status</strong><div class="muted">${gv.state.toUpperCase()}</div></div></div>
+      ${gv.suggestedDate ? `<div class="list-item"><div><strong>Safer suggestion</strong><div class="muted">${gv.suggestedWeight||'--'} kg by ${gv.suggestedDate}</div></div></div>` : ''}`;
+  }
       ${gv.suggestedDate ? `<div class="list-item"><div><strong>Safer suggestion</strong><div class="muted">${gv.suggestedWeight||'--'} kg by ${gv.suggestedDate}</div></div></div>` : ''}`;
   }
   const re = calculateRecoveryEngine();
@@ -1710,7 +1757,7 @@ function renderAll(){
   }
   const cw = latestWeight()?.value || '--';
   const tw = data.profile.targetWeight || '--';
-  $('weightTrend').innerHTML = latestWeight() ? `Latest: <strong>${cw} kg</strong><br>Target: ${tw} kg<br>Since start: ${ws===null?'--':ws} kg<br>Since last: ${wl===null?'--':wl} kg` : 'No entries yet.';
+  $('weightTrend').innerHTML = latestWeight() ? `Latest: <strong>${cw} kg</strong><br>Target: ${tw} kg<br>Since start: ${ws===null?'--':ws} kg<br>Since last: ${wl===null?'--':wl} kg` : `No entries yet.<br>Target: ${tw} kg`;
   $('hydrationTrend').innerHTML = `Today: <strong>${water} L</strong><br>Target: ${wt} L`;
   renderCoach();
 }
@@ -1774,7 +1821,21 @@ function bindEvents(){
 
   document.querySelectorAll('.chip[data-feel], .chip[data-goal]').forEach(btn=>btn.addEventListener('click', ()=>{ if(btn.dataset.feel) data.coachState.feel=btn.dataset.feel; saveData(); renderCoach(btn.dataset.feel, btn.dataset.goal); }));
   $('saveProfileBtn').addEventListener('click', ()=>{
-    data.profile={name:$('profileName').value.trim(),age:$('profileAge').value,gender:$('profileGender').value,height:$('profileHeight').value,startWeight:$('profileStartWeight').value,goal:$('profileGoal').value,activityLevel:(document.getElementById('profileActivityLevel')?$('profileActivityLevel').value:'Moderate'),targetWeight:Number((document.getElementById('profileTargetWeight')?$('profileTargetWeight').value:0)||0),targetBodyFat:Number((document.getElementById('profileTargetBodyFat')?$('profileTargetBodyFat').value:0)||0),targetDate:(document.getElementById('profileTargetDate')?$('profileTargetDate').value:''),weighFreq:$('profileWeighFreq').value,waterTarget:Number($('profileWaterTarget').value||3.5),recoverySource:$('profileRecoverySource').value};
+    data.profile={
+      name:$('profileName').value.trim(),
+      age:$('profileAge').value,
+      gender:$('profileGender').value,
+      height:$('profileHeight').value,
+      startWeight:$('profileStartWeight').value,
+      goal:$('profileGoal').value,
+      activityLevel:(document.getElementById('profileActivityLevel')?$('profileActivityLevel').value:'Moderate'),
+      targetWeight:Number((document.getElementById('profileTargetWeight')?$('profileTargetWeight').value:0)||0),
+      targetBodyFat:Number((document.getElementById('profileTargetBodyFat')?$('profileTargetBodyFat').value:0)||0),
+      targetDate:(document.getElementById('profileTargetDate')?$('profileTargetDate').value:''),
+      weighFreq:$('profileWeighFreq').value,
+      waterTarget:Number($('profileWaterTarget').value||3.5),
+      recoverySource:$('profileRecoverySource').value
+    };
     saveData();
     const gv = validateGoalTargets();
     if(gv.state==='aggressive') alert('Goal saved. It is aggressive, so suggestions will stay conservative.');
@@ -1952,7 +2013,7 @@ async function startScanner(preferredIndex=null){
   }
 }
 
-async function switchScannerCamera(){
+async async function switchScannerCamera(){
   if(!availableCameras || availableCameras.length < 2){
     alert('No second camera available');
     return;
@@ -1963,33 +2024,6 @@ async function switchScannerCamera(){
 
 
 </script>
-<script src="https://unpkg.com/html5-qrcode">
-let html5QrCode;
-
-function startScanner(){
-  document.getElementById("scannerContainer").style.display="block";
-  html5QrCode=new Html5Qrcode("reader");
-  Html5Qrcode.getCameras().then(devices=>{
-    if(devices.length){
-      const id=devices[0].id;
-      html5QrCode.start(id,{fps:10,qrbox:{width:250,height:150}},(txt)=>{
-        stopScanner();
-        document.getElementById("barcodeInput").value=txt;
-        lookupBarcodeValue(txt);
-        if(navigator.vibrate) navigator.vibrate(200);
-      });
-    }
-  }).catch(()=>alert("Camera not available"));
-}
-
-function stopScanner(){
-  if(html5QrCode){
-    html5QrCode.stop().then(()=>{
-      document.getElementById("scannerContainer").style.display="none";
-    });
-  }
-}
-
-</script>
+<script src="https://unpkg.com/html5-qrcode"></script>
 </body>
 </html>

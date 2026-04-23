@@ -10,3 +10,5 @@ V6.5: Cost-effective Goal Based System + Recovery Engine using local calculation
 V6.6: Calorie Engine + smart deficit UI using local MET-based estimates, goal system, and recovery engine in a cost-effective way.
 
 V7 integrated UI: target weight/body fat, goal validation, cheat-meal intelligence, inactivity/re-entry mode, merged into V6.6 UI.
+
+V7.0.2 full fix: profile target fields, goal validation rendering, home engine panels, scanner stability, mobile overlap fixes.
