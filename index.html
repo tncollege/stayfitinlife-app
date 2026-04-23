@@ -1,3 +1,4 @@
+<!-- V7.0.3 JS FIX -->
 <!-- V7.0.2 FULL FIX -->
 <!-- V7 FULL SYSTEM INTEGRATED -->
 <!-- V6.6 CALORIE ENGINE -->
@@ -19,7 +20,7 @@
 <meta name="theme-color" content="#07111f"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<meta name="build-version" content="v7.0.2-full-fix"/>
+<meta name="build-version" content="v7.0.3-js-fix"/>
 <title>Stayfitinlife</title>
 <link rel="manifest" href="manifest.webmanifest"/>
 <link rel="apple-touch-icon" href="icons/icon-192.png"/>
@@ -679,7 +680,7 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
             <div class="list-item">
               <div>
                 <strong>Version</strong>
-                <div class="muted" id="appVersion">V7.0.2</div>
+                <div class="muted" id="appVersion">V7.0.3</div>
               </div>
             </div>
             <div class="list-item">
@@ -1394,7 +1395,7 @@ function populateProfile(){
   const p=data.profile;
   $('profileName').value=p.name||''; $('profileAge').value=p.age||''; $('profileGender').value=p.gender||'Male';
   $('profileHeight').value=p.height||''; $('profileStartWeight').value=p.startWeight||''; $('profileGoal').value=p.goal||'Fat Loss';
-  $('profileWeighFreq').value=p.weighFreq||'Daily'; $('profileWaterTarget').value=p.waterTarget||3.5; $('profileRecoverySource').value=p.recoverySource||'Manual'; const pa=document.getElementById('profileActivityLevel'); if(pa) pa.value=p.activityLevel||'Moderate'; const ptw=document.getElementById('profileTargetWeight'); if(ptw) ptw.value=p.targetWeight||''; const ptbf=document.getElementById('profileTargetBodyFat'); if(ptbf) ptbf.value=p.targetBodyFat||''; const ptd=document.getElementById('profileTargetDate'); if(ptd) ptd.value=p.targetDate||''; const ptw=document.getElementById('profileTargetWeight'); if(ptw) ptw.value=p.targetWeight||''; const ptbf=document.getElementById('profileTargetBodyFat'); if(ptbf) ptbf.value=p.targetBodyFat||''; const ptd=document.getElementById('profileTargetDate'); if(ptd) ptd.value=p.targetDate||'';
+  $('profileWeighFreq').value=p.weighFreq||'Daily'; $('profileWaterTarget').value=p.waterTarget||3.5; $('profileRecoverySource').value=p.recoverySource||'Manual'; const pa=document.getElementById('profileActivityLevel'); if(pa) pa.value=p.activityLevel||'Moderate'; const ptw=document.getElementById('profileTargetWeight'); if(ptw) ptw.value=p.targetWeight||''; const ptbf=document.getElementById('profileTargetBodyFat'); if(ptbf) ptbf.value=p.targetBodyFat||''; const ptd=document.getElementById('profileTargetDate'); if(ptd) ptd.value=p.targetDate||'';
   $('weightDate').value=todayISO(); $('recoverySource').value=p.recoverySource||'Manual';
 }
 
@@ -1731,8 +1732,6 @@ function renderAll(){
       <div class="list-item"><div><strong>Status</strong><div class="muted">${gv.state.toUpperCase()}</div></div></div>
       ${gv.suggestedDate ? `<div class="list-item"><div><strong>Safer suggestion</strong><div class="muted">${gv.suggestedWeight||'--'} kg by ${gv.suggestedDate}</div></div></div>` : ''}`;
   }
-      ${gv.suggestedDate ? `<div class="list-item"><div><strong>Safer suggestion</strong><div class="muted">${gv.suggestedWeight||'--'} kg by ${gv.suggestedDate}</div></div></div>` : ''}`;
-  }
   const re = calculateRecoveryEngine();
   const ce = getTodayCalorieEngine();
   const ceHome = document.getElementById('calorieEngineHome');
@@ -2013,7 +2012,7 @@ async function startScanner(preferredIndex=null){
   }
 }
 
-async async function switchScannerCamera(){
+async function switchScannerCamera(){
   if(!availableCameras || availableCameras.length < 2){
     alert('No second camera available');
     return;
@@ -2021,7 +2020,6 @@ async async function switchScannerCamera(){
   const nextIndex = (activeCameraIndex + 1) % availableCameras.length;
   await startScanner(nextIndex);
 }
-
 
 </script>
 <script src="https://unpkg.com/html5-qrcode"></script>

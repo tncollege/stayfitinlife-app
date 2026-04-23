@@ -12,3 +12,5 @@ V6.6: Calorie Engine + smart deficit UI using local MET-based estimates, goal sy
 V7 integrated UI: target weight/body fat, goal validation, cheat-meal intelligence, inactivity/re-entry mode, merged into V6.6 UI.
 
 V7.0.2 full fix: profile target fields, goal validation rendering, home engine panels, scanner stability, mobile overlap fixes.
+
+V7.0.3 JS fix: removed duplicate profile declarations, removed stray goal-validation fragment, fixed scanner function declaration, validated with node -c.
