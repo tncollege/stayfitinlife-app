@@ -14,3 +14,5 @@ V7 integrated UI: target weight/body fat, goal validation, cheat-meal intelligen
 V7.0.2 full fix: profile target fields, goal validation rendering, home engine panels, scanner stability, mobile overlap fixes.
 
 V7.0.4 final clean: fixed cheat variable order, removed stray goal-validation fragment, removed duplicate profile declarations, fixed scanner declaration, JS validated.
+
+V7.0.5 profile UI fix: added visible Activity Level, Target Weight, Target Body Fat, and Target Date fields.
