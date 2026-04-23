@@ -1,13 +1,14 @@
-<!-- V7.2.5 MOBILE HEADER FIT -->
-<!-- V7.2.5 HEADER OVERLAP FIX -->
-<!-- V7.2.5 LAYOUT CLEANUP -->
-<!-- V7.2.5 SPACING RING FIX -->
-<!-- V7.2.5 WORDMARK GRADIENT -->
-<!-- V7.2.5 PREMIUM LAYOUT -->
-<!-- V7.2.5 WORDMARK REFINED -->
-<!-- V7.2.5 MOBILE REFINE -->
-<!-- V7.2.5 STABLE DEBUG -->
-<!-- V7.2.5 HEADER COLOR THEME -->
+<!-- V7.2.6 RUNTIME LAYOUT FIX -->
+<!-- V7.2.6 MOBILE HEADER FIT -->
+<!-- V7.2.6 HEADER OVERLAP FIX -->
+<!-- V7.2.6 LAYOUT CLEANUP -->
+<!-- V7.2.6 SPACING RING FIX -->
+<!-- V7.2.6 WORDMARK GRADIENT -->
+<!-- V7.2.6 PREMIUM LAYOUT -->
+<!-- V7.2.6 WORDMARK REFINED -->
+<!-- V7.2.6 MOBILE REFINE -->
+<!-- V7.2.6 STABLE DEBUG -->
+<!-- V7.2.6 HEADER COLOR THEME -->
 <!-- V7.0.6 PREMIUM HEADER -->
 <!-- V7.0.5 PROFILE UI FIX -->
 <!-- V7.0.4 FINAL CLEAN -->
@@ -32,7 +33,7 @@
 <meta name="theme-color" content="#07111f"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<meta name="build-version" content="v7.2.5-mobile-header-fit"/>
+<meta name="build-version" content="v7.2.6-runtime-layout-fix"/>
 <title>Stayfitinlife</title>
 <link rel="manifest" href="manifest.webmanifest"/>
 <link rel="apple-touch-icon" href="icons/icon-192.png"/>
@@ -612,7 +613,7 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
 }
 
 
-/* V7.2.5 stable debug */
+/* V7.2.6 stable debug */
 .desktop-hero{
   display:block;
   padding:2px 4px 14px;
@@ -727,7 +728,7 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
 }
 
 
-/* V7.2.5 mobile refine */
+/* V7.2.6 mobile refine */
 .mobile-header{
   gap:8px !important;
   padding:0 0 8px !important;
@@ -829,7 +830,7 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
 }
 
 
-/* V7.2.5 wordmark refined */
+/* V7.2.6 wordmark refined */
 .wordmark{
   font-weight:900;
   letter-spacing:.08em;
@@ -953,7 +954,7 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
 }
 
 
-/* V7.2.5 Premium Layout */
+/* V7.2.6 Premium Layout */
 
 .logo img{display:none !important;}
 
@@ -1021,7 +1022,7 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
 
 
 
-/* V7.2.5 spacing + ring crash fix */
+/* V7.2.6 spacing + ring crash fix */
 .main{
   padding:18px 20px 110px !important;
 }
@@ -1233,7 +1234,7 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
 }
 
 
-/* V7.2.5 layout cleanup */
+/* V7.2.6 layout cleanup */
 .main{
   padding:16px 20px 110px !important;
 }
@@ -1440,7 +1441,7 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
 }
 
 
-/* V7.2.5 header overlap fix */
+/* V7.2.6 header overlap fix */
 .desktop-hero-top{
   display:grid !important;
   grid-template-columns:minmax(0,1fr) 320px !important;
@@ -1517,7 +1518,7 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
 }
 
 
-/* V7.2.5 mobile header fit */
+/* V7.2.6 mobile header fit */
 #home{
   display:flex !important;
   flex-direction:column !important;
@@ -1670,6 +1671,221 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
     letter-spacing:.1em !important;
   }
 }
+
+
+/* V7.2.6 runtime layout fix */
+.main{
+  display:block !important;
+  padding:12px 18px 110px !important;
+}
+#home{
+  display:block !important;
+  margin:0 !important;
+  padding:0 !important;
+}
+#home > .desktop-hero,
+#home > .mobile-header,
+#home > .mobile-only-actions,
+#home > .home-rings-grid,
+#home > .cards,
+#home > .content-grid,
+#home > .coach-banner{
+  position:relative !important;
+  top:0 !important;
+  left:0 !important;
+  transform:none !important;
+}
+.brand{
+  padding:14px 10px 18px !important;
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:flex-start !important;
+  gap:0 !important;
+}
+.brand img{display:none !important;}
+.brand .wordmark{
+  font-size:18px !important;
+}
+.brand .wordmark-tag{
+  font-size:8px !important;
+  letter-spacing:.16em !important;
+}
+.desktop-hero{
+  display:block !important;
+  margin:0 0 12px !important;
+  padding:0 !important;
+}
+.desktop-hero-top{
+  display:grid !important;
+  grid-template-columns:minmax(0,1fr) 320px !important;
+  gap:24px !important;
+  align-items:start !important;
+}
+.desktop-hero-left{
+  min-width:0 !important;
+}
+.desktop-hero-right{
+  width:320px !important;
+  min-width:320px !important;
+  max-width:320px !important;
+  justify-self:end !important;
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:flex-end !important;
+  gap:12px !important;
+}
+.desktop-hero-right .desktop-wordmark{
+  text-align:right !important;
+}
+.top-actions-inline{
+  display:flex !important;
+  justify-content:flex-end !important;
+  gap:12px !important;
+}
+.mobile-header,
+.mobile-only-actions{
+  display:none !important;
+}
+.home-rings-grid{
+  display:grid !important;
+  grid-template-columns:minmax(0,1.15fr) minmax(280px,.85fr) !important;
+  gap:16px !important;
+  margin:8px 0 0 !important;
+}
+.rings-wrap{
+  display:grid !important;
+  grid-template-columns:repeat(4,minmax(0,1fr)) !important;
+  gap:14px 10px !important;
+  justify-items:center !important;
+}
+.ring-card{
+  width:100% !important;
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:center !important;
+  justify-content:flex-start !important;
+}
+.ring{
+  width:110px !important;
+  height:110px !important;
+  margin:0 auto !important;
+}
+.ring-inner{
+  width:80px !important;
+  height:80px !important;
+}
+.cards{
+  margin-top:14px !important;
+}
+.content-grid.home-after-rings{
+  margin-top:16px !important;
+}
+@media (max-width:860px){
+  .main{
+    padding:8px 12px 126px !important;
+  }
+  .desktop-hero{
+    display:none !important;
+    height:0 !important;
+    overflow:hidden !important;
+    margin:0 !important;
+    padding:0 !important;
+  }
+  .mobile-header{
+    display:grid !important;
+    grid-template-columns:minmax(0,1fr) minmax(118px,42vw) !important;
+    gap:10px !important;
+    align-items:start !important;
+    margin:0 0 8px !important;
+    padding:0 !important;
+  }
+  .mobile-header-left{
+    min-width:0 !important;
+    width:100% !important;
+  }
+  .mobile-header-right{
+    width:100% !important;
+    max-width:42vw !important;
+    display:flex !important;
+    justify-content:flex-end !important;
+    align-items:flex-start !important;
+  }
+  .mobile-header .hero-copy{
+    padding:0 !important;
+    margin:0 !important;
+  }
+  .mobile-header .hero-copy h1{
+    margin:0 0 4px !important;
+    font-size:clamp(22px,7vw,34px) !important;
+    line-height:1.02 !important;
+    text-align:left !important;
+  }
+  .mobile-header .hero-copy p{
+    margin:0 !important;
+    font-size:14px !important;
+    line-height:1.2 !important;
+    text-align:left !important;
+  }
+  .mobile-date{
+    margin-top:6px !important;
+    font-size:12px !important;
+    line-height:1.2 !important;
+    text-align:left !important;
+  }
+  .mobile-logo{
+    display:flex !important;
+    flex-direction:column !important;
+    align-items:flex-end !important;
+    text-align:right !important;
+    margin:0 !important;
+  }
+  .mobile-logo .wordmark{
+    font-size:20px !important;
+    letter-spacing:.02em !important;
+    white-space:nowrap !important;
+  }
+  .mobile-logo .wordmark-tag{
+    font-size:7px !important;
+    letter-spacing:.10em !important;
+    white-space:nowrap !important;
+  }
+  .mobile-only-actions{
+    display:grid !important;
+    grid-template-columns:1fr 1fr !important;
+    gap:10px !important;
+    margin:0 0 10px !important;
+  }
+  .mobile-only-actions .action-btn{
+    min-height:48px !important;
+    padding:0 14px !important;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    font-size:15px !important;
+  }
+  .home-rings-grid{
+    grid-template-columns:1fr !important;
+    gap:12px !important;
+    margin-top:0 !important;
+  }
+  .rings-wrap{
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+    gap:12px 8px !important;
+  }
+  .ring{
+    width:102px !important;
+    height:102px !important;
+  }
+  .ring-inner{
+    width:74px !important;
+    height:74px !important;
+  }
+  .cards{
+    grid-template-columns:1fr 1fr !important;
+    gap:12px !important;
+    margin-top:12px !important;
+  }
+}
 </style>
 </head>
 <body>
@@ -1677,8 +1893,7 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
 <div id="overlay" class="overlay"></div>
 <div class="app-shell">
   <aside class="sidebar">
-    <div class="brand"></div>
-    <nav class="sidebar-nav">
+    <div class="brand"><div class="wordmark">STAYFITINLIFE</div><div class="wordmark-tag">TRAIN • FUEL • RECOVER • EVOLVE</div></div><nav class="sidebar-nav">
       <button class="active" data-tab="home">🏠 Dashboard</button>
       <button data-tab="profile">👤 Profile</button>
       <button data-tab="workout">🏋️ Workouts</button>
@@ -1688,7 +1903,7 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
       <button data-tab="progress">📈 Progress</button>
       <button data-tab="settings">⚙️ Settings</button>
     </nav>
-    <button id="quickHomeBtn">+</button></div>
+    </div>
   </aside>
 
   <main class="main">
@@ -2059,7 +2274,7 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
             <div class="list-item">
               <div>
                 <strong>Version</strong>
-                <div class="muted" id="appVersion">V7.2.5</div>
+                <div class="muted" id="appVersion">V7.2.6</div>
               </div>
             </div>
             <div class="list-item">
@@ -3386,6 +3601,42 @@ document.addEventListener('visibilitychange', ()=>{ if(document.hidden){ stopSca
 moveTopActionsForMobile();
 bindQuickLog();
 window.addEventListener('resize', moveTopActionsForMobile);
+
+function enforceDashboardLayout(){
+  const mobile = window.innerWidth <= 860;
+  const home = document.getElementById('home');
+  const desktopHero = home ? home.querySelector('.desktop-hero') : null;
+  const mobileHeader = home ? home.querySelector('.mobile-header') : null;
+  const mobileActions = home ? home.querySelector('.mobile-only-actions') : null;
+  const desktopRight = home ? home.querySelector('.desktop-hero-right') : null;
+  const desktopWordmark = home ? home.querySelector('.desktop-wordmark') : null;
+  const topActionsInline = home ? home.querySelector('.top-actions-inline') : null;
+  if(home){
+    home.style.marginTop = '0';
+    home.style.paddingTop = '0';
+  }
+  if(desktopHero){
+    desktopHero.style.display = mobile ? 'none' : 'block';
+    desktopHero.style.height = mobile ? '0' : 'auto';
+    desktopHero.style.overflow = mobile ? 'hidden' : 'visible';
+  }
+  if(mobileHeader){
+    mobileHeader.style.display = mobile ? 'grid' : 'none';
+  }
+  if(mobileActions){
+    mobileActions.style.display = mobile ? 'grid' : 'none';
+  }
+  if(desktopRight && !mobile){
+    desktopRight.style.width = '320px';
+    desktopRight.style.minWidth = '320px';
+    desktopRight.style.maxWidth = '320px';
+  }
+  const quickBtn = document.getElementById('quickHomeBtn');
+  if(quickBtn) quickBtn.remove();
+}
+
+window.addEventListener('resize', enforceDashboardLayout);
+enforceDashboardLayout();
 init();
 
 
