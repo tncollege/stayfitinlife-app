@@ -1,7 +1,9 @@
-<!-- V7.1.2 WORDMARK REFINED -->
-<!-- V7.1.2 MOBILE REFINE -->
-<!-- V7.1.2 STABLE DEBUG -->
-<!-- V7.1.2 HEADER COLOR THEME -->
+<!-- V7.2.1 WORDMARK GRADIENT -->
+<!-- V7.2.1 PREMIUM LAYOUT -->
+<!-- V7.2.1 WORDMARK REFINED -->
+<!-- V7.2.1 MOBILE REFINE -->
+<!-- V7.2.1 STABLE DEBUG -->
+<!-- V7.2.1 HEADER COLOR THEME -->
 <!-- V7.0.6 PREMIUM HEADER -->
 <!-- V7.0.5 PROFILE UI FIX -->
 <!-- V7.0.4 FINAL CLEAN -->
@@ -26,7 +28,7 @@
 <meta name="theme-color" content="#07111f"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<meta name="build-version" content="v7.1.2-wordmark-refined"/>
+<meta name="build-version" content="v7.2.1-wordmark-gradient"/>
 <title>Stayfitinlife</title>
 <link rel="manifest" href="manifest.webmanifest"/>
 <link rel="apple-touch-icon" href="icons/icon-192.png"/>
@@ -606,7 +608,7 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
 }
 
 
-/* V7.1.2 stable debug */
+/* V7.2.1 stable debug */
 .desktop-hero{
   display:block;
   padding:2px 4px 14px;
@@ -721,7 +723,7 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
 }
 
 
-/* V7.1.2 mobile refine */
+/* V7.2.1 mobile refine */
 .mobile-header{
   gap:8px !important;
   padding:0 0 8px !important;
@@ -823,23 +825,23 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
 }
 
 
-/* V7.1.2 wordmark refined */
+/* V7.2.1 wordmark refined */
 .wordmark{
-  font-size:clamp(20px,2vw,28px);
   font-weight:900;
   letter-spacing:.08em;
   line-height:1;
-  background:linear-gradient(90deg, #e8eefc 0%, #67e8f9 28%, #34d399 52%, #a78bfa 78%, #f8fafc 100%);
+  background:linear-gradient(90deg, #00E5FF 0%, #00FFA3 30%, #7C6CFF 65%, #C084FC 100%);
   -webkit-background-clip:text;
   background-clip:text;
   color:transparent;
   text-transform:uppercase;
+  text-shadow:0 0 12px rgba(0,229,255,.16), 0 0 24px rgba(124,108,255,.10);
 }
 .wordmark-tag{
   margin-top:6px;
   font-size:10px;
   letter-spacing:.22em;
-  color:rgba(255,255,255,.48);
+  color:rgba(255,255,255,.52);
   text-transform:uppercase;
   white-space:nowrap;
 }
@@ -945,6 +947,74 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
     font-size:24px;
   }
 }
+
+
+/* V7.2.1 Premium Layout */
+
+.logo img{display:none !important;}
+
+.premium-mobile-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+}
+
+.premium-mobile-header .hero-copy{
+  text-align:left;
+}
+
+.premium-mobile-header .mobile-logo{
+  text-align:right;
+}
+
+.wordmark{
+  font-weight:900;
+  letter-spacing:.08em;
+  background:linear-gradient(90deg,#e8eefc,#67e8f9,#34d399,#a78bfa,#f8fafc);
+  -webkit-background-clip:text;
+  color:transparent;
+}
+
+.wordmark-tag{
+  font-size:10px;
+  letter-spacing:.2em;
+  color:rgba(255,255,255,.5);
+}
+
+.rings-wrap{
+  display:grid !important;
+  grid-template-columns:repeat(2,1fr);
+  justify-items:center;
+  align-items:center;
+  gap:16px;
+}
+
+.ring{
+  width:110px !important;
+  height:110px !important;
+  border-radius:50% !important;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:conic-gradient(var(--c) calc(var(--p,0)*1%), rgba(255,255,255,.08) 0);
+}
+
+.ring-inner{
+  width:80px !important;
+  height:80px !important;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#0b1732;
+  border:1px solid rgba(255,255,255,.06);
+}
+
+.ring-value{
+  font-size:18px;
+  font-weight:800;
+}
+
 </style>
 </head>
 <body>
@@ -952,7 +1022,7 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
 <div id="overlay" class="overlay"></div>
 <div class="app-shell">
   <aside class="sidebar">
-    <div class="brand"><img src="logo-full.png" alt="Stayfitinlife logo"/></div>
+    <div class="brand"></div>
     <nav class="sidebar-nav">
       <button class="active" data-tab="home">🏠 Dashboard</button>
       <button data-tab="profile">👤 Profile</button>
@@ -963,7 +1033,7 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
       <button data-tab="progress">📈 Progress</button>
       <button data-tab="settings">⚙️ Settings</button>
     </nav>
-    <div class="quick-card"><div><strong>Quick Log</strong><div class="muted">Fast entry</div></div><button id="quickHomeBtn">+</button></div>
+    <button id="quickHomeBtn">+</button></div>
   </aside>
 
   <main class="main">
@@ -980,7 +1050,7 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
         <div class="date" id="todayDateLine">Today</div>
       </div>
 
-      <div class="mobile-header">
+      <div class="mobile-header premium-mobile-header">
         <div class="mobile-header-left">
           <div class="mobile-logo"><div class="wordmark">STAYFITINLIFE</div><div class="wordmark-tag">TRAIN • FUEL • RECOVER • EVOLVE</div></div>
           <div class="hero-copy"><h1 id="welcomeTitleMobile">Dashboard</h1><p id="welcomeSubtitleMobile"></p></div>
@@ -993,10 +1063,10 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
           <div class="panel-title">Today's Progress</div>
           <div class="small-note" style="margin-top:-6px;margin-bottom:10px">Complete your rings daily</div>
           <div class="rings-wrap">
-            <div class="ring-card"><div class="ring" id="proteinRing" style="--c:var(--green)"><div class="ring-inner"><div><span class="ring-value" id="proteinVal">0g</span></div></div></div><div class="ring-name">Protein</div><div class="small-note" id="proteinSub">0 / 150 g</div></div>
-            <div class="ring-card"><div class="ring" id="carbRing" style="--c:var(--purple)"><div class="ring-inner"><div><span class="ring-value" id="carbVal">0g</span></div></div></div><div class="ring-name">Carbs</div><div class="small-note" id="carbSub">0 / 200 g</div></div>
-            <div class="ring-card"><div class="ring" id="fatRing" style="--c:var(--blue)"><div class="ring-inner"><div><span class="ring-value" id="fatVal">0g</span></div></div></div><div class="ring-name">Fats</div><div class="small-note" id="fatSub">0 / 60 g</div></div>
-            <div class="ring-card"><div class="ring" id="waterRing" style="--c:var(--cyan)"><div class="ring-inner"><div><span class="ring-value" id="waterVal">0L</span></div></div></div><div class="ring-name">Water</div><div class="small-note" id="waterSub">0 / 3.5 L</div></div>
+            <div class="ring-card"><div class="ring" id="proteinRing" style="--c:var(--green)"><div class="ring-inner"><div class="ring-value-wrap"><span class="ring-value">0</span></div></div></div><div class="ring-name">Protein</div><div class="small-note" id="proteinSub">0 / 150 g</div></div>
+            <div class="ring-card"><div class="ring" id="carbRing" style="--c:var(--purple)"><div class="ring-inner"><div class="ring-value-wrap"><span class="ring-value">0</span></div></div></div><div class="ring-name">Carbs</div><div class="small-note" id="carbSub">0 / 200 g</div></div>
+            <div class="ring-card"><div class="ring" id="fatRing" style="--c:var(--blue)"><div class="ring-inner"><div class="ring-value-wrap"><span class="ring-value">0</span></div></div></div><div class="ring-name">Fats</div><div class="small-note" id="fatSub">0 / 60 g</div></div>
+            <div class="ring-card"><div class="ring" id="waterRing" style="--c:var(--cyan)"><div class="ring-inner"><div class="ring-value-wrap"><span class="ring-value">0</span></div></div></div><div class="ring-name">Water</div><div class="small-note" id="waterSub">0 / 3.5 L</div></div>
           </div>
         </div>
         <div class="panel rings-summary-panel">
@@ -1289,7 +1359,7 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
             <div class="list-item">
               <div>
                 <strong>Version</strong>
-                <div class="muted" id="appVersion">V7.1.2</div>
+                <div class="muted" id="appVersion">V7.2.1</div>
               </div>
             </div>
             <div class="list-item">
