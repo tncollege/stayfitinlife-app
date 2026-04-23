@@ -1,11 +1,13 @@
-<!-- V7.2.3 LAYOUT CLEANUP -->
-<!-- V7.2.3 SPACING RING FIX -->
-<!-- V7.2.3 WORDMARK GRADIENT -->
-<!-- V7.2.3 PREMIUM LAYOUT -->
-<!-- V7.2.3 WORDMARK REFINED -->
-<!-- V7.2.3 MOBILE REFINE -->
-<!-- V7.2.3 STABLE DEBUG -->
-<!-- V7.2.3 HEADER COLOR THEME -->
+<!-- V7.2.5 MOBILE HEADER FIT -->
+<!-- V7.2.5 HEADER OVERLAP FIX -->
+<!-- V7.2.5 LAYOUT CLEANUP -->
+<!-- V7.2.5 SPACING RING FIX -->
+<!-- V7.2.5 WORDMARK GRADIENT -->
+<!-- V7.2.5 PREMIUM LAYOUT -->
+<!-- V7.2.5 WORDMARK REFINED -->
+<!-- V7.2.5 MOBILE REFINE -->
+<!-- V7.2.5 STABLE DEBUG -->
+<!-- V7.2.5 HEADER COLOR THEME -->
 <!-- V7.0.6 PREMIUM HEADER -->
 <!-- V7.0.5 PROFILE UI FIX -->
 <!-- V7.0.4 FINAL CLEAN -->
@@ -30,7 +32,7 @@
 <meta name="theme-color" content="#07111f"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<meta name="build-version" content="v7.2.3-layout-cleanup"/>
+<meta name="build-version" content="v7.2.5-mobile-header-fit"/>
 <title>Stayfitinlife</title>
 <link rel="manifest" href="manifest.webmanifest"/>
 <link rel="apple-touch-icon" href="icons/icon-192.png"/>
@@ -610,7 +612,7 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
 }
 
 
-/* V7.2.3 stable debug */
+/* V7.2.5 stable debug */
 .desktop-hero{
   display:block;
   padding:2px 4px 14px;
@@ -725,7 +727,7 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
 }
 
 
-/* V7.2.3 mobile refine */
+/* V7.2.5 mobile refine */
 .mobile-header{
   gap:8px !important;
   padding:0 0 8px !important;
@@ -827,7 +829,7 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
 }
 
 
-/* V7.2.3 wordmark refined */
+/* V7.2.5 wordmark refined */
 .wordmark{
   font-weight:900;
   letter-spacing:.08em;
@@ -951,7 +953,7 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
 }
 
 
-/* V7.2.3 Premium Layout */
+/* V7.2.5 Premium Layout */
 
 .logo img{display:none !important;}
 
@@ -1019,7 +1021,7 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
 
 
 
-/* V7.2.3 spacing + ring crash fix */
+/* V7.2.5 spacing + ring crash fix */
 .main{
   padding:18px 20px 110px !important;
 }
@@ -1231,7 +1233,7 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
 }
 
 
-/* V7.2.3 layout cleanup */
+/* V7.2.5 layout cleanup */
 .main{
   padding:16px 20px 110px !important;
 }
@@ -1434,6 +1436,238 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
   .stat-number{
     font-size:42px !important;
     margin-top:16px !important;
+  }
+}
+
+
+/* V7.2.5 header overlap fix */
+.desktop-hero-top{
+  display:grid !important;
+  grid-template-columns:minmax(0,1fr) 320px !important;
+  gap:24px !important;
+  align-items:start !important;
+}
+.desktop-hero-left{
+  min-width:0 !important;
+  max-width:100% !important;
+  overflow:hidden !important;
+}
+.desktop-hero-left h1,
+.desktop-hero-left .sub,
+.desktop-hero-left .date{
+  max-width:100% !important;
+  overflow-wrap:anywhere;
+}
+.desktop-hero-right{
+  width:320px !important;
+  min-width:320px !important;
+  max-width:320px !important;
+  justify-self:end !important;
+  overflow:hidden !important;
+}
+.desktop-hero-right .desktop-wordmark{
+  width:100% !important;
+  text-align:right !important;
+}
+.desktop-hero-right .wordmark{
+  display:block !important;
+  font-size:20px !important;
+  line-height:1 !important;
+  letter-spacing:.05em !important;
+  white-space:nowrap !important;
+}
+.desktop-hero-right .wordmark-tag{
+  display:block !important;
+  font-size:8px !important;
+  letter-spacing:.16em !important;
+  white-space:nowrap !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+}
+.top-actions-inline{
+  width:100% !important;
+  justify-content:flex-end !important;
+  flex-wrap:nowrap !important;
+}
+.top-actions-inline .action-btn{
+  min-width:128px !important;
+  font-size:16px !important;
+}
+@media (max-width:1200px){
+  .desktop-hero-top{
+    grid-template-columns:minmax(0,1fr) 280px !important;
+    gap:18px !important;
+  }
+  .desktop-hero-right{
+    width:280px !important;
+    min-width:280px !important;
+    max-width:280px !important;
+  }
+  .desktop-hero-right .wordmark{
+    font-size:18px !important;
+  }
+}
+@media (max-width:860px){
+  .desktop-hero-top,
+  .desktop-hero-right{
+    width:auto !important;
+    min-width:0 !important;
+    max-width:none !important;
+  }
+}
+
+
+/* V7.2.5 mobile header fit */
+#home{
+  display:flex !important;
+  flex-direction:column !important;
+  gap:0 !important;
+}
+#home > *{
+  flex:0 0 auto !important;
+}
+.desktop-hero{
+  margin-bottom:0 !important;
+}
+@media (max-width:860px){
+  .main{
+    padding:6px 12px 126px !important;
+  }
+  #home{
+    gap:0 !important;
+  }
+  .desktop-hero{
+    display:none !important;
+    margin:0 !important;
+    padding:0 !important;
+    height:0 !important;
+    overflow:hidden !important;
+  }
+  .premium-mobile-header,
+  .mobile-header{
+    display:grid !important;
+    grid-template-columns:minmax(0,1fr) minmax(120px, 42vw) !important;
+    column-gap:12px !important;
+    row-gap:0 !important;
+    align-items:start !important;
+    margin:0 0 8px !important;
+    padding:0 !important;
+    min-height:auto !important;
+  }
+  .mobile-header-left{
+    width:100% !important;
+    min-width:0 !important;
+    max-width:none !important;
+  }
+  .mobile-header-right{
+    width:100% !important;
+    min-width:0 !important;
+    max-width:42vw !important;
+    justify-self:end !important;
+    display:flex !important;
+    justify-content:flex-end !important;
+    align-items:flex-start !important;
+  }
+  .mobile-header .hero-copy{
+    width:100% !important;
+    padding:0 !important;
+    margin:0 !important;
+  }
+  .mobile-header .hero-copy h1{
+    margin:0 0 4px !important;
+    font-size:clamp(22px, 7vw, 34px) !important;
+    line-height:1.02 !important;
+    letter-spacing:-.035em !important;
+    text-align:left !important;
+  }
+  .mobile-header .hero-copy p{
+    margin:0 !important;
+    font-size:14px !important;
+    line-height:1.2 !important;
+    text-align:left !important;
+    white-space:normal !important;
+  }
+  .mobile-date{
+    margin-top:6px !important;
+    font-size:12px !important;
+    line-height:1.2 !important;
+    text-align:left !important;
+  }
+  .mobile-logo{
+    width:100% !important;
+    margin:0 !important;
+    padding-top:2px !important;
+    text-align:right !important;
+    display:flex !important;
+    flex-direction:column !important;
+    align-items:flex-end !important;
+  }
+  .mobile-logo .wordmark{
+    font-size:20px !important;
+    line-height:1 !important;
+    letter-spacing:.02em !important;
+    white-space:nowrap !important;
+  }
+  .mobile-logo .wordmark-tag{
+    margin-top:4px !important;
+    font-size:7px !important;
+    line-height:1.1 !important;
+    letter-spacing:.12em !important;
+    white-space:nowrap !important;
+    overflow:hidden !important;
+    text-overflow:ellipsis !important;
+    max-width:100% !important;
+  }
+  .mobile-only-actions{
+    display:grid !important;
+    grid-template-columns:1fr 1fr !important;
+    gap:10px !important;
+    margin:0 0 10px !important;
+    width:100% !important;
+  }
+  .mobile-only-actions .action-btn{
+    min-height:48px !important;
+    padding:0 14px !important;
+    font-size:15px !important;
+  }
+  .home-rings-first{
+    margin-top:0 !important;
+  }
+  .home-rings-grid{
+    grid-template-columns:1fr !important;
+    gap:12px !important;
+    margin-top:0 !important;
+  }
+  .rings-wrap{
+    grid-template-columns:repeat(2, minmax(0,1fr)) !important;
+    gap:12px 8px !important;
+  }
+  .ring-card{
+    width:100% !important;
+  }
+  .ring{
+    width:102px !important;
+    height:102px !important;
+  }
+  .ring-inner{
+    width:74px !important;
+    height:74px !important;
+  }
+  .cards{
+    margin-top:12px !important;
+  }
+}
+@media (max-width:420px){
+  .premium-mobile-header,
+  .mobile-header{
+    grid-template-columns:minmax(0,1fr) minmax(108px, 40vw) !important;
+  }
+  .mobile-logo .wordmark{
+    font-size:18px !important;
+  }
+  .mobile-logo .wordmark-tag{
+    font-size:6.5px !important;
+    letter-spacing:.1em !important;
   }
 }
 </style>
@@ -1825,7 +2059,7 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
             <div class="list-item">
               <div>
                 <strong>Version</strong>
-                <div class="muted" id="appVersion">V7.2.3</div>
+                <div class="muted" id="appVersion">V7.2.5</div>
               </div>
             </div>
             <div class="list-item">
