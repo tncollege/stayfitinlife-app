@@ -1,10 +1,11 @@
-<!-- V7.2.2 SPACING RING FIX -->
-<!-- V7.2.2 WORDMARK GRADIENT -->
-<!-- V7.2.2 PREMIUM LAYOUT -->
-<!-- V7.2.2 WORDMARK REFINED -->
-<!-- V7.2.2 MOBILE REFINE -->
-<!-- V7.2.2 STABLE DEBUG -->
-<!-- V7.2.2 HEADER COLOR THEME -->
+<!-- V7.2.3 LAYOUT CLEANUP -->
+<!-- V7.2.3 SPACING RING FIX -->
+<!-- V7.2.3 WORDMARK GRADIENT -->
+<!-- V7.2.3 PREMIUM LAYOUT -->
+<!-- V7.2.3 WORDMARK REFINED -->
+<!-- V7.2.3 MOBILE REFINE -->
+<!-- V7.2.3 STABLE DEBUG -->
+<!-- V7.2.3 HEADER COLOR THEME -->
 <!-- V7.0.6 PREMIUM HEADER -->
 <!-- V7.0.5 PROFILE UI FIX -->
 <!-- V7.0.4 FINAL CLEAN -->
@@ -29,7 +30,7 @@
 <meta name="theme-color" content="#07111f"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<meta name="build-version" content="v7.2.2-spacing-ring-fix"/>
+<meta name="build-version" content="v7.2.3-layout-cleanup"/>
 <title>Stayfitinlife</title>
 <link rel="manifest" href="manifest.webmanifest"/>
 <link rel="apple-touch-icon" href="icons/icon-192.png"/>
@@ -609,7 +610,7 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
 }
 
 
-/* V7.2.2 stable debug */
+/* V7.2.3 stable debug */
 .desktop-hero{
   display:block;
   padding:2px 4px 14px;
@@ -724,7 +725,7 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
 }
 
 
-/* V7.2.2 mobile refine */
+/* V7.2.3 mobile refine */
 .mobile-header{
   gap:8px !important;
   padding:0 0 8px !important;
@@ -826,7 +827,7 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
 }
 
 
-/* V7.2.2 wordmark refined */
+/* V7.2.3 wordmark refined */
 .wordmark{
   font-weight:900;
   letter-spacing:.08em;
@@ -950,7 +951,7 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
 }
 
 
-/* V7.2.2 Premium Layout */
+/* V7.2.3 Premium Layout */
 
 .logo img{display:none !important;}
 
@@ -1018,7 +1019,7 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
 
 
 
-/* V7.2.2 spacing + ring crash fix */
+/* V7.2.3 spacing + ring crash fix */
 .main{
   padding:18px 20px 110px !important;
 }
@@ -1226,6 +1227,213 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
   .ring-inner{
     width:82px !important;
     height:82px !important;
+  }
+}
+
+
+/* V7.2.3 layout cleanup */
+.main{
+  padding:16px 20px 110px !important;
+}
+.section,
+.section.active,
+#home{
+  margin-top:0 !important;
+  padding-top:0 !important;
+}
+.desktop-hero{
+  display:block !important;
+  padding:0 0 14px !important;
+  margin:0 !important;
+}
+.desktop-hero-top{
+  display:grid !important;
+  grid-template-columns:minmax(0,1fr) auto !important;
+  gap:20px !important;
+  align-items:start !important;
+}
+.desktop-hero-left,
+.desktop-hero-right{
+  margin:0 !important;
+  padding:0 !important;
+}
+.desktop-hero-right{
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:flex-end !important;
+  gap:12px !important;
+}
+.top-actions-inline{
+  display:flex !important;
+  gap:12px !important;
+  margin:0 !important;
+}
+.top-actions-inline .action-btn{
+  min-height:56px;
+  padding:0 24px !important;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
+.home-rings-first{
+  margin-top:8px !important;
+}
+.home-rings-grid{
+  display:grid !important;
+  grid-template-columns:minmax(0,1.2fr) minmax(280px,.8fr) !important;
+  gap:16px !important;
+  margin-top:8px !important;
+}
+.rings-wrap{
+  display:grid !important;
+  grid-template-columns:repeat(4,minmax(0,1fr)) !important;
+  justify-items:center !important;
+  align-items:start !important;
+  gap:14px !important;
+}
+.ring-card{
+  width:100%;
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:center !important;
+  text-align:center !important;
+}
+.ring{
+  width:116px !important;
+  height:116px !important;
+  margin:0 auto !important;
+}
+.ring-inner{
+  width:82px !important;
+  height:82px !important;
+}
+.ring-name{
+  margin-top:10px !important;
+  font-size:14px !important;
+  font-weight:700 !important;
+}
+#proteinSub,#carbSub,#fatSub,#waterSub{
+  font-size:12px !important;
+  line-height:1.2 !important;
+}
+.cards{
+  margin-top:14px !important;
+}
+.content-grid.home-after-rings{
+  margin-top:16px !important;
+}
+.logo{
+  padding-top:10px !important;
+  padding-bottom:18px !important;
+}
+.logo .wordmark{
+  font-size:18px !important;
+}
+.logo .wordmark-tag{
+  font-size:9px !important;
+  letter-spacing:.16em !important;
+}
+.mobile-only-actions{
+  display:none !important;
+}
+@media (max-width:860px){
+  .main{
+    padding:8px 12px 126px !important;
+  }
+  .desktop-hero{
+    display:none !important;
+  }
+  .mobile-header{
+    display:grid !important;
+    grid-template-columns:minmax(0,1fr) auto !important;
+    gap:12px !important;
+    align-items:start !important;
+    padding:0 !important;
+    margin:0 0 10px !important;
+  }
+  .mobile-header-left{
+    min-width:0 !important;
+  }
+  .mobile-header-right{
+    display:flex !important;
+    justify-content:flex-end !important;
+    align-items:flex-start !important;
+  }
+  .mobile-logo{
+    margin:0 !important;
+    text-align:right !important;
+  }
+  .mobile-logo .wordmark{
+    font-size:22px !important;
+    letter-spacing:.03em !important;
+  }
+  .mobile-logo .wordmark-tag{
+    font-size:8px !important;
+    letter-spacing:.14em !important;
+  }
+  .mobile-header .hero-copy{
+    padding:0 !important;
+  }
+  .mobile-header .hero-copy h1{
+    margin:0 0 4px !important;
+    font-size:clamp(22px,7vw,34px) !important;
+    line-height:1.02 !important;
+  }
+  .mobile-header .hero-copy p{
+    margin:0 !important;
+    font-size:14px !important;
+    line-height:1.2 !important;
+  }
+  .mobile-date{
+    margin-top:6px !important;
+    font-size:12px !important;
+  }
+  .mobile-only-actions{
+    display:grid !important;
+    grid-template-columns:1fr 1fr !important;
+    gap:10px !important;
+    margin:0 0 12px !important;
+  }
+  .mobile-only-actions .action-btn{
+    min-height:50px !important;
+    padding:0 16px !important;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    font-size:16px !important;
+  }
+  .home-rings-grid{
+    grid-template-columns:1fr !important;
+    gap:12px !important;
+    margin-top:6px !important;
+  }
+  .rings-wrap{
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+    gap:14px 10px !important;
+  }
+  .ring{
+    width:108px !important;
+    height:108px !important;
+  }
+  .ring-inner{
+    width:78px !important;
+    height:78px !important;
+  }
+  .rings-summary-panel{
+    order:2;
+  }
+  .cards{
+    grid-template-columns:1fr 1fr !important;
+    gap:12px !important;
+    margin-top:12px !important;
+  }
+  .stat-card{
+    min-height:118px !important;
+    padding:16px !important;
+  }
+  .stat-number{
+    font-size:42px !important;
+    margin-top:16px !important;
   }
 }
 </style>
@@ -1617,7 +1825,7 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
             <div class="list-item">
               <div>
                 <strong>Version</strong>
-                <div class="muted" id="appVersion">V7.2.2</div>
+                <div class="muted" id="appVersion">V7.2.3</div>
               </div>
             </div>
             <div class="list-item">
