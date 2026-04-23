@@ -1,7 +1,4 @@
-<!-- V8.0.2 SIDEBAR DATE FIX -->
-<!-- V8.0.2 MENU FIX -->
-<!-- V8.0.2 CLEAN REBUILD -->
-<!-- V8 HEADER COLOR THEME -->
+<!-- V7.0.7 HEADER COLOR THEME -->
 <!-- V7.0.6 PREMIUM HEADER -->
 <!-- V7.0.5 PROFILE UI FIX -->
 <!-- V7.0.4 FINAL CLEAN -->
@@ -26,7 +23,7 @@
 <meta name="theme-color" content="#07111f"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<meta name="build-version" content="v8.0.2-sidebar-date-fix"/>
+<meta name="build-version" content="v7.0.7-header-color-theme"/>
 <title>Stayfitinlife</title>
 <link rel="manifest" href="manifest.webmanifest"/>
 <link rel="apple-touch-icon" href="icons/icon-192.png"/>
@@ -604,232 +601,6 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
     text-shadow:none;
   }
 }
-
-
-/* V8 clean rebuild home */
-.logo, .brand{
-  padding:14px 10px 18px !important;
-  display:flex !important;
-  flex-direction:column !important;
-  align-items:flex-start !important;
-  gap:0 !important;
-}
-.wordmark{
-  font-weight:900;
-  line-height:1;
-  letter-spacing:.04em;
-  text-transform:uppercase;
-  background:linear-gradient(90deg, #00E5FF 0%, #00FFA3 30%, #7C6CFF 65%, #C084FC 100%);
-  -webkit-background-clip:text;
-  background-clip:text;
-  color:transparent;
-  text-shadow:0 0 12px rgba(0,229,255,.16), 0 0 24px rgba(124,108,255,.10);
-}
-.brand .wordmark, .logo .wordmark{font-size:18px !important}
-.wordmark-tag{
-  margin-top:6px;
-  font-size:8px;
-  letter-spacing:.16em;
-  color:rgba(255,255,255,.52);
-  text-transform:uppercase;
-  white-space:nowrap;
-}
-.menu-btn{top:14px !important;left:14px !important}
-.main{
-  padding:14px 18px 110px !important;
-}
-#home, .home-shell{
-  margin:0 !important;
-  padding:0 !important;
-}
-.home-head{
-  display:grid;
-  grid-template-columns:minmax(0,1fr) 320px;
-  gap:24px;
-  align-items:start;
-  margin:0 0 12px;
-}
-.home-head-left{min-width:0}
-.home-head-right{
-  width:320px;
-  min-width:320px;
-  max-width:320px;
-  justify-self:end;
-  display:flex;
-  flex-direction:column;
-  align-items:flex-end;
-  gap:12px;
-}
-.home-head h1{
-  margin:0 0 4px;
-  font-size:clamp(30px,4.2vw,58px);
-  line-height:1;
-  letter-spacing:-.04em;
-}
-.home-greet{
-  margin:0;
-  font-size:clamp(18px,1.6vw,28px);
-  color:rgba(255,255,255,.92);
-  font-weight:800;
-}
-.home-date{
-  margin-top:8px;
-  font-size:14px;
-  color:rgba(255,255,255,.6);
-}
-.home-brand{
-  text-align:right;
-}
-.home-actions{
-  display:flex;
-  gap:12px;
-  justify-content:flex-end;
-}
-.home-actions .action-btn{
-  min-height:52px;
-  padding:0 22px;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-}
-.home-head-mobile, .home-actions-mobile{display:none}
-.home-grid-top{
-  display:grid;
-  grid-template-columns:minmax(0,1.15fr) minmax(280px,.85fr);
-  gap:16px;
-  margin-top:8px;
-}
-.rings-subtitle{margin-top:-6px;margin-bottom:10px}
-.clean-rings{
-  display:grid !important;
-  grid-template-columns:repeat(4,minmax(0,1fr)) !important;
-  gap:14px 10px !important;
-  justify-items:center !important;
-}
-.ring-card{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  text-align:center;
-  width:100%;
-}
-.ring{
-  width:110px;
-  height:110px;
-  border-radius:50%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background:conic-gradient(var(--c) calc(var(--p)*1%), rgba(255,255,255,.08) 0);
-  box-shadow:inset 0 0 0 1px rgba(255,255,255,.05), 0 0 0 10px rgba(255,255,255,.02), 0 12px 28px rgba(0,0,0,.18);
-}
-.ring-inner{
-  width:80px;
-  height:80px;
-  border-radius:50%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background:#0b1732;
-  border:1px solid rgba(255,255,255,.06);
-}
-.ring-value{font-size:18px;font-weight:800}
-.ring-name{margin-top:10px;font-size:14px;font-weight:700}
-.cards{margin-top:14px !important}
-.content-grid.home-after-rings{margin-top:16px !important}
-.quick-card, #quickHomeBtn{display:none !important}
-@media (max-width:860px){
-  .main{padding:8px 12px 126px !important}
-  .home-head-desktop, .desktop-only{display:none !important}
-  .home-head-mobile{display:grid !important;grid-template-columns:minmax(0,1fr) minmax(118px,42vw);gap:10px;align-items:start;margin:0 0 8px}
-  .home-head-mobile .home-head-right{width:100%;min-width:0;max-width:42vw;justify-self:end;align-items:flex-end}
-  .home-head-mobile h1{margin:0 0 4px;font-size:clamp(22px,7vw,34px);line-height:1.02}
-  .home-head-mobile .home-greet{font-size:14px;line-height:1.2}
-  .home-head-mobile .home-date{margin-top:6px;font-size:12px;line-height:1.2}
-  .mobile-brand .wordmark{font-size:20px;letter-spacing:.02em;white-space:nowrap}
-  .mobile-brand .wordmark-tag{font-size:7px;letter-spacing:.10em;white-space:nowrap}
-  .home-actions-mobile{display:grid !important;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 10px}
-  .home-actions-mobile .action-btn{min-height:48px;padding:0 14px;font-size:15px}
-  .home-grid-top{grid-template-columns:1fr;gap:12px;margin-top:0}
-  .clean-rings{grid-template-columns:repeat(2,minmax(0,1fr)) !important;gap:12px 8px !important}
-  .ring{width:102px;height:102px}
-  .ring-inner{width:74px;height:74px}
-  .cards{grid-template-columns:1fr 1fr !important;gap:12px !important;margin-top:12px !important}
-  .stat-card{min-height:118px !important;padding:16px !important}
-  .stat-number{font-size:42px !important;margin-top:16px !important}
-}
-
-
-/* V8.0.2 mobile menu fix */
-#sidebarOverlay{
-  display:none;
-  position:fixed;
-  inset:0;
-  background:rgba(2,6,23,.55);
-  backdrop-filter:blur(2px);
-  z-index:55;
-}
-@media (max-width:860px){
-  .menu-btn{
-    display:flex !important;
-    align-items:center;
-    justify-content:center;
-    position:fixed !important;
-    top:12px !important;
-    left:12px !important;
-    width:46px !important;
-    height:46px !important;
-    border-radius:14px !important;
-    z-index:70 !important;
-    background:rgba(15,23,42,.92) !important;
-    border:1px solid rgba(255,255,255,.12) !important;
-    box-shadow:0 10px 24px rgba(0,0,0,.24) !important;
-    font-size:22px !important;
-    cursor:pointer !important;
-    pointer-events:auto !important;
-  }
-  .sidebar{
-    transform:translateX(-110%) !important;
-    transition:transform .24s ease !important;
-    z-index:65 !important;
-  }
-  body.sidebar-open .sidebar{
-    transform:translateX(0) !important;
-  }
-  body.sidebar-open #sidebarOverlay{
-    display:block !important;
-  }
-}
-
-
-/* V8.0.2 sidebar + date fix */
-@media (max-width:860px){
-  .sidebar{
-    left:0 !important;
-    transform:translateX(-110%) !important;
-    transition:transform .24s ease !important;
-    z-index:65 !important;
-    will-change:transform;
-  }
-  .sidebar.open,
-  body.sidebar-open .sidebar{
-    transform:translateX(0) !important;
-  }
-  #sidebarOverlay{
-    display:none;
-    position:fixed;
-    inset:0;
-    background:rgba(2,6,23,.55);
-    z-index:55;
-  }
-  body.sidebar-open #sidebarOverlay{
-    display:block !important;
-  }
-  .menu-btn{
-    z-index:70 !important;
-    pointer-events:auto !important;
-  }
-}
 </style>
 </head>
 <body>
@@ -837,7 +608,7 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
 <div id="overlay" class="overlay"></div>
 <div class="app-shell">
   <aside class="sidebar">
-    <div class="brand"></div>
+    <div class="brand"><img src="logo-full.png" alt="Stayfitinlife logo"/></div>
     <nav class="sidebar-nav">
       <button class="active" data-tab="home">🏠 Dashboard</button>
       <button data-tab="profile">👤 Profile</button>
@@ -848,119 +619,43 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
       <button data-tab="progress">📈 Progress</button>
       <button data-tab="settings">⚙️ Settings</button>
     </nav>
-    </aside>
-<div id="sidebarOverlay"></div>
+    <div class="quick-card"><div><strong>Quick Log</strong><div class="muted">Fast entry</div></div><button id="quickHomeBtn">+</button></div>
+  </aside>
 
   <main class="main">
+    <div class="top-actions-floating">
+      <button class="action-btn" id="exportBtn" type="button">Export</button>
+      <label class="action-btn" for="importFile" style="display:inline-flex;align-items:center" tabindex="0">Import</label>
+      <input id="importFile" type="file" accept="application/json" class="hidden"/>
+    </div>
     <section class="section active" id="home">
-      <div class="home-shell">
-        <div class="home-head home-head-desktop">
-          <div class="home-head-left">
-            <h1 id="welcomeTitle">Dashboard</h1>
-            <div class="home-greet" id="welcomeSubtitle">Good morning, there! 👋</div>
-            <div class="home-date" id="todayDateLine">📅 Today</div>
-          </div>
-          <div class="home-head-right">
-            <div class="home-brand">
-              <div class="wordmark">STAYFITINLIFE</div>
-              <div class="wordmark-tag">TRAIN • FUEL • RECOVER • EVOLVE</div>
-            </div>
-            <div class="home-actions">
-              <button class="action-btn" id="exportBtn" type="button">Export</button>
-              <label class="action-btn" for="importFile" tabindex="0">Import</label>
-              <input id="importFile" type="file" accept="application/json" class="hidden"/>
-            </div>
-          </div>
-        </div>
-
-        <div class="home-head home-head-mobile">
-          <div class="home-head-left">
-            <h1 id="welcomeTitleMobile">Dashboard</h1>
-            <div class="home-greet" id="welcomeSubtitleMobile">Good morning, there! 👋</div>
-            <div class="home-date" id="todayDateLineMobile">📅 Today</div>
-          </div>
-          <div class="home-head-right">
-            <div class="home-brand mobile-brand">
-              <div class="wordmark">STAYFITINLIFE</div>
-              <div class="wordmark-tag">TRAIN • FUEL • RECOVER • EVOLVE</div>
-            </div>
-          </div>
-        </div>
-        <div class="home-actions home-actions-mobile">
-          <button class="action-btn" id="exportBtnMobile" type="button">Export</button>
-          <label class="action-btn" for="importFileMobile" tabindex="0">Import</label>
-          <input id="importFileMobile" type="file" accept="application/json" class="hidden"/>
-        </div>
-
-        <div class="home-grid-top">
-          <div class="panel rings-panel">
-            <div class="panel-title">Today's Progress</div>
-            <div class="small-note rings-subtitle">Complete your rings daily</div>
-            <div class="rings-wrap clean-rings">
-              <div class="ring-card">
-                <div class="ring" id="proteinRing" style="--c:var(--green);--p:0">
-                  <div class="ring-inner"><span class="ring-value" id="proteinVal">0g</span></div>
-                </div>
-                <div class="ring-name">Protein</div>
-                <div class="small-note" id="proteinSub">0 / 150 g</div>
-              </div>
-              <div class="ring-card">
-                <div class="ring" id="carbRing" style="--c:var(--purple);--p:0">
-                  <div class="ring-inner"><span class="ring-value" id="carbVal">0g</span></div>
-                </div>
-                <div class="ring-name">Carbs</div>
-                <div class="small-note" id="carbSub">0 / 200 g</div>
-              </div>
-              <div class="ring-card">
-                <div class="ring" id="fatRing" style="--c:var(--blue);--p:0">
-                  <div class="ring-inner"><span class="ring-value" id="fatVal">0g</span></div>
-                </div>
-                <div class="ring-name">Fats</div>
-                <div class="small-note" id="fatSub">0 / 60 g</div>
-              </div>
-              <div class="ring-card">
-                <div class="ring" id="waterRing" style="--c:var(--cyan);--p:0">
-                  <div class="ring-inner"><span class="ring-value" id="waterVal">0L</span></div>
-                </div>
-                <div class="ring-name">Water</div>
-                <div class="small-note" id="waterSub">0 / 3.5 L</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="panel rings-summary-panel">
-            <div class="panel-title">Rings Summary</div>
-            <div class="summary-big">
-              <div class="summary-meter" id="ringsSummaryMeter">
-                <div><span id="ringsDoneText">0/4</span><small>done</small></div>
-              </div>
-              <div>
-                <div class="summary-title" id="ringsSummaryTitle">Getting started</div>
-                <div class="summary-copy" id="ringsSummaryCopy">Log your meals and water to build momentum today.</div>
-              </div>
-            </div>
-            <div class="streak"><span>🔥</span><span id="ringsStreakText">0 day streak</span></div>
-          </div>
-        </div>
-
-        <div class="cards">
-          <div class="card stat-card"><div class="stat-label">Meals</div><div class="stat-number" id="statMeals">0</div><div class="stat-sub">logged today</div></div>
-          <div class="card stat-card"><div class="stat-label">Strength Sets</div><div class="stat-number" id="statSets">0</div><div class="stat-sub">sets today</div></div>
-          <div class="card stat-card"><div class="stat-label">Recovery</div><div class="stat-number" id="statRecovery">--</div><div class="stat-sub" id="recoverySummary">No recovery yet</div></div>
-          <div class="card stat-card"><div class="stat-label">Weight Change</div><div class="stat-number" id="statProgress">--</div><div class="stat-sub">since last check-in</div></div>
-        </div>
-
-        <div class="content-grid home-after-rings">
-          <div class="panel"><div class="panel-title">Goal Engine</div><div class="list" id="goalEngineList"></div><div style="height:12px"></div><div class="panel-title">Goal Validation</div><div class="list" id="goalValidationBox"></div></div>
-          <div class="panel"><div class="panel-title">Calorie Engine</div><div class="list" id="calorieEngineHome"></div><div style="height:12px"></div><div class="panel-title">Re-entry Mode</div><div class="list" id="reentryBox"></div></div>
-          <div class="panel"><div class="panel-title">Weight + Recovery</div><div class="list" id="weightSummary"></div></div>
-        </div>
-
-        <div class="coach-banner" style="margin-top:16px">
-          <div class="coach-left"><div class="coach-icon">🧠</div><div><div style="font-size:20px;font-weight:800">AI Coach</div><div class="muted">Need guidance? Ask the coach for this screen.</div></div></div>
-          <button class="primary-btn" id="openCoachHome" type="button">Ask Coach AI</button>
+      <div class="mobile-header">
+        <div class="mobile-header-left">
+          <div class="mobile-logo"><img src="logo-full.png" alt="Stayfitinlife logo"/></div>
+          <div class="hero-copy"><h1 id="welcomeTitle">Dashboard</h1><p id="welcomeSubtitle"></p></div>
         </div>
       </div>
+      <div class="cards">
+        <div class="card stat-card"><div class="stat-label">Meals</div><div class="stat-number" id="statMeals">0</div><div class="stat-sub">logged today</div></div>
+        <div class="card stat-card"><div class="stat-label">Strength Sets</div><div class="stat-number" id="statSets">0</div><div class="stat-sub">sets today</div></div>
+        <div class="card stat-card"><div class="stat-label">Recovery</div><div class="stat-number" id="statRecovery">--</div><div class="stat-sub" id="recoverySummary">No recovery yet</div></div>
+        <div class="card stat-card"><div class="stat-label">Weight Change</div><div class="stat-number" id="statProgress">--</div><div class="stat-sub">since last check-in</div></div>
+      </div>
+      <div class="content-grid">
+        <div class="panel"><div class="panel-title">Goal Engine</div><div class="list" id="goalEngineList"></div><div style="height:12px"></div><div class="panel-title">Goal Validation</div><div class="list" id="goalValidationBox"></div></div>
+        <div class="panel"><div class="panel-title">Calorie Engine</div><div class="list" id="calorieEngineHome"></div><div style="height:12px"></div><div class="panel-title">Re-entry Mode</div><div class="list" id="reentryBox"></div></div>
+        <div class="panel">
+          <div class="panel-title">Activity Rings</div>
+          <div class="rings-wrap">
+            <div class="ring-card"><div class="ring" id="proteinRing" style="--c:var(--green)"><div class="ring-inner"><div><span class="ring-value" id="proteinVal">0g</span></div></div></div><div class="ring-name">Protein</div><div class="small-note" id="proteinSub">0 / 150 g</div></div>
+            <div class="ring-card"><div class="ring" id="carbRing" style="--c:var(--purple)"><div class="ring-inner"><div><span class="ring-value" id="carbVal">0g</span></div></div></div><div class="ring-name">Carbs</div><div class="small-note" id="carbSub">0 / 200 g</div></div>
+            <div class="ring-card"><div class="ring" id="fatRing" style="--c:var(--blue)"><div class="ring-inner"><div><span class="ring-value" id="fatVal">0g</span></div></div></div><div class="ring-name">Fats</div><div class="small-note" id="fatSub">0 / 60 g</div></div>
+            <div class="ring-card"><div class="ring" id="waterRing" style="--c:var(--cyan)"><div class="ring-inner"><div><span class="ring-value" id="waterVal">0L</span></div></div></div><div class="ring-name">Water</div><div class="small-note" id="waterSub">0 / 3.5 L</div></div>
+          </div>
+        </div>
+        <div class="panel"><div class="panel-title">Weight + Recovery</div><div class="list" id="weightSummary"></div></div>
+      </div>
+      <div class="coach-banner" style="margin-top:16px"><div class="coach-left"><div class="coach-icon">🧠</div><div><div style="font-size:20px;font-weight:800">AI Coach</div><div class="muted">Need guidance? Ask the coach for this screen.</div></div></div><button class="primary-btn" id="openCoachHome" type="button">Ask Coach</button></div>
     </section>
 
     <section class="section" id="profile">
@@ -1225,7 +920,7 @@ input,select{width:100%;padding:14px 14px;border-radius:16px;background:rgba(255
             <div class="list-item">
               <div>
                 <strong>Version</strong>
-                <div class="muted" id="appVersion">V8</div>
+                <div class="muted" id="appVersion">V7.0.7</div>
               </div>
             </div>
             <div class="list-item">
@@ -1909,56 +1604,7 @@ async function lookupBarcodeValue(barcode){
 
 
 
-
-function bindMobileMenu(){
-  const btn = document.getElementById('menuBtn');
-  const overlay = document.getElementById('sidebarOverlay');
-  const sidebar = document.querySelector('.sidebar');
-  if(!btn || !sidebar) return;
-
-  const closeMenu = ()=>{
-    document.body.classList.remove('sidebar-open');
-    sidebar.classList.remove('open');
-    btn.setAttribute('aria-expanded', 'false');
-  };
-  const openMenu = ()=>{
-    document.body.classList.add('sidebar-open');
-    sidebar.classList.add('open');
-    btn.setAttribute('aria-expanded', 'true');
-  };
-  const toggleMenu = ()=>{
-    const isOpen = document.body.classList.contains('sidebar-open') || sidebar.classList.contains('open');
-    if(isOpen) closeMenu();
-    else openMenu();
-  };
-
-  btn.onclick = (e)=>{
-    e.preventDefault();
-    e.stopPropagation();
-    toggleMenu();
-  };
-  btn.addEventListener('touchstart', (e)=>{
-    e.preventDefault();
-    e.stopPropagation();
-    toggleMenu();
-  }, {passive:false});
-
-  if(overlay){
-    overlay.onclick = closeMenu;
-    overlay.addEventListener('touchstart', closeMenu, {passive:true});
-  }
-
-  document.querySelectorAll('.sidebar-nav .nav-btn, .bottom-nav [data-tab]').forEach(el=>{
-    el.addEventListener('click', ()=>{ if(window.innerWidth <= 860) closeMenu(); });
-  });
-
-  window.addEventListener('resize', ()=>{
-    if(window.innerWidth > 860) closeMenu();
-  });
-}
-
 function switchTab(tab){
-  if(tab==='home'){ setTimeout(resetHomeScroll, 0); }
   currentTab = tab;
   document.querySelectorAll('.section').forEach(s=>s.classList.toggle('active', s.id===tab));
   document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active', b.dataset.tab===tab));
@@ -2190,82 +1836,15 @@ function deleteAllLocalData(){
   alert("All local data has been deleted.");
 }
 
-
-function getGreetingByTime(){
-  const hr = new Date().getHours();
-  if(hr < 12) return 'Good morning';
-  if(hr < 17) return 'Good afternoon';
-  return 'Good evening';
-}
-function formatTodayLongLocal(){
-  const now = new Date();
-  return now.toLocaleDateString(undefined, { weekday:'short', month:'short', day:'numeric', year:'numeric' });
-}
-function updateGreetingUI(){
-  const name = (data.profile.name || '').trim() || 'there';
-  const greeting = `${getGreetingByTime()}, ${name}! 👋`;
-  const wt = document.getElementById('welcomeTitle'); if(wt) wt.textContent = 'Dashboard';
-  const ws = document.getElementById('welcomeSubtitle'); if(ws) ws.textContent = greeting;
-  const dt = document.getElementById('todayDateLine'); if(dt) dt.textContent = formatTodayLongLocal();
-  const wtm = document.getElementById('welcomeTitleMobile'); if(wtm) wtm.textContent = 'Dashboard';
-  const wsm = document.getElementById('welcomeSubtitleMobile'); if(wsm) wsm.textContent = greeting;
-  const dtm = document.getElementById('todayDateLineMobile'); if(dtm) dtm.textContent = formatTodayLongLocal();
-}
-function updateRingsSummaryUI(protein, carbs, fats, water){
-  const t = getGoalTargets();
-  const wt = Number(data.profile.waterTarget || 3.5);
-  const done = [
-    protein >= t.protein,
-    carbs >= Math.round(t.carbs * 0.8),
-    fats >= Math.round(t.fats * 0.8),
-    water >= wt
-  ].filter(Boolean).length;
-  const pct = Math.round((done/4)*100);
-  const meter = document.getElementById('ringsSummaryMeter'); if(meter) meter.style.setProperty('--sp', pct);
-  const txt = document.getElementById('ringsDoneText'); if(txt) txt.textContent = `${done}/4`;
-  const title = document.getElementById('ringsSummaryTitle');
-  const copy = document.getElementById('ringsSummaryCopy');
-  const streak = document.getElementById('ringsStreakText');
-  let t1 = 'Getting started', c1 = 'Log your meals and water to build momentum today.';
-  if(done >= 3){ t1 = 'On track'; c1 = "Keep going! You're building great habits."; }
-  else if(done >= 2){ t1 = 'Good progress'; c1 = 'Finish the remaining rings and stay consistent.'; }
-  if(title) title.textContent = t1;
-  if(copy) copy.textContent = c1;
-  if(streak) streak.textContent = `${done} day streak`;
-}
-
-
-function bindHomeActions(){
-  const doExport = ()=>{ const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}), url=URL.createObjectURL(blob), a=document.createElement('a'); a.href=url; a.download='stayfitinlife-backup.json'; a.click(); URL.revokeObjectURL(url); };
-  const eb=document.getElementById('exportBtn'); if(eb) eb.onclick = doExport;
-  const ebm=document.getElementById('exportBtnMobile'); if(ebm) ebm.onclick = doExport;
-  const bindImport = async (e)=>{ const file=e.target.files[0]; if(!file) return; try{ const txt=await file.text(); const imported=JSON.parse(txt); data = { ...defaultData, ...imported, profile:{...defaultData.profile,...(imported.profile||{})}, barcodeCatalog:{...(imported.barcodeCatalog||defaultData.barcodeCatalog)} }; alert('Import successful'); saveData(); } catch(err){ alert('Invalid backup file'); } };
-  const if1=document.getElementById('importFile'); if(if1) if1.onchange = bindImport;
-  const if2=document.getElementById('importFileMobile'); if(if2) if2.onchange = bindImport;
-}
-function resetHomeScroll(){
-  try{ history.scrollRestoration = 'manual'; }catch(e){}
-  window.scrollTo(0,0);
-  document.documentElement.scrollTop = 0;
-  document.body.scrollTop = 0;
-}
-
 function renderRings(protein, carbs, fats, water){
   const t=getGoalTargets();
   const pt=t.protein, ct=t.carbs, ft=t.fats, wt=Number(data.profile.waterTarget||3.5);
-  const pv=document.getElementById('proteinVal'); if(pv) pv.textContent=`${protein}g`;
-  const cv=document.getElementById('carbVal'); if(cv) cv.textContent=`${carbs}g`;
-  const fv=document.getElementById('fatVal'); if(fv) fv.textContent=`${fats}g`;
-  const wv=document.getElementById('waterVal'); if(wv) wv.textContent=`${water}L`;
-  const ps=document.getElementById('proteinSub'); if(ps) ps.textContent=`${protein} / ${pt} g`;
-  const cs=document.getElementById('carbSub'); if(cs) cs.textContent=`${carbs} / ${ct} g`;
-  const fs=document.getElementById('fatSub'); if(fs) fs.textContent=`${fats} / ${ft} g`;
-  const ws=document.getElementById('waterSub'); if(ws) ws.textContent=`${water} / ${wt} L`;
-  const pr=document.getElementById('proteinRing'); if(pr) pr.style.setProperty('--p', Math.min(100, Math.round((protein/Math.max(1,pt))*100)));
-  const cr=document.getElementById('carbRing'); if(cr) cr.style.setProperty('--p', Math.min(100, Math.round((carbs/Math.max(1,ct))*100)));
-  const fr=document.getElementById('fatRing'); if(fr) fr.style.setProperty('--p', Math.min(100, Math.round((fats/Math.max(1,ft))*100)));
-  const wr=document.getElementById('waterRing'); if(wr) wr.style.setProperty('--p', Math.min(100, Math.round((water/Math.max(0.1,wt))*100)));
-  updateRingsSummaryUI(protein, carbs, fats, water);
+  $('proteinVal').textContent=`${protein}g`; $('carbVal').textContent=`${carbs}g`; $('fatVal').textContent=`${fats}g`; $('waterVal').textContent=`${water}L`;
+  $('proteinSub').textContent=`${protein} / ${pt} g`; $('carbSub').textContent=`${carbs} / ${ct} g`; $('fatSub').textContent=`${fats} / ${ft} g`; $('waterSub').textContent=`${water} / ${wt} L`;
+  $('proteinRing').style.setProperty('--p', Math.min(100, Math.round((protein/Math.max(1,pt))*100)));
+  $('carbRing').style.setProperty('--p', Math.min(100, Math.round((carbs/Math.max(1,ct))*100)));
+  $('fatRing').style.setProperty('--p', Math.min(100, Math.round((fats/Math.max(1,ft))*100)));
+  $('waterRing').style.setProperty('--p', Math.min(100, Math.round((water/Math.max(.1,wt))*100)));
 }
 
 function renderAll(){
@@ -2273,7 +1852,8 @@ function renderAll(){
   const meals=todayBucket('mealsByDate'), workouts=todayBucket('workoutsByDate'), water=totalWaterToday();
   const protein=+meals.reduce((a,b)=>a+Number(b.protein||0),0).toFixed(1), carbs=+meals.reduce((a,b)=>a+Number(b.carbs||0),0).toFixed(1), fats=+meals.reduce((a,b)=>a+Number(b.fats||0),0).toFixed(1);
   const recovery=data.recoveryLogs[0], ws=weightSinceStart(), wl=weightSinceLastCheckin(), wt=Number(data.profile.waterTarget||3.5);
-  updateGreetingUI();
+  const name=(data.profile.name||'').trim();
+  $('welcomeTitle').textContent = name ? `Dashboard • ${name}` : 'Dashboard';
   $('statMeals').textContent = meals.length;
   $('statSets').textContent = workouts.filter(x=>x.activityType==='Strength Training').length;
   $('statRecovery').textContent = recovery ? recovery.score : '--';
@@ -2587,9 +2167,6 @@ function init(){
   switchTab('home');
 }
 document.addEventListener('visibilitychange', ()=>{ if(document.hidden){ stopScanner(true); } });
-bindHomeActions();
-bindMobileMenu();
-resetHomeScroll();
 init();
 
 
