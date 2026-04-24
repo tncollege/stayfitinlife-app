@@ -1,3 +1,4 @@
+<!-- V10.4 CUSTOM SELECT FIX -->
 <!-- V10.3 MOBILE NAV + DROPDOWN HARD FIX -->
 <!-- V10.2 FINAL GITHUB BUILD -->
 <!-- V10.2 FIXED WORKOUT NUTRITION AI COACH -->
@@ -8,7 +9,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <meta name="theme-color" content="#050b1c"/>
-<title>STAYFITINLIFE V10.3</title>
+<title>STAYFITINLIFE V10.4</title>
 <style>
 :root{--bg:#050b1c;--card:#09152c;--card2:#0d1b38;--line:#22314f;--text:#f7f9ff;--muted:#9fb0cd;--cyan:#20e4ff;--green:#55f5a2;--purple:#8b5cf6;--blue:#6ca7ff;--yellow:#fbbf24;--red:#fb7185;--radius:24px;--sidebar:260px;--shadow:0 24px 70px rgba(0,0,0,.38)}
 *{box-sizing:border-box}html,body{margin:0;min-height:100%;background:radial-gradient(circle at 70% 0%,rgba(37,99,235,.18),transparent 34%),linear-gradient(180deg,#07122c,#030816);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}body{overflow-x:hidden}button,input,select,textarea{font:inherit}button{cursor:pointer}.hidden{display:none!important}
@@ -78,6 +79,72 @@
   }
   .main{padding-bottom:112px!important}
 }
+
+
+/* V10.4 custom dropdown replacement */
+.native-hidden-select{
+  position:absolute!important;
+  opacity:0!important;
+  pointer-events:none!important;
+  height:0!important;
+  min-height:0!important;
+  padding:0!important;
+  border:0!important;
+}
+.custom-select{position:relative;width:100%}
+.custom-select-btn{
+  width:100%;
+  min-height:48px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.05);
+  color:var(--text);
+  border-radius:14px;
+  padding:0 14px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  text-align:left;
+}
+.custom-select-btn:after{content:"⌄";opacity:.7}
+.custom-select-panel{
+  position:absolute;
+  left:0;
+  right:0;
+  top:calc(100% + 6px);
+  max-height:260px;
+  overflow:auto;
+  z-index:500;
+  background:#08142f;
+  border:1px solid rgba(255,255,255,.16);
+  border-radius:16px;
+  box-shadow:0 18px 50px rgba(0,0,0,.45);
+  padding:6px;
+}
+.custom-option{
+  width:100%;
+  min-height:42px;
+  border:0;
+  border-radius:12px;
+  background:transparent;
+  color:var(--text);
+  padding:10px 12px;
+  display:block;
+  text-align:left;
+}
+.custom-option:hover,.custom-option.active{
+  background:rgba(32,228,255,.14);
+}
+@media(max-width:980px){
+  .custom-select-panel{
+    position:fixed;
+    left:14px;
+    right:14px;
+    top:auto;
+    bottom:92px;
+    max-height:52vh;
+    z-index:120;
+  }
+}
 </style>
 
 <link rel="icon" href="/favicon.png" type="image/png"/>
@@ -110,8 +177,22 @@
     <div class="panel-title">Workout Logger</div>
     <div class="form-grid">
       <div class="field"><label>Activity Type</label><select id="activityType"><option>Strength</option><option>Cardio</option><option>Yoga</option><option>Sports</option><option>Outdoor</option></select></div>
-      <div class="field" id="bodyPartWrap"><label>Body Part</label><select id="bodyPart"></select></div>
-      <div class="field"><label>Exercise / Activity</label><select id="exerciseName"></select></div>
+      <div class="field" id="bodyPartWrap">
+      <label>Body Part</label>
+      <select id="bodyPart" class="native-hidden-select"></select>
+      <div class="custom-select" id="bodyPartCustomSelect">
+        <button type="button" class="custom-select-btn" id="bodyPartSelectBtn">Select body part</button>
+        <div class="custom-select-panel hidden" id="bodyPartSelectPanel"></div>
+      </div>
+    </div>
+      <div class="field">
+      <label>Exercise / Activity</label>
+      <select id="exerciseName" class="native-hidden-select"></select>
+      <div class="custom-select" id="exerciseCustomSelect">
+        <button type="button" class="custom-select-btn" id="exerciseSelectBtn">Select exercise/activity</button>
+        <div class="custom-select-panel hidden" id="exerciseSelectPanel"></div>
+      </div>
+    </div>
       <div class="field nonStrengthField"><label>Duration (min)</label><input id="activityDuration" type="number" placeholder="Required for cardio/sports"/></div>
       <div class="field nonStrengthField"><label>Distance (optional)</label><input id="activityDistance" type="number" step=".1" placeholder="km"/></div>
     </div>
@@ -168,7 +249,14 @@
       <div class="field"><label>Meal Type</label><select id="mealType"><option>Breakfast</option><option>Lunch</option><option>Dinner</option><option>Snacks</option></select></div>
       <div class="field"><label>Category</label><select id="foodCategory"><option>Indian</option><option>Arabic</option><option>American</option><option>Asian</option><option>Fruits</option><option>Vegetables</option><option>Drinks</option><option>Custom</option></select></div>
       <div class="field"><label>Food Search</label><input id="foodSearch" placeholder="Search food item"/></div>
-      <div class="field"><label>Food Item</label><select id="foodItem"></select></div>
+      <div class="field">
+      <label>Food Item</label>
+      <select id="foodItem" class="native-hidden-select"></select>
+      <div class="custom-select" id="foodCustomSelect">
+        <button type="button" class="custom-select-btn" id="foodSelectBtn">Select food item</button>
+        <div class="custom-select-panel hidden" id="foodSelectPanel"></div>
+      </div>
+    </div>
       <div class="field"><label>Quantity</label><input id="foodQty" type="number" step=".1" value="1"/></div>
       <div class="field"><label>Unit</label><select id="foodUnit"><option value="serving">serving</option><option value="g">grams</option><option value="piece">piece</option><option value="cup">cup</option><option value="ml">ml</option></select></div>
     </div>
@@ -1164,6 +1252,261 @@ v103BindDropdowns();
 v103BindMobileBottomNav();
 setTimeout(()=>{ v103BindDropdowns(); v103BindMobileBottomNav(); }, 100);
 try{ renderAll(); }catch(e){ console.error('V10.3 init issue', e); }
+
+
+// ================= V10.4 CUSTOM SELECT HARD FIX =================
+// Replaces problematic native dropdown interaction with controlled custom selectors.
+
+const V104 = {
+  selectedFood: '',
+  selectedBodyPart: '',
+  selectedExercise: ''
+};
+
+function v104FoodCatalog(){
+  try{
+    if(typeof v103FoodCatalog === 'function') return v103FoodCatalog();
+    if(typeof v102fFoodCatalog === 'function') return v102fFoodCatalog();
+    if(typeof v102FoodCatalog === 'function') return v102FoodCatalog();
+    if(typeof FOOD_DB_V101 !== 'undefined') return FOOD_DB_V101.concat(data.customFoods || []);
+  }catch(e){}
+  return data.customFoods || [];
+}
+
+function v104ExerciseDb(){
+  try{
+    if(typeof v103ExerciseDb === 'function') return v103ExerciseDb();
+    if(typeof EXERCISE_DB_V101 !== 'undefined') return EXERCISE_DB_V101;
+  }catch(e){}
+  return {
+    Strength:{
+      Chest:['Bench Press','Incline Bench Press','Dumbbell Press','Chest Fly','Push-ups'],
+      Back:['Lat Pulldown','Pull-ups','Barbell Row','Seated Cable Row','Deadlift'],
+      Legs:['Squats','Leg Press','Lunges','Leg Curl','Calf Raises'],
+      Shoulders:['Shoulder Press','Lateral Raises','Front Raises','Rear Delt Fly'],
+      Arms:['Barbell Curl','Dumbbell Curl','Tricep Pushdown','Skull Crushers'],
+      Core:['Plank','Crunches','Leg Raises','Russian Twists']
+    },
+    Cardio:['Running Outdoor','Treadmill Running','Walking','Cycling Indoor','Cycling Outdoor','Skipping Jump Rope'],
+    Yoga:['Hatha Yoga','Power Yoga','Stretching Routine','Sun Salutation'],
+    Sports:['Football','Basketball','Cricket','Badminton','Tennis'],
+    Outdoor:['Hiking','Trekking','Swimming','Outdoor Cycling']
+  };
+}
+
+function v104ClosePanels(){
+  ['foodSelectPanel','bodyPartSelectPanel','exerciseSelectPanel'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.classList.add('hidden');
+  });
+}
+
+function v104RenderOptions(panelId, options, selected, onPick){
+  const panel = document.getElementById(panelId);
+  if(!panel) return;
+  panel.innerHTML = options.length ? options.map(opt => 
+    `<button type="button" class="custom-option ${opt===selected?'active':''}" data-value="${String(opt).replace(/"/g,'&quot;')}">${opt}</button>`
+  ).join('') : '<div class="custom-option">No items found</div>';
+  panel.querySelectorAll('.custom-option[data-value]').forEach(btn=>{
+    btn.onclick = (e)=>{
+      e.preventDefault();
+      e.stopPropagation();
+      onPick(btn.dataset.value);
+      v104ClosePanels();
+    };
+  });
+}
+
+function v104FoodOptions(){
+  const category = document.getElementById('foodCategory')?.value || 'Indian';
+  const search = (document.getElementById('foodSearch')?.value || '').toLowerCase().trim();
+  let list = v104FoodCatalog().filter(f => category === 'Custom' ? f.custom : f.category === category);
+  if(search){
+    list = v104FoodCatalog().filter(f =>
+      String(f.name||'').toLowerCase().includes(search) ||
+      String(f.category||'').toLowerCase().includes(search)
+    );
+  }
+  return list.map(f=>f.name);
+}
+
+function v104SyncNativeSelect(selectId, value){
+  const sel = document.getElementById(selectId);
+  if(!sel) return;
+  if(!Array.from(sel.options).some(o=>o.value===value)){
+    sel.innerHTML += `<option value="${String(value).replace(/"/g,'&quot;')}">${value}</option>`;
+  }
+  sel.value = value;
+}
+
+function v104SetFood(value){
+  V104.selectedFood = value;
+  v104SyncNativeSelect('foodItem', value);
+  const btn = document.getElementById('foodSelectBtn');
+  if(btn) btn.textContent = value || 'Select food item';
+  v104RenderFoodPreview();
+}
+
+function v104SelectedFood(){
+  const name = V104.selectedFood || document.getElementById('foodItem')?.value || '';
+  return v104FoodCatalog().find(f => f.name === name);
+}
+
+function v104EggMacros(){
+  const whole = Number(document.getElementById('wholeEggCount')?.value || 0);
+  const whites = Number(document.getElementById('eggWhiteCount')?.value || 0);
+  const style = document.getElementById('eggStyle')?.value || 'Boiled';
+  let extraCal=0, extraFat=0;
+  if(style==='Omelette' || style==='Bhurji'){extraCal=40;extraFat=4;}
+  if(style==='Fried'){extraCal=60;extraFat=6;}
+  return {name:`Egg Dish (${style})`,category:'Indian',meal:document.getElementById('mealType')?.value||'Breakfast',qty:`${whole} whole + ${whites} whites`,unit:'eggs',calories:Math.round(whole*70+whites*17+extraCal),protein:round(whole*6+whites*3.5),carbs:round(whole*.5+whites*.2),fats:round(whole*5+extraFat)};
+}
+
+function v104CalcFoodMacros(){
+  const food = v104SelectedFood();
+  if(!food) return null;
+  if(food.name === 'Egg Dish') return v104EggMacros();
+  const qty = Number(document.getElementById('foodQty')?.value || 1);
+  const unit = document.getElementById('foodUnit')?.value || food.unit || 'serving';
+  let factor = qty;
+  if(unit==='g') factor = qty/100;
+  if(unit==='ml') factor = qty/250;
+  return {name:food.name,category:food.category,meal:document.getElementById('mealType')?.value||'Breakfast',qty,unit,calories:Math.round(Number(food.calories||0)*factor),protein:round(Number(food.protein||0)*factor),carbs:round(Number(food.carbs||0)*factor),fats:round(Number(food.fats||0)*factor)};
+}
+
+function v104RenderFoodPreview(){
+  const preview = document.getElementById('foodMacroPreview');
+  if(!preview) return;
+  const food = v104SelectedFood();
+  document.getElementById('eggDishBox')?.classList.toggle('hidden', !(food && food.name === 'Egg Dish'));
+  const m = v104CalcFoodMacros();
+  preview.innerHTML = m ? `<strong>${m.name}</strong><br>${m.qty} ${m.unit} • ${m.calories} kcal • Protein ${m.protein}g • Carbs ${m.carbs}g • Fats ${m.fats}g` : 'Select food and quantity to preview macros.';
+}
+
+function v104RefreshFoodSelector(){
+  const options = v104FoodOptions();
+  if(!options.includes(V104.selectedFood)) V104.selectedFood = options[0] || '';
+  const native = document.getElementById('foodItem');
+  if(native) native.innerHTML = options.map(x=>`<option value="${String(x).replace(/"/g,'&quot;')}">${x}</option>`).join('');
+  v104SetFood(V104.selectedFood);
+  v104RenderOptions('foodSelectPanel', options, V104.selectedFood, v104SetFood);
+}
+
+function v104ExerciseOptions(){
+  const type = document.getElementById('activityType')?.value || 'Strength';
+  const db = v104ExerciseDb();
+  if(type === 'Strength'){
+    const body = V104.selectedBodyPart || document.getElementById('bodyPart')?.value || Object.keys(db.Strength||{})[0];
+    return (db.Strength?.[body] || []).concat((data.customExercises||[]).filter(e=>e.type==='Strength' && e.bodyPart===body).map(e=>e.name));
+  }
+  return (db[type] || []).concat((data.customExercises||[]).filter(e=>e.type===type).map(e=>e.name));
+}
+
+function v104BodyPartOptions(){
+  const db = v104ExerciseDb();
+  return Object.keys(db.Strength || {});
+}
+
+function v104SetBodyPart(value){
+  V104.selectedBodyPart = value;
+  v104SyncNativeSelect('bodyPart', value);
+  const btn = document.getElementById('bodyPartSelectBtn');
+  if(btn) btn.textContent = value || 'Select body part';
+  v104RefreshExerciseSelector();
+}
+
+function v104SetExercise(value){
+  V104.selectedExercise = value;
+  v104SyncNativeSelect('exerciseName', value);
+  const btn = document.getElementById('exerciseSelectBtn');
+  if(btn) btn.textContent = value || 'Select exercise/activity';
+  if(typeof v102RenderCurrentWorkoutPreview === 'function') v102RenderCurrentWorkoutPreview();
+}
+
+function v104RefreshBodyPartSelector(){
+  const type = document.getElementById('activityType')?.value || 'Strength';
+  const wrap = document.getElementById('bodyPartWrap');
+  if(wrap) wrap.classList.toggle('hidden', type !== 'Strength');
+  document.getElementById('strengthSetBox')?.classList.toggle('hidden', type !== 'Strength');
+  document.querySelectorAll('.nonStrengthField').forEach(el=>el.classList.toggle('hidden', type === 'Strength'));
+  if(type !== 'Strength'){
+    v104RefreshExerciseSelector();
+    return;
+  }
+  const options = v104BodyPartOptions();
+  if(!options.includes(V104.selectedBodyPart)) V104.selectedBodyPart = options[0] || '';
+  const native = document.getElementById('bodyPart');
+  if(native) native.innerHTML = options.map(x=>`<option value="${String(x).replace(/"/g,'&quot;')}">${x}</option>`).join('');
+  v104SetBodyPart(V104.selectedBodyPart);
+  v104RenderOptions('bodyPartSelectPanel', options, V104.selectedBodyPart, v104SetBodyPart);
+}
+
+function v104RefreshExerciseSelector(){
+  const options = v104ExerciseOptions();
+  if(!options.includes(V104.selectedExercise)) V104.selectedExercise = options[0] || '';
+  const native = document.getElementById('exerciseName');
+  if(native) native.innerHTML = options.map(x=>`<option value="${String(x).replace(/"/g,'&quot;')}">${x}</option>`).join('');
+  v104SetExercise(V104.selectedExercise);
+  v104RenderOptions('exerciseSelectPanel', options, V104.selectedExercise, v104SetExercise);
+}
+
+function v104BindCustomSelectors(){
+  const foodBtn = document.getElementById('foodSelectBtn');
+  const bodyBtn = document.getElementById('bodyPartSelectBtn');
+  const exBtn = document.getElementById('exerciseSelectBtn');
+
+  if(foodBtn && !foodBtn.dataset.bound){
+    foodBtn.dataset.bound='1';
+    foodBtn.onclick = (e)=>{e.preventDefault();e.stopPropagation();v104ClosePanels();document.getElementById('foodSelectPanel')?.classList.toggle('hidden');};
+  }
+  if(bodyBtn && !bodyBtn.dataset.bound){
+    bodyBtn.dataset.bound='1';
+    bodyBtn.onclick = (e)=>{e.preventDefault();e.stopPropagation();v104ClosePanels();document.getElementById('bodyPartSelectPanel')?.classList.toggle('hidden');};
+  }
+  if(exBtn && !exBtn.dataset.bound){
+    exBtn.dataset.bound='1';
+    exBtn.onclick = (e)=>{e.preventDefault();e.stopPropagation();v104ClosePanels();document.getElementById('exerciseSelectPanel')?.classList.toggle('hidden');};
+  }
+
+  if(document.getElementById('foodCategory')) document.getElementById('foodCategory').onchange = v104RefreshFoodSelector;
+  if(document.getElementById('foodSearch')) document.getElementById('foodSearch').oninput = v104RefreshFoodSelector;
+  ['foodQty','foodUnit','wholeEggCount','eggWhiteCount','eggStyle','mealType'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){el.oninput=v104RenderFoodPreview;el.onchange=v104RenderFoodPreview;}
+  });
+
+  if(document.getElementById('activityType')) document.getElementById('activityType').onchange = ()=>{V104.selectedExercise='';v104RefreshBodyPartSelector();};
+  if(document.getElementById('addFoodBtn')) document.getElementById('addFoodBtn').onclick = ()=>{
+    const m = v104CalcFoodMacros();
+    if(!m) return alert('Select food first');
+    data.meals[todayKey()] = data.meals[todayKey()] || [];
+    data.meals[todayKey()].push(m);
+    save();
+  };
+
+  document.addEventListener('click', (e)=>{
+    if(!e.target.closest('.custom-select')) v104ClosePanels();
+  }, {once:false});
+}
+
+function v104Init(){
+  v104BindCustomSelectors();
+  v104RefreshFoodSelector();
+  v104RefreshBodyPartSelector();
+}
+
+if(typeof switchTab === 'function'){
+  const oldSwitchV104 = switchTab;
+  switchTab = function(tab){
+    oldSwitchV104(tab);
+    setTimeout(v104Init, 0);
+  };
+}
+
+// Final override after all older dropdown patches.
+v104Init();
+setTimeout(v104Init, 250);
+try{renderAll();}catch(e){console.error('V10.4 render issue', e);}
 </script>
 <script>
 if ('serviceWorker' in navigator) {

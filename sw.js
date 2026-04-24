@@ -1,4 +1,4 @@
-const CACHE_NAME = 'stayfitinlife-v10-3-cache-v1';
+const CACHE_NAME = 'stayfitinlife-v10-4-cache-v1';
 const APP_SHELL = ['/', '/index.html', '/manifest.webmanifest', '/favicon.png', '/icons/icon-192.png', '/icons/icon-512.png'];
 self.addEventListener('install', event => {
   self.skipWaiting();

@@ -49,3 +49,10 @@ Unregister old service worker and clear site data, then hard refresh.
 - Hard fixed Nutrition Food Item dropdown selection.
 - Hard fixed Workout Body Part dropdown selection.
 - Prevents render cycles from resetting selected dropdown values.
+
+
+## V10.4 Custom Select Fix
+- Replaced problematic native Food Item dropdown with a custom selector.
+- Replaced problematic Body Part dropdown with a custom selector.
+- Replaced Exercise/Activity dropdown with a custom selector.
+- This avoids browser select/render reset issues completely.
