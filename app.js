@@ -2,8 +2,8 @@ import { FOOD_DATABASE } from './data/foodDatabase.js';
 import { EXERCISE_DATABASE, SPLITS } from './data/exerciseDatabase.js';
 import { SUPPLEMENT_DATABASE } from './data/supplementDatabase.js';
 
-const STORE='stayfitinlife_v12_6';
-const APP_VERSION='V12.6';
+const STORE='stayfitinlife_v13_1_final';
+const APP_VERSION='V13.1';
 const LAST_UPDATED='25 April 2026';
 
 const todayKey=()=>new Date().toISOString().slice(0,10);
@@ -325,21 +325,230 @@ function wireDate(){
   if(q('viewDatePicker'))q('viewDatePicker').onchange=e=>{viewDate=e.target.value;render()};
 }
 
+
+// ---------- V13.1 Coach Engine ----------
+function isBeginnerMode(){
+  return (data.profile.mode||'Beginner')==='Beginner';
+}
+function chooseFoodsByDiet(){
+  const diet=(data.profile.diet||'Non-Veg').toLowerCase();
+  if(diet.includes('veg') && !diet.includes('non')) {
+    return {
+      breakfast:["Oats","Banana","Milk"],
+      lunch:["Paneer Curry","Plain Rice","Cucumber"],
+      dinner:["Dal Tadka","Roti","Curd"],
+      snack:["Whey Protein","Apple"]
+    };
+  }
+  return {
+    breakfast:["Egg Dish","Banana","Coffee"],
+    lunch:["Chicken Curry","Plain Rice","Cucumber"],
+    dinner:["Paneer Curry","Roti","Curd"],
+    snack:["Whey Protein","Apple"]
+  };
+}
+function findFoodByName(name){
+  return foodList().find(f=>f.name===name) || foodList().find(f=>String(f.name).toLowerCase().includes(String(name).toLowerCase()));
+}
+function buildMealLine(name, meal, multiplier=1){
+  const f=findFoodByName(name);
+  if(!f) return {meal,name,qty:1,unit:"serving",calories:0,protein:0,carbs:0,fats:0};
+  return {
+    meal,
+    name:f.name,
+    qty:round((f.defaultQty||1)*multiplier,1),
+    unit:f.unit||"serving",
+    calories:Math.round((f.calories||0)*multiplier),
+    protein:round((f.protein||0)*multiplier),
+    carbs:round((f.carbs||0)*multiplier),
+    fats:round((f.fats||0)*multiplier),
+    portion:f.portion||""
+  };
+}
+function generateMealPlanEngine(){
+  const t=targets();
+  const foods=chooseFoodsByDiet();
+  let plan=[];
+  const mealMap=[["Breakfast",foods.breakfast,.25],["Lunch",foods.lunch,.35],["Dinner",foods.dinner,.30],["Snacks",foods.snack,.10]];
+  mealMap.forEach(([meal,items,share])=>{
+    const targetCal=t.calories*share;
+    let base=items.map(n=>buildMealLine(n,meal,1));
+    const baseCal=Math.max(1,base.reduce((a,x)=>a+x.calories,0));
+    const factor=Math.max(.6,Math.min(1.8,targetCal/baseCal));
+    base=items.map(n=>buildMealLine(n,meal,factor));
+    plan.push({meal,targetCalories:Math.round(targetCal),items:base});
+  });
+  const totals=plan.flatMap(p=>p.items).reduce((a,x)=>({calories:a.calories+x.calories,protein:a.protein+x.protein,carbs:a.carbs+x.carbs,fats:a.fats+x.fats}),{calories:0,protein:0,carbs:0,fats:0});
+  return {mode:isBeginnerMode()?"Beginner":"Advanced",targets:t,meals:plan,totals};
+}
+function generateWorkoutPlanEngine(){
+  const rec=recoveryStatus(todayKey());
+  const mode=isBeginnerMode()?"Beginner":"Advanced";
+  const muscles=recommendMuscles();
+  let split="Full Body";
+  if(rec.score>=70) split=muscles.length?muscles.join(" + "):"Push Day";
+  if(rec.score<50) split="Recovery / Mobility";
+  const exercisePool=split.includes("Recovery")?["Walk","Mobility","Stretching"]:muscles.flatMap(m=>(EXERCISE_DATABASE[m]||[]).slice(0, mode==="Beginner"?2:3));
+  const exercises=exercisePool.slice(0, mode==="Beginner"?5:7).map((name,i)=>({
+    name,
+    sets: split.includes("Recovery")?2:(mode==="Beginner"?3:4),
+    reps: split.includes("Recovery")?"easy":(i<2?"6-10":"10-15"),
+    rest: split.includes("Recovery")?"30 sec":(i<2?"90 sec":"60 sec")
+  }));
+  return {mode,split,recovery:rec.status,decision:rec.decision,exercises};
+}
+function generateFullCoachPlan(){
+  return {
+    date:todayKey(),
+    generatedAt:new Date().toISOString(),
+    mode:isBeginnerMode()?"Beginner":"Advanced",
+    mealPlan:generateMealPlanEngine(),
+    workoutPlan:generateWorkoutPlanEngine(),
+    insights:coachInsights()
+  };
+}
+function coachInsights(){
+  const t=targets(), m=mealTotals(todayKey()), w=waterTotal(todayKey()), r=recoveryStatus(todayKey());
+  const insights=[];
+  if(m.p<t.protein) insights.push(`Protein remaining today: ${Math.max(0,Math.round(t.protein-m.p))}g`);
+  if(w<t.water) insights.push(`Water remaining today: ${round(t.water-w)}L`);
+  insights.push(`Recovery: ${r.status} (${r.decision})`);
+  insights.push(`Suggested muscle focus: ${recommendMuscles().join(" + ")||"Flexible"}`);
+  return insights;
+}
+function coachPlanCard(){
+  const p=data.coachPlans[todayKey()];
+  if(!p) return '<div class="item">No plan yet. Generate today’s coach plan.</div>';
+  if(p.mode==="Advanced"){
+    return `<div class="item"><strong>Advanced Mode: Targets + Insights</strong><br>${p.insights.join("<br>")}</div>
+    <div class="item"><strong>Optional Workout:</strong> ${p.workoutPlan.split}<br>${p.workoutPlan.exercises.map(e=>`• ${e.name}: ${e.sets} sets x ${e.reps}`).join("<br>")}</div>`;
+  }
+  return `<div class="item"><strong>Today Meal Plan</strong><br>${p.mealPlan.meals.map(m=>`<b>${m.meal}</b>: ${m.items.map(i=>`${i.name} (${i.qty} ${i.unit})`).join(", ")}`).join("<br>")}</div>
+  <div class="item"><strong>Workout Plan:</strong> ${p.workoutPlan.split}<br>${p.workoutPlan.exercises.map(e=>`• ${e.name}: ${e.sets} sets x ${e.reps}, rest ${e.rest}`).join("<br>")}</div>`;
+}
+
+
+// ---------- V13.1 Final Coach Engine ----------
+function isBeginnerMode(){
+  return (data.profile.mode||'Beginner')==='Beginner';
+}
+function findFoodByName(name){
+  return foodList().find(f=>f.name===name) || foodList().find(f=>String(f.name).toLowerCase().includes(String(name).toLowerCase()));
+}
+function chooseFoodsByDiet(){
+  const diet=(data.profile.diet||'Non-Veg').toLowerCase();
+  if(diet.includes('veg') && !diet.includes('non')) {
+    return {
+      breakfast:["Oats","Banana","Milk"],
+      lunch:["Paneer Curry","Plain Rice","Cucumber"],
+      dinner:["Dal Tadka","Roti","Curd"],
+      snack:["Whey Protein","Apple"]
+    };
+  }
+  return {
+    breakfast:["Egg Dish","Banana","Coffee"],
+    lunch:["Chicken Curry","Plain Rice","Cucumber"],
+    dinner:["Paneer Curry","Roti","Curd"],
+    snack:["Whey Protein","Apple"]
+  };
+}
+function buildMealLine(name, meal, multiplier=1){
+  const f=findFoodByName(name);
+  if(!f) return {meal,name,qty:1,unit:"serving",calories:0,protein:0,carbs:0,fats:0,portion:""};
+  return {meal,name:f.name,qty:round((f.defaultQty||1)*multiplier,1),unit:f.unit||"serving",calories:Math.round((f.calories||0)*multiplier),protein:round((f.protein||0)*multiplier),carbs:round((f.carbs||0)*multiplier),fats:round((f.fats||0)*multiplier),portion:f.portion||""};
+}
+function generateMealPlanEngine(){
+  const t=targets(), foods=chooseFoodsByDiet();
+  const mealMap=[["Breakfast",foods.breakfast,.25],["Lunch",foods.lunch,.35],["Dinner",foods.dinner,.30],["Snacks",foods.snack,.10]];
+  const meals=mealMap.map(([meal,items,share])=>{
+    const targetCal=t.calories*share;
+    const base=items.map(n=>buildMealLine(n,meal,1));
+    const baseCal=Math.max(1,base.reduce((a,x)=>a+x.calories,0));
+    const factor=Math.max(.6,Math.min(1.8,targetCal/baseCal));
+    return {meal,targetCalories:Math.round(targetCal),items:items.map(n=>buildMealLine(n,meal,factor))};
+  });
+  const totals=meals.flatMap(p=>p.items).reduce((a,x)=>({calories:a.calories+x.calories,protein:a.protein+x.protein,carbs:a.carbs+x.carbs,fats:a.fats+x.fats}),{calories:0,protein:0,carbs:0,fats:0});
+  return {mode:isBeginnerMode()?"Beginner":"Advanced",targets:t,meals,totals};
+}
+function generateWorkoutPlanEngine(){
+  const rec=recoveryStatus(todayKey()), mode=isBeginnerMode()?"Beginner":"Advanced";
+  const muscles=recommendMuscles();
+  let split="Full Body";
+  if(rec.score>=70) split=muscles.length?muscles.join(" + "):"Push Day";
+  if(rec.score<50) split="Recovery / Mobility";
+  const exercisePool=split.includes("Recovery")?["Walk","Mobility","Stretching"]:muscles.flatMap(m=>(EXERCISE_DATABASE[m]||[]).slice(0, mode==="Beginner"?2:3));
+  const exercises=exercisePool.slice(0, mode==="Beginner"?5:7).map((name,i)=>({name,sets:split.includes("Recovery")?2:(mode==="Beginner"?3:4),reps:split.includes("Recovery")?"easy":(i<2?"6-10":"10-15"),rest:split.includes("Recovery")?"30 sec":(i<2?"90 sec":"60 sec")}));
+  return {mode,split,recovery:rec.status,decision:rec.decision,exercises};
+}
+function coachInsights(){
+  const t=targets(), m=mealTotals(todayKey()), w=waterTotal(todayKey()), r=recoveryStatus(todayKey());
+  const insights=[];
+  if(m.p<t.protein) insights.push(`Protein remaining: ${Math.max(0,Math.round(t.protein-m.p))}g`);
+  else insights.push(`Protein on track`);
+  if(w<t.water) insights.push(`Water remaining: ${round(t.water-w)}L`);
+  else insights.push(`Water on track`);
+  insights.push(`Recovery: ${r.status} (${r.decision})`);
+  insights.push(`Suggested muscles: ${recommendMuscles().join(" + ")||"Flexible"}`);
+  return insights;
+}
+function generateFullCoachPlan(){
+  return {date:todayKey(),generatedAt:new Date().toISOString(),mode:isBeginnerMode()?"Beginner":"Advanced",mealPlan:generateMealPlanEngine(),workoutPlan:generateWorkoutPlanEngine(),insights:coachInsights()};
+}
+function coachPlanCard(){
+  const p=data.coachPlans[todayKey()];
+  if(!p) return '<div class="item">No plan yet. Generate today’s coach plan.</div>';
+  if(p.mode==="Advanced"){
+    return `<div class="item"><strong>Advanced Mode: Targets + Insights</strong><br>${p.insights.join("<br>")}</div><div class="item"><strong>Optional Workout:</strong> ${p.workoutPlan.split}<br>${p.workoutPlan.exercises.map(e=>`• ${e.name}: ${e.sets} sets x ${e.reps}`).join("<br>")}</div>`;
+  }
+  return `<div class="item"><strong>Today Meal Plan</strong><br>${p.mealPlan.meals.map(m=>`<b>${m.meal}</b>: ${m.items.map(i=>`${i.name} (${i.qty} ${i.unit})`).join(", ")}`).join("<br>")}</div><div class="item"><strong>Workout Plan:</strong> ${p.workoutPlan.split}<br>${p.workoutPlan.exercises.map(e=>`• ${e.name}: ${e.sets} sets x ${e.reps}, rest ${e.rest}`).join("<br>")}</div>`;
+}
+function progressBar(label,value,target,unit){
+  const pct=Math.min(100,Math.round((value/Math.max(1,target))*100));
+  return `<div class="metric-row"><div class="metric-top"><span>${label}</span><span>${round(value)} / ${target} ${unit}</span></div><div class="bar"><span style="width:${pct}%"></span></div></div>`;
+}
+
 // ---------- Dashboard ----------
+
 function home(){
   const t=targets(),m=mealTotals(todayKey()),w=waterTotal(todayKey()),r=recoveryStatus(todayKey());
-  const rings=[['Protein',m.p,t.protein,'g','--green'],['Carbs',m.c,t.carbs,'g','--purple'],['Fats',m.f,t.fats,'g','--blue'],['Water',w,t.water,'L','--cyan']];
+  const calPct=Math.min(100,Math.round(m.cal/t.calories*100));
+  const coachTitle=isBeginnerMode()?'Today’s Plan':'Today’s Targets + Insights';
   shell('Dashboard',new Date().toLocaleDateString(),
-  `<div class="grid-top"><div class="panel"><div class="panel-title">Today’s Progress</div><div class="rings">${rings.map(([n,v,target,u,c])=>{const pct=Math.min(100,Math.round(v/target*100));return`<div class="ring-card"><div class="ring" style="--c:var(${c});--p:${pct}"><div class="ring-inner">${pct}%</div></div><div class="ring-name">${n}</div><div class="ring-sub">${round(v)} / ${target} ${u}</div></div>`}).join('')}</div></div>
-  <div class="panel"><div class="panel-title">Next Actions</div>${nextActions().map(x=>`<div class="item">${x}</div>`).join('')}<button class="btn" id="morningBtn" style="margin-top:12px">Good Morning Check-in</button></div></div>
-  <div class="panel"><div class="panel-title">Water Quick Add</div><button class="btn" data-water="250">+250ml</button><button class="btn" data-water="500">+500ml</button><button class="btn" data-water="1000">+1L</button></div>
-  <div class="cards"><div class="card"><div class="stat-label">Meals</div><div class="stat-number">${meals(todayKey()).length}</div></div><div class="card"><div class="stat-label">Workouts</div><div class="stat-number">${workouts(todayKey()).length}</div></div><div class="card"><div class="stat-label">Recovery</div><div class="stat-number">${r.status}</div><div class="muted">${r.decision}</div></div><div class="card"><div class="stat-label">Water</div><div class="stat-number">${w}L</div></div></div>
-  <div class="panel"><button class="btn primary" id="smartPlan">Generate Smart Plan</button>${planHtml()}</div>
-  <div class="panel"><div class="panel-title">Weekly Summary</div>${weeklySummary()}</div>`);
-  wireWater(todayKey());
+  `<div class="desktop-dashboard-grid">
+    <div class="dashboard-main">
+      <div class="hero-card">
+        <div class="calorie-ring" style="--p:${calPct}">
+          <div><strong>${calPct}%</strong><span>${m.cal} / ${t.calories} kcal</span></div>
+        </div>
+        <div class="hero-copy">
+          <div class="mode-badge">${isBeginnerMode()?'Beginner Guided Mode':'Advanced Pro Mode'}</div>
+          <h2>${coachTitle}</h2>
+          <p>${r.status} recovery • ${r.decision}</p>
+          <button class="btn primary" id="smartPlan">Generate Coach Plan</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">Nutrition Progress</div>
+        ${progressBar('Protein',m.p,t.protein,'g')}
+        ${progressBar('Carbs',m.c,t.carbs,'g')}
+        ${progressBar('Fats',m.f,t.fats,'g')}
+        ${progressBar('Water',w,t.water,'L')}
+      </div>
+
+      <div class="panel"><div class="panel-title">${coachTitle}</div>${planHtml()}</div>
+
+      <div class="panel"><div class="panel-title">Workout Preview</div><div class="item">Suggested muscles: ${recommendMuscles().join(' + ')||'Flexible'}<br>Recovery status: ${r.status}</div></div>
+    </div>
+
+    <aside class="desktop-coach-panel" id="desktopCoachPanel">${desktopCoachPanelHtml()}</aside>
+  </div>`);
   q('smartPlan').onclick=smartPlan;
-  q('morningBtn').onclick=morningCheckin;
+  const sideGenerate=q('sideGenerate'); if(sideGenerate) sideGenerate.onclick=smartPlan;
+  const sideMeal=q('sideMeal'); if(sideMeal) sideMeal.onclick=()=>switchTab('nutrition');
+  const sideWorkout=q('sideWorkout'); if(sideWorkout) sideWorkout.onclick=()=>switchTab('workout');
 }
+
 function nextActions(){
   const t=targets(),m=mealTotals(todayKey());
   const a=[];
@@ -463,21 +672,7 @@ function recommendMuscles(){
 }
 
 // ---------- Smart plan / recovery / profile / progress / coach ----------
-function smartPlan(){
-  const t=targets(),m=mealTotals(todayKey()),r=recoveryStatus(todayKey());
-  data.coachPlans[todayKey()]={meal:[`Remaining protein: ${Math.max(0,t.protein-m.p)}g`,`Remaining calories: ${Math.max(0,t.calories-m.cal)} kcal`],workout:[`Recommended: ${recommendMuscles().join(' + ')||'Any fresh group'}`,`${r.decision}: ${r.decision==='Performance Day'?'hard training allowed':'manage intensity'}`],recovery:[`Water target: ${t.water}L`,`Recovery score: ${r.score}/100`]};
-}
-function planHtml(){
-  const p=data.coachPlans[todayKey()];
-  if(!p)return'<div class="item">Generate Smart Plan.</div>';
-  return['meal','workout','recovery'].map(k=>`<div class="item"><strong>${k.toUpperCase()}</strong><ul>${p[k].map(i=>`<li>${i}</li>`).join('')}</ul></div>`).join('');
-}
-function morningCheckin(){
-  openModal(`<div class="panel-title">Good Morning 👋</div><div class="field"><label>How long did you sleep?</label><div class="pill-row">${['5h','6h','7h','8h','9h+'].map(x=>`<button class="pill" data-sleep="${x}">${x}</button>`).join('')}</div></div><div class="form-grid"><div class="field"><label>Sleep Quality</label><select id="mc_quality"><option>Poor</option><option selected>Average</option><option>Good</option></select></div><div class="field"><label>Energy</label><select id="mc_energy"><option>Low</option><option selected>Moderate</option><option>High</option></select></div><div class="field"><label>Soreness</label><select id="mc_soreness"><option>Low</option><option selected>Moderate</option><option>High</option></select></div></div><button class="btn primary" id="saveMorning">Save</button>`);
-  let sleep='7';
-  document.querySelectorAll('[data-sleep]').forEach(b=>b.onclick=()=>{sleep=b.dataset.sleep.replace('h+','').replace('h','');document.querySelectorAll('[data-sleep]').forEach(x=>x.classList.remove('active'));b.classList.add('active')});
-  q('saveMorning').onclick=()=>{data.recovery[todayKey()]={sleep,quality:q('mc_quality').value,energy:q('mc_energy').value,soreness:q('mc_soreness').value};closeModal();save()};
-}
+function smartPlan(){data.coachPlans[todayKey()]=generateFullCoachPlan();localStorage.setItem(STORE,JSON.stringify(data));const box=q('coachPlanBox');if(box)box.innerHTML=coachPlanCard();const side=q('desktopCoachPanel');if(side)side.innerHTML=desktopCoachPanelHtml();}
 function profile(){
   const p=data.profile;
   shell('Profile','Matches onboarding. Starting weight is stored internally from onboarding current weight.',
@@ -504,14 +699,38 @@ function progress(){
   q('addWeight').onclick=()=>{data.weights.unshift({date:todayKey(),weight:q('weight').value});save()};
   document.querySelectorAll('[data-delweight]').forEach(b=>b.onclick=()=>{data.weights.splice(Number(b.dataset.delweight),1);save()});
 }
+
+
 function coach(){
   let u=data.aiCoachUsage;
   if(u.date!==todayKey())u=data.aiCoachUsage={date:todayKey(),count:0};
-  shell('AI Coach','5 AI questions/day',
-  `<div class="panel"><div class="item">AI Coach: <strong>${u.count}/5</strong> used today</div><div class="field"><label>Question</label><textarea id="question"></textarea></div><button class="btn primary" id="ask">Ask AI Coach</button><button class="btn" id="quick">Quick Local Advice</button><div class="suggestion" id="answer"></div></div>`);
-  q('quick').onclick=()=>q('answer').innerHTML=localCoach();
-  q('ask').onclick=askCoach;
+  if(!data.coachPlans[todayKey()]) data.coachPlans[todayKey()]=generateFullCoachPlan();
+  localStorage.setItem(STORE,JSON.stringify(data));
+  shell('Coach Engine',`${data.coachPlans[todayKey()].mode} Mode • Meal + Workout Planning`,
+  `<div class="panel">
+    <div class="pill-row">
+      <button class="pill active" data-coachtab="today">Today Plan</button>
+      <button class="pill" data-coachtab="meal">Meal Plan</button>
+      <button class="pill" data-coachtab="workout">Workout Plan</button>
+      <button class="pill" data-coachtab="ask">Ask AI</button>
+    </div>
+    <button class="btn primary" id="regenCoach">Regenerate Coach Plan</button>
+    <div id="coachContent" class="suggestion"></div>
+  </div>`);
+  const renderCoachTab=(ct='today')=>{
+    document.querySelectorAll('[data-coachtab]').forEach(b=>b.classList.toggle('active',b.dataset.coachtab===ct));
+    const plan=data.coachPlans[todayKey()] || generateFullCoachPlan();
+    if(ct==='today') q('coachContent').innerHTML=coachPlanCard();
+    if(ct==='meal') q('coachContent').innerHTML=`<strong>Meal Plan</strong><br>${plan.mealPlan.meals.map(m=>`<h4>${m.meal} (${m.targetCalories} kcal target)</h4>${m.items.map(i=>`• ${i.name}: ${i.qty} ${i.unit} — ${i.calories} kcal, P${i.protein} C${i.carbs} F${i.fats}`).join("<br>")}`).join("<br>")}<br><br><strong>Total:</strong> ${Math.round(plan.mealPlan.totals.calories)} kcal, P${round(plan.mealPlan.totals.protein)} C${round(plan.mealPlan.totals.carbs)} F${round(plan.mealPlan.totals.fats)}`;
+    if(ct==='workout') q('coachContent').innerHTML=`<strong>${plan.workoutPlan.split}</strong><br>Recovery: ${plan.workoutPlan.recovery} • ${plan.workoutPlan.decision}<br>${plan.workoutPlan.exercises.map(e=>`• ${e.name}: ${e.sets} sets x ${e.reps}, rest ${e.rest}`).join("<br>")}`;
+    if(ct==='ask') q('coachContent').innerHTML=`<div class="item">AI Coach: <strong>${u.count}/5</strong> used today</div><div class="field"><label>Question</label><textarea id="question"></textarea></div><button class="btn primary" id="ask">Ask AI Coach</button><button class="btn" id="quick">Quick Local Advice</button><div class="suggestion" id="answer"></div>`;
+    if(ct==='ask'){q('quick').onclick=()=>q('answer').innerHTML=localCoach();q('ask').onclick=askCoach;}
+  };
+  q('regenCoach').onclick=()=>{data.coachPlans[todayKey()]=generateFullCoachPlan();localStorage.setItem(STORE,JSON.stringify(data));renderCoachTab('today')};
+  document.querySelectorAll('[data-coachtab]').forEach(b=>b.onclick=()=>renderCoachTab(b.dataset.coachtab));
+  renderCoachTab('today');
 }
+
 function localCoach(){return`Recovery: ${recoveryStatus(todayKey()).status}<br>Recommended: ${recommendMuscles().join(' + ')||'Any fresh group'}<br>Protein remaining: ${Math.max(0,targets().protein-mealTotals(todayKey()).p)}g`}
 async function askCoach(){
   const u=data.aiCoachUsage;
