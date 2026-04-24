@@ -1,35 +1,45 @@
-# Stayfitinlife App
+# STAYFITINLIFE V10.2
 
-A performance-focused fitness tracking app with AI-powered coaching.
+GitHub-ready build.
 
-## Features
-- Workout tracking (strength, cardio, sports)
-- Nutrition logging
-- Hydration tracking
-- Supplement stack management
-- Recovery tracking
-- Progress analytics
-- AI Coach (screen-aware recommendations)
+## Files included
 
-## Tech Stack
-- Frontend: HTML, CSS, JavaScript
-- Hosting: Netlify
-- Backend: Netlify Functions
-- AI: OpenAI API
+- `index.html` — full app UI and logic
+- `favicon.png` — browser icon
+- `icons/` — PWA icons
+- `manifest.webmanifest` — PWA manifest
+- `sw.js` — versioned service worker
+- `netlify.toml` — Netlify config
+- `netlify/functions/ai-coach.js` — AI Coach serverless function
+- `.gitignore`
 
-## Setup
+## Deploy on Netlify
 
-1. Clone repo
-2. Deploy via Netlify (Git integration)
-3. Add environment variable:
+1. Push this folder to GitHub.
+2. Connect GitHub repo to Netlify.
+3. Set publish directory to project root.
+4. Add environment variable:
 
-OPENAI_API_KEY=your_key_here
+```text
+OPENAI_API_KEY=your_openai_key
+```
 
-## Version
-V6 (AI Coach Integration)
+5. Deploy.
 
-## Publisher
-Himanshu Kaushik
+## Important
 
-## Support
-support@stayfitinlife.com
+If old UI appears after deploy:
+- Open browser DevTools
+- Application → Service Workers → Unregister
+- Clear site data
+- Hard refresh
+
+## AI Coach
+
+Frontend calls:
+
+```text
+/.netlify/functions/ai-coach
+```
+
+The API key is never exposed in frontend code.
