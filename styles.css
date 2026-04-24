@@ -17,3 +17,15 @@
 @keyframes onboardPage{from{opacity:.15;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
 .onboarding-progress{height:8px;background:rgba(255,255,255,.08);border-radius:999px;overflow:hidden;margin:12px 0 18px}
 .onboarding-progress span{display:block;height:100%;background:linear-gradient(90deg,#20e4ff,#8b5cf6);border-radius:999px}
+
+/* V12.6 stable architecture */
+.hidden{display:none!important}
+.onboarding-page{animation:onboardStable .28s ease-out both}
+@keyframes onboardStable{from{opacity:.15;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.onboarding-progress{height:8px;background:rgba(255,255,255,.08);border-radius:999px;overflow:hidden;margin:12px 0 18px}
+.onboarding-progress span{display:block;height:100%;background:linear-gradient(90deg,#20e4ff,#8b5cf6);border-radius:999px}
+.onboarding-goals .choice-btn{min-height:86px}
+#addSet{margin-top:8px}
+.modal{position:fixed;inset:0;z-index:100;display:grid;place-items:center;background:rgba(2,6,23,.92);padding:18px}
+.modal.hidden{display:none!important}
+.modal-card{width:min(900px,100%);max-height:92vh;overflow:auto;background:#081229;border:1px solid rgba(255,255,255,.12);border-radius:30px;padding:26px}
