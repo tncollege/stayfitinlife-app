@@ -1,14 +1,12 @@
-# STAYFITINLIFE V13.1 Final Clean
+# STAYFITINLIFE V13.1 Rebuild Fixed
 
-This is the corrected V13.1 final production UI package.
+This build was rebuilt from the last stable V12.6 base and then upgraded carefully to V13.1.
 
-## Corrections
-- App shell title is V13.1.
-- Runtime version is V13.1.
-- Local storage key is V13.1-specific.
-- Service worker now clears older caches and fetches current files.
-- CSS and JS links include V13.1 cache-busting.
-- Netlify headers disable stale app-shell caching.
-
-## Deploy
-On Netlify, deploy this ZIP/folder and use: Deploys → Trigger deploy → Clear cache and deploy site.
+## Fix
+- Fixes blank dashboard/main render bug.
+- Keeps stable onboarding.
+- Adds V13.1 Coach Engine.
+- Adds calorie ring + progress bars dashboard.
+- Adds desktop right coach panel.
+- Adds expanded food database.
+- Adds no-cache Netlify headers and clean service worker.
