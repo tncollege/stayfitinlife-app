@@ -1,40 +1,32 @@
-# STAYFITINLIFE V10.2
+# STAYFITINLIFE V10.2 Final GitHub Build
 
-GitHub-ready build.
+## Includes
+- Complete standalone app
+- Clean onboarding
+- Goal validation
+- Dashboard activity rings
+- Smart Plan Engine
+- Nutrition structured logger
+- Fixed Food Item dropdown
+- Egg Dish: whole eggs + egg whites + cooking style
+- Expanded Indian foods and drinks
+- Workout structured logger
+- Fixed Body Part dropdown
+- Strength sets with rest timer
+- Finish Workout flow
+- AI Coach tab
+- AI Coach 5/day limit
+- Local Coach fallback
+- Legal section: Privacy, Terms, AI Disclaimer
+- PWA files
+- Netlify function for AI Coach
 
-## Files included
-
-- `index.html` — full app UI and logic
-- `favicon.png` — browser icon
-- `icons/` — PWA icons
-- `manifest.webmanifest` — PWA manifest
-- `sw.js` — versioned service worker
-- `netlify.toml` — Netlify config
-- `netlify/functions/ai-coach.js` — AI Coach serverless function
-- `.gitignore`
-
-## Deploy on Netlify
-
-1. Push this folder to GitHub.
-2. Connect GitHub repo to Netlify.
-3. Set publish directory to project root.
-4. Add environment variable:
+## Netlify setup
+Add this environment variable:
 
 ```text
-OPENAI_API_KEY=your_openai_key
+OPENAI_API_KEY=your_key
 ```
-
-5. Deploy.
-
-## Important
-
-If old UI appears after deploy:
-- Open browser DevTools
-- Application → Service Workers → Unregister
-- Clear site data
-- Hard refresh
-
-## AI Coach
 
 Frontend calls:
 
@@ -42,4 +34,18 @@ Frontend calls:
 /.netlify/functions/ai-coach
 ```
 
-The API key is never exposed in frontend code.
+## If old UI appears
+Unregister old service worker and clear site data, then hard refresh.
+
+
+## V10.3 Fixes
+- Added mobile bottom navigation:
+  - Dashboard
+  - Nutrition
+  - Workout
+  - Coach
+  - Profile
+- Sidebar remains for secondary navigation.
+- Hard fixed Nutrition Food Item dropdown selection.
+- Hard fixed Workout Body Part dropdown selection.
+- Prevents render cycles from resetting selected dropdown values.

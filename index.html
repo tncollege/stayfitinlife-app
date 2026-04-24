@@ -1,3 +1,5 @@
+<!-- V10.3 MOBILE NAV + DROPDOWN HARD FIX -->
+<!-- V10.2 FINAL GITHUB BUILD -->
 <!-- V10.2 FIXED WORKOUT NUTRITION AI COACH -->
 <!-- V10.1 FULL UPGRADE -->
 <!DOCTYPE html>
@@ -6,7 +8,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <meta name="theme-color" content="#050b1c"/>
-<title>STAYFITINLIFE V10.2</title>
+<title>STAYFITINLIFE V10.3</title>
 <style>
 :root{--bg:#050b1c;--card:#09152c;--card2:#0d1b38;--line:#22314f;--text:#f7f9ff;--muted:#9fb0cd;--cyan:#20e4ff;--green:#55f5a2;--purple:#8b5cf6;--blue:#6ca7ff;--yellow:#fbbf24;--red:#fb7185;--radius:24px;--sidebar:260px;--shadow:0 24px 70px rgba(0,0,0,.38)}
 *{box-sizing:border-box}html,body{margin:0;min-height:100%;background:radial-gradient(circle at 70% 0%,rgba(37,99,235,.18),transparent 34%),linear-gradient(180deg,#07122c,#030816);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}body{overflow-x:hidden}button,input,select,textarea{font:inherit}button{cursor:pointer}.hidden{display:none!important}
@@ -33,6 +35,49 @@
 .nav button.active{position:relative;background:rgba(255,255,255,.08) !important;border-color:rgba(255,255,255,.12) !important}
 .nav button.active:before{content:"";position:absolute;left:-22px;width:6px;height:58px;border-radius:8px;background:linear-gradient(180deg,#20e4ff,#6ca7ff)}
 @media(max-width:980px){.nav button{font-size:20px !important;min-height:58px !important}.nav .ico{font-size:25px !important}}
+
+
+/* V10.3 mobile bottom nav */
+.mobile-bottom-nav{display:none}
+@media(max-width:980px){
+  .mobile-bottom-nav{
+    position:fixed;
+    left:10px;
+    right:10px;
+    bottom:10px;
+    z-index:70;
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:6px;
+    padding:8px;
+    border-radius:24px;
+    background:rgba(5,11,28,.92);
+    border:1px solid rgba(255,255,255,.12);
+    backdrop-filter:blur(18px);
+    box-shadow:0 18px 50px rgba(0,0,0,.45);
+  }
+  .mobile-bottom-nav button{
+    border:0;
+    background:transparent;
+    color:rgba(255,255,255,.68);
+    border-radius:18px;
+    min-height:58px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:3px;
+    padding:5px 2px;
+  }
+  .mobile-bottom-nav button span{font-size:22px;line-height:1}
+  .mobile-bottom-nav button small{font-size:10px;font-weight:800}
+  .mobile-bottom-nav button.active{
+    color:white;
+    background:linear-gradient(180deg,rgba(32,228,255,.18),rgba(139,92,246,.14));
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);
+  }
+  .main{padding-bottom:112px!important}
+}
 </style>
 
 <link rel="icon" href="/favicon.png" type="image/png"/>
@@ -83,6 +128,15 @@
     </div>
 
     <div id="currentWorkoutPreview" class="suggestion" style="margin-top:16px">No sets/activity added yet.</div>
+    <div id="restTimerBox" class="suggestion hidden" style="margin-top:16px">
+      <strong>Rest Timer</strong>
+      <div id="restTimerDisplay" style="font-size:36px;font-weight:950;margin:8px 0">01:30</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn" id="pauseRestBtn">Pause</button>
+        <button class="btn" id="skipRestBtn">Skip</button>
+        <button class="btn" id="addRestBtn">+30 sec</button>
+      </div>
+    </div>
   </div>
 
   <div class="panel" style="margin-top:16px">
@@ -166,7 +220,17 @@
     <div class="suggestion" id="coachAnswer" style="margin-top:16px">Coach answer will appear here.</div>
   </div>
 </section>
-<section id="settings" class="section"><div class="header"><div><h1>Settings</h1><div class="muted">Local mode now. Supabase sync later.</div></div></div><div class="panel"><div class="list"><div class="item"><strong>Cloud Sync:</strong> Not connected. Supabase login will be added after this standalone build is stable.</div><button class="btn" id="resetOnboardingBtn">↻ Restart Onboarding</button><button class="btn danger" id="deleteDataBtn">Delete Local Data</button></div></div></section>
+<section id="settings" class="section"><div class="header"><div><h1>Settings</h1><div class="muted">Local mode now. Supabase sync later.</div></div></div><div class="panel"><div class="list"><div class="item"><strong>Cloud Sync:</strong> Not connected. Supabase login will be added after this standalone build is stable.</div><button class="btn" id="resetOnboardingBtn">↻ Restart Onboarding</button><button class="btn danger" id="deleteDataBtn">Delete Local Data</button></div></div>
+<div class="panel" style="margin-top:16px">
+  <div class="panel-title">Legal</div>
+  <div class="list">
+    <button class="btn" id="privacyBtn">Privacy Policy</button>
+    <button class="btn" id="termsBtn">Terms of Use</button>
+    <button class="btn" id="aiDisclaimerBtn">AI Disclaimer</button>
+  </div>
+</div>
+
+</section>
 </main></div>
 <div class="modal hidden" id="onboarding"><div class="modal-card"><div class="brand" style="margin-bottom:22px"><div class="wordmark" style="font-size:30px">STAYFITINLIFE</div><div class="tagline">TRAIN • FUEL • RECOVER • EVOLVE</div></div><div class="step active" data-step="1"><div class="kicker">Welcome</div><h2>Let’s build your personalized fitness plan.</h2><p class="muted">This setup activates your dashboard, calories, macros, water target, goal validation, recovery guidance, and Daily Coach Plan.</p><div class="benefits"><div>Goal-based calories & macros</div><div>Smart water target</div><div>Safe goal validation</div><div>Daily Coach Plan</div></div><button class="btn primary next" data-next="2">Start Setup</button></div><div class="step" data-step="2"><div class="kicker">Step 1 of 4</div><h2>Basic details</h2><div class="form-grid"><div class="field"><label>Name</label><input id="obName"/></div><div class="field"><label>Age</label><input id="obAge" type="number"/></div><div class="field"><label>Gender</label><select id="obGender"><option>Male</option><option>Female</option><option>Other</option></select></div><div class="field"><label>Height (cm)</label><input id="obHeight" type="number" step=".1"/></div><div class="field"><label>Starting Weight (kg)</label><input id="obStartWeight" type="number" step=".1"/></div><div class="field"><label>Activity Level</label><select id="obActivity"><option>Low</option><option selected>Moderate</option><option>High</option></select></div></div><div class="modal-actions"><button class="btn back" data-prev="1">Back</button><button class="btn primary next" data-next="3">Continue</button></div></div><div class="step" data-step="3"><div class="kicker">Step 2 of 4</div><h2>Choose your goal</h2><div class="choice-row" id="goalChoices"><button class="choice active" data-goal="Fat Loss">Fat Loss</button><button class="choice" data-goal="Muscle Gain">Muscle Gain</button><button class="choice" data-goal="Maintenance">Maintenance</button></div><div class="modal-actions"><button class="btn back" data-prev="2">Back</button><button class="btn primary next" data-next="4">Continue</button></div></div><div class="step" data-step="4"><div class="kicker">Step 3 of 4</div><h2>Set one target</h2><p class="muted">Choose one target. The other value will be calculated and shown as a suggestion.</p><div class="choice-row" id="targetChoices"><button class="choice active" data-target="weight">Goal Weight</button><button class="choice" data-target="bodyfat">Goal Body Fat %</button></div><div class="form-grid"><div class="field"><label>Goal Weight (kg)</label><input id="obTargetWeight" type="number" step=".1"/></div><div class="field"><label>Goal Body Fat %</label><input id="obTargetBodyFat" type="number" step=".1"/></div><div class="field"><label>Target Date</label><input id="obTargetDate" type="date"/></div></div><div class="suggestion" id="targetSuggestion" style="margin-top:16px">Enter a target to validate.</div><div class="modal-actions"><button class="btn back" data-prev="3">Back</button><button class="btn primary next" data-next="5">Continue</button></div></div><div class="step" data-step="5"><div class="kicker">Step 4 of 4</div><h2>Review your setup</h2><div class="review" id="setupReview"></div><div class="modal-actions"><button class="btn back" data-prev="4">Back</button><button class="btn primary" id="finishSetupBtn">Activate Dashboard</button></div></div></div></div>
 <script>
@@ -586,6 +650,520 @@ renderNutrition = function(){
 v102PatchHistoryRender();
 v102Bind();
 try{renderAll();}catch(e){console.error(e);}
+
+
+// ================= V10.2 FINAL GITHUB PATCH =================
+// Dropdown fix, rest timer, legal section, AI limit, smart plan engine.
+
+let v102fFoodCat = '', v102fFoodSearch = '', v102fAct = '', v102fBody = '';
+let restTimerSeconds = 0, restTimerInterval = null, restTimerPaused = false;
+
+function v102fEnsure(){
+  data.customFoods = data.customFoods || [];
+  data.customExercises = data.customExercises || [];
+  data.aiCoachUsage = data.aiCoachUsage || {date: todayKey(), count: 0};
+}
+
+function v102fFoodCatalog(){
+  const base = typeof v102FoodCatalog === 'function' ? v102FoodCatalog() : (typeof FOOD_DB_V101 !== 'undefined' ? FOOD_DB_V101.concat(data.customFoods||[]) : data.customFoods||[]);
+  return base;
+}
+
+function v102fPopulateFoodItems(force=false){
+  const foodItem = q('foodItem');
+  if(!foodItem) return;
+  const cat = q('foodCategory')?.value || 'Indian';
+  const search = (q('foodSearch')?.value || '').toLowerCase().trim();
+  if(!force && cat === v102fFoodCat && search === v102fFoodSearch && foodItem.options.length){
+    v102fRenderFoodPreview();
+    return;
+  }
+  const prev = foodItem.value;
+  let list = v102fFoodCatalog().filter(f => cat === 'Custom' ? f.custom : f.category === cat);
+  if(search) list = v102fFoodCatalog().filter(f => String(f.name||'').toLowerCase().includes(search) || String(f.category||'').toLowerCase().includes(search));
+  foodItem.innerHTML = list.map(f=>`<option value="${f.name}">${f.name}</option>`).join('');
+  if(prev && Array.from(foodItem.options).some(o=>o.value===prev)) foodItem.value = prev;
+  v102fFoodCat = cat; v102fFoodSearch = search;
+  v102fRenderFoodPreview();
+}
+
+function v102fSelectedFood(){
+  const name = q('foodItem')?.value;
+  return v102fFoodCatalog().find(f=>f.name===name);
+}
+
+function v102fEggMacros(){
+  const whole = Number(q('wholeEggCount')?.value || 0);
+  const whites = Number(q('eggWhiteCount')?.value || 0);
+  const style = q('eggStyle')?.value || 'Boiled';
+  let extraCal=0, extraFat=0;
+  if(style==='Omelette' || style==='Bhurji'){extraCal=40; extraFat=4;}
+  if(style==='Fried'){extraCal=60; extraFat=6;}
+  return {name:`Egg Dish (${style})`,category:'Indian',meal:q('mealType')?.value||'Breakfast',qty:`${whole} whole + ${whites} whites`,unit:'eggs',calories:Math.round(whole*70+whites*17+extraCal),protein:round(whole*6+whites*3.5),carbs:round(whole*.5+whites*.2),fats:round(whole*5+extraFat)};
+}
+
+function v102fCalcFoodMacros(){
+  const food = v102fSelectedFood();
+  if(!food) return null;
+  if(food.name === 'Egg Dish') return v102fEggMacros();
+  const qty = Number(q('foodQty')?.value || 1);
+  const unit = q('foodUnit')?.value || food.unit || 'serving';
+  let factor = qty;
+  if(unit==='g') factor = qty/100;
+  if(unit==='ml') factor = qty/250;
+  return {name:food.name,category:food.category,meal:q('mealType')?.value||'Breakfast',qty,unit,calories:Math.round(Number(food.calories||0)*factor),protein:round(Number(food.protein||0)*factor),carbs:round(Number(food.carbs||0)*factor),fats:round(Number(food.fats||0)*factor)};
+}
+
+function v102fRenderFoodPreview(){
+  if(!q('foodMacroPreview')) return;
+  const food = v102fSelectedFood();
+  q('eggDishBox')?.classList.toggle('hidden', !(food && food.name === 'Egg Dish'));
+  const m = v102fCalcFoodMacros();
+  q('foodMacroPreview').innerHTML = m ? `<strong>${m.name}</strong><br>${m.qty} ${m.unit} • ${m.calories} kcal • Protein ${m.protein}g • Carbs ${m.carbs}g • Fats ${m.fats}g` : 'Select food and quantity to preview macros.';
+}
+
+function v102fExerciseDb(){ return typeof EXERCISE_DB_V101 !== 'undefined' ? EXERCISE_DB_V101 : {}; }
+
+function v102fPopulateExercises(force=false){
+  const activity=q('activityType'), body=q('bodyPart'), ex=q('exerciseName');
+  if(!activity || !ex) return;
+  const type=activity.value, db=v102fExerciseDb(), isStrength=type==='Strength';
+  q('bodyPartWrap')?.classList.toggle('hidden', !isStrength);
+  q('strengthSetBox')?.classList.toggle('hidden', !isStrength);
+  document.querySelectorAll('.nonStrengthField').forEach(el=>el.classList.toggle('hidden', isStrength));
+  if(isStrength && body){
+    const parts=Object.keys(db.Strength||{}), prevBody=body.value;
+    if(force || type!==v102fAct || !body.options.length){
+      body.innerHTML=parts.map(x=>`<option value="${x}">${x}</option>`).join('');
+      if(prevBody && parts.includes(prevBody)) body.value=prevBody;
+    }
+    const selected=body.value || parts[0] || '';
+    const prevEx=ex.value;
+    const exercises=(db.Strength?.[selected]||[]).concat((data.customExercises||[]).filter(e=>e.type==='Strength'&&e.bodyPart===selected).map(e=>e.name));
+    if(force || selected!==v102fBody || type!==v102fAct || !ex.options.length){
+      ex.innerHTML=exercises.map(x=>`<option value="${x}">${x}</option>`).join('');
+      if(prevEx && exercises.includes(prevEx)) ex.value=prevEx;
+    }
+    v102fBody=selected;
+  } else {
+    const prevEx=ex.value;
+    const exercises=(db[type]||[]).concat((data.customExercises||[]).filter(e=>e.type===type).map(e=>e.name));
+    if(force || type!==v102fAct || !ex.options.length){
+      ex.innerHTML=exercises.map(x=>`<option value="${x}">${x}</option>`).join('');
+      if(prevEx && exercises.includes(prevEx)) ex.value=prevEx;
+    }
+    v102fBody='';
+  }
+  v102fAct=type;
+  if(typeof v102RenderCurrentWorkoutPreview==='function') v102RenderCurrentWorkoutPreview();
+}
+
+function formatRest(sec){
+  const m = Math.floor(sec/60).toString().padStart(2,'0');
+  const s = Math.floor(sec%60).toString().padStart(2,'0');
+  return `${m}:${s}`;
+}
+function updateRestDisplay(){
+  if(q('restTimerDisplay')) q('restTimerDisplay').textContent = formatRest(restTimerSeconds);
+}
+function startRestTimer(setType, reps, weight){
+  clearInterval(restTimerInterval);
+  restTimerSeconds = setType === 'Warmup' ? 45 : 90;
+  if(Number(reps) <= 5 || Number(weight) >= 100) restTimerSeconds = 120;
+  restTimerPaused = false;
+  q('restTimerBox')?.classList.remove('hidden');
+  updateRestDisplay();
+  restTimerInterval = setInterval(()=>{
+    if(restTimerPaused) return;
+    restTimerSeconds -= 1;
+    updateRestDisplay();
+    if(restTimerSeconds <= 0){
+      clearInterval(restTimerInterval);
+      q('restTimerBox')?.classList.add('hidden');
+    }
+  },1000);
+}
+function pauseRest(){restTimerPaused=!restTimerPaused; if(q('pauseRestBtn')) q('pauseRestBtn').textContent=restTimerPaused?'Resume':'Pause';}
+function skipRest(){clearInterval(restTimerInterval); restTimerSeconds=0; q('restTimerBox')?.classList.add('hidden');}
+function addRest(){restTimerSeconds += 30; updateRestDisplay();}
+
+function smartPlanEngine(){
+  const t=targets(), r=recoveryStatus(), m=mealTotals(), p=data.profile, workouts=Object.values(data.workouts||{}).flat();
+  const proteinLeft=Math.max(0,t.protein-m.p), calLeft=Math.max(0,t.calories-m.cal);
+  const recentHard=workouts.slice(-3).some(w=>w.intensity==='High');
+  const mealItems=[
+    `Calories target: ${t.calories} kcal. Remaining today: ~${calLeft} kcal.`,
+    `Protein target: ${t.protein}g. Remaining today: ~${proteinLeft}g.`,
+    proteinLeft>40?'Prioritize lean protein in your next meal.':'Protein is on track. Keep meals balanced.',
+    p.goal==='Fat Loss'?'Keep calories controlled and avoid liquid calories.':'Use carbs around training for performance.'
+  ];
+  const workoutItems = r.status==='Low' || recentHard
+    ? ['Recovery-aware training: light walk or mobility today.','Avoid high-intensity work because recovery/load is not ideal.']
+    : workouts.length ? ['Moderate strength or cardio session is suitable today.','Keep intensity moderate and log sets/activity.'] : ['Start with a moderate full-body session.','Focus on clean form and consistency.'];
+  const recoveryItems=[`Water target: ${t.water} L.`, r.status==='Low'?'Sleep 8+ hours and stretch 10–15 minutes.':'Sleep 7–8 hours and complete 8–10 min mobility.','Keep protein target complete for recovery.'];
+  data.coachPlans[todayKey()]={date:todayKey(),meta:`Smart Plan • Goal: ${p.goal||'--'} • Recovery: ${r.status}`,meal:{title:'Smart Meal Plan',items:mealItems},workout:{title:'Smart Workout Plan',items:workoutItems},recovery:{title:'Smart Recovery Plan',items:recoveryItems}};
+  save();
+}
+
+function aiUsage(){
+  v102fEnsure();
+  if(data.aiCoachUsage.date !== todayKey()) data.aiCoachUsage = {date:todayKey(), count:0};
+  return data.aiCoachUsage;
+}
+function renderAIUsage(){
+  const u=aiUsage();
+  if(q('aiUsageBox')) q('aiUsageBox').innerHTML=`AI Coach: <strong>${u.count} / 5</strong> used today`;
+  if(q('askCoachBtn')) q('askCoachBtn').disabled = u.count >= 5;
+}
+function localCoach(question){
+  const t=targets(), r=recoveryStatus(), m=mealTotals();
+  return `Local Coach Summary:<br><br>Recovery: ${r.status} (${r.reason})<br>Calories remaining: ~${Math.max(0,t.calories-m.cal)} kcal<br>Protein remaining: ~${Math.max(0,t.protein-m.p)}g<br><br>${r.status==='Low'?'Keep training light and prioritize sleep, water and protein.':'A moderate training session is suitable. Complete your protein and water targets.'}`;
+}
+async function askCoachLimited(useAI=true){
+  const question=q('coachQuestion')?.value || 'Give me guidance for today.';
+  if(!useAI){ q('coachAnswer').innerHTML=localCoach(question); return; }
+  const u=aiUsage();
+  if(u.count>=5){ q('coachAnswer').innerHTML='Daily AI Coach limit reached. You can ask AI Coach again tomorrow. Quick Local Advice is still available.'; renderAIUsage(); return; }
+  q('coachAnswer').innerHTML='Thinking...';
+  const context={profile:data.profile,meals:data.meals,workouts:data.workouts,recovery:data.recovery,progress:data.weights,coachPlan:data.coachPlans?.[todayKey()]};
+  try{
+    const res=await fetch('/.netlify/functions/ai-coach',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question,context})});
+    if(!res.ok) throw new Error('AI function failed');
+    const json=await res.json();
+    data.aiCoachUsage.count += 1;
+    save();
+    q('coachAnswer').innerHTML=json.answer || json.message || JSON.stringify(json);
+  }catch(e){
+    q('coachAnswer').innerHTML=localCoach(question)+'<br><br><span class="muted">AI function unavailable, showing local fallback. This did not count against your AI limit.</span>';
+  }
+  renderAIUsage();
+}
+function showLegal(type){
+  const content={
+    privacy:`<h3>Privacy Policy</h3><p>STAYFITINLIFE stores profile data, nutrition logs, workout logs, recovery inputs, progress entries and coach context to personalize your fitness experience.</p><p>In this version, data is stored locally in your browser unless you enable future cloud sync. We do not sell your data.</p><p>If you use AI Coach, relevant app context may be sent to the secure Netlify function to generate a response.</p>`,
+    terms:`<h3>Terms of Use</h3><p>STAYFITINLIFE is a fitness tracking and coaching support tool. Use it at your own risk. Results are not guaranteed.</p><p>The app does not replace professional medical, nutrition, or fitness advice. Consult a qualified professional before starting or changing a fitness or diet plan.</p>`,
+    ai:`<h3>AI Disclaimer</h3><p>AI Coach provides general fitness, nutrition, workout and recovery guidance based on your app data.</p><p>It is not a doctor, dietitian, physiotherapist, or certified personal trainer. Do not use AI responses as medical advice.</p>`
+  };
+  q('legalTitle').textContent = type==='privacy'?'Privacy Policy':type==='terms'?'Terms of Use':'AI Disclaimer';
+  q('legalContent').innerHTML=content[type];
+  q('legalModal').classList.remove('hidden');
+}
+function v102fBind(){
+  v102fEnsure();
+  if(q('foodCategory')) q('foodCategory').onchange=()=>v102fPopulateFoodItems(true);
+  if(q('foodSearch')) q('foodSearch').oninput=()=>v102fPopulateFoodItems(true);
+  if(q('foodItem')) q('foodItem').onchange=v102fRenderFoodPreview;
+  ['foodQty','foodUnit','wholeEggCount','eggWhiteCount','eggStyle','mealType'].forEach(id=>{if(q(id)){q(id).oninput=v102fRenderFoodPreview;q(id).onchange=v102fRenderFoodPreview;}});
+  if(q('addFoodBtn')) q('addFoodBtn').onclick=()=>{const m=v102fCalcFoodMacros(); if(!m)return alert('Select food first'); data.meals[todayKey()]=data.meals[todayKey()]||[]; data.meals[todayKey()].push(m); save();};
+  if(q('activityType')) q('activityType').onchange=()=>v102fPopulateExercises(true);
+  if(q('bodyPart')) q('bodyPart').onchange=()=>v102fPopulateExercises(true);
+  if(q('exerciseName')) q('exerciseName').onchange=()=>{if(typeof v102RenderCurrentWorkoutPreview==='function')v102RenderCurrentWorkoutPreview();};
+  if(q('addSetBtn')){
+    const oldAdd = q('addSetBtn').onclick;
+    q('addSetBtn').onclick=()=>{const st=q('setType')?.value, reps=q('setReps')?.value, wt=q('setWeight')?.value; if(typeof v102AddSet==='function') v102AddSet(); else if(oldAdd) oldAdd(); startRestTimer(st,reps,wt);};
+  }
+  if(q('pauseRestBtn')) q('pauseRestBtn').onclick=pauseRest;
+  if(q('skipRestBtn')) q('skipRestBtn').onclick=skipRest;
+  if(q('addRestBtn')) q('addRestBtn').onclick=addRest;
+  if(q('generateCoachBtn')) q('generateCoachBtn').onclick=smartPlanEngine;
+  if(q('askCoachBtn')) q('askCoachBtn').onclick=()=>askCoachLimited(true);
+  if(q('quickCoachBtn')) q('quickCoachBtn').onclick=()=>askCoachLimited(false);
+  if(q('openCoachBtn')) q('openCoachBtn').onclick=()=>switchTab('coach');
+  if(q('privacyBtn')) q('privacyBtn').onclick=()=>showLegal('privacy');
+  if(q('termsBtn')) q('termsBtn').onclick=()=>showLegal('terms');
+  if(q('aiDisclaimerBtn')) q('aiDisclaimerBtn').onclick=()=>showLegal('ai');
+  if(q('closeLegalBtn')) q('closeLegalBtn').onclick=()=>q('legalModal').classList.add('hidden');
+  v102fPopulateFoodItems(true);
+  v102fPopulateExercises(true);
+  renderAIUsage();
+}
+if(typeof renderNutrition==='function'){
+  const oldRN=renderNutrition;
+  renderNutrition=function(){oldRN();v102fBind();v102fPopulateFoodItems(false);};
+}
+if(typeof renderWorkout==='function'){
+  const oldRW=renderWorkout;
+  renderWorkout=function(){oldRW();v102fBind();v102fPopulateExercises(false);};
+}
+if(typeof renderAll==='function'){
+  const oldRA=renderAll;
+  renderAll=function(){oldRA();renderAIUsage();};
+}
+v102fBind();
+try{renderAll();}catch(e){console.error('V10.2 Final init error',e);}
+
+
+// ================= V10.3 HARD FIX: DROPDOWNS + MOBILE BOTTOM NAV =================
+// Source-of-truth dropdown rendering. Prevents Food Item and Body Part selects from resetting on click/change.
+
+let V103 = {
+  foodPopulated: false,
+  lastFoodCategory: null,
+  lastFoodSearch: null,
+  exercisePopulated: false,
+  lastActivity: null,
+  lastBodyPart: null
+};
+
+function v103FoodCatalog(){
+  let list = [];
+  try{
+    if(typeof v102fFoodCatalog === 'function') list = v102fFoodCatalog();
+    else if(typeof v102FoodCatalog === 'function') list = v102FoodCatalog();
+    else if(typeof FOOD_DB_V101 !== 'undefined') list = FOOD_DB_V101.concat(data.customFoods || []);
+    else list = data.customFoods || [];
+  }catch(e){ list = data.customFoods || []; }
+
+  // Make sure required foods exist even if previous DB failed.
+  const required = [
+    {category:'Indian',name:'Paneer Bhurji',calories:320,protein:20,carbs:12,fats:24,unit:'serving'},
+    {category:'Indian',name:'Kadai Chicken',calories:380,protein:36,carbs:12,fats:22,unit:'serving'},
+    {category:'Indian',name:'Chicken Korma',calories:430,protein:34,carbs:14,fats:28,unit:'serving'},
+    {category:'Indian',name:'Chicken Keema',calories:350,protein:32,carbs:10,fats:22,unit:'serving'},
+    {category:'Indian',name:'Chicken Rara',calories:430,protein:38,carbs:14,fats:26,unit:'serving'},
+    {category:'Indian',name:'Malai Chaap',calories:420,protein:20,carbs:24,fats:28,unit:'serving'},
+    {category:'Indian',name:'Tandoori Chaap',calories:310,protein:24,carbs:18,fats:14,unit:'serving'},
+    {category:'Indian',name:'Egg Dish',calories:0,protein:0,carbs:0,fats:0,unit:'custom'}
+  ];
+  const merged = list.concat(required);
+  const seen = new Set();
+  return merged.filter(f => {
+    const key = (f.category || '') + '|' + (f.name || '');
+    if(seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+function v103PopulateFoodItems(force=false){
+  const foodItem = document.getElementById('foodItem');
+  const catEl = document.getElementById('foodCategory');
+  const searchEl = document.getElementById('foodSearch');
+  if(!foodItem || !catEl || !searchEl) return;
+
+  const category = catEl.value || 'Indian';
+  const search = (searchEl.value || '').toLowerCase().trim();
+
+  // Critical: do NOT repopulate when user merely selects Food Item.
+  if(!force && V103.foodPopulated && V103.lastFoodCategory === category && V103.lastFoodSearch === search){
+    v103RenderFoodPreview();
+    return;
+  }
+
+  const previous = foodItem.value;
+  let items = v103FoodCatalog().filter(f => category === 'Custom' ? f.custom : f.category === category);
+  if(search){
+    items = v103FoodCatalog().filter(f =>
+      String(f.name || '').toLowerCase().includes(search) ||
+      String(f.category || '').toLowerCase().includes(search)
+    );
+  }
+
+  foodItem.innerHTML = items.map(f => `<option value="${f.name}">${f.name}</option>`).join('');
+
+  if(previous && Array.from(foodItem.options).some(o => o.value === previous)){
+    foodItem.value = previous;
+  }
+
+  V103.foodPopulated = true;
+  V103.lastFoodCategory = category;
+  V103.lastFoodSearch = search;
+  v103RenderFoodPreview();
+}
+
+function v103SelectedFood(){
+  const name = document.getElementById('foodItem')?.value || '';
+  return v103FoodCatalog().find(f => f.name === name);
+}
+
+function v103EggMacros(){
+  const whole = Number(document.getElementById('wholeEggCount')?.value || 0);
+  const whites = Number(document.getElementById('eggWhiteCount')?.value || 0);
+  const style = document.getElementById('eggStyle')?.value || 'Boiled';
+  let extraCal=0, extraFat=0;
+  if(style === 'Omelette' || style === 'Bhurji'){ extraCal = 40; extraFat = 4; }
+  if(style === 'Fried'){ extraCal = 60; extraFat = 6; }
+  return {
+    name:`Egg Dish (${style})`,
+    category:'Indian',
+    meal:document.getElementById('mealType')?.value || 'Breakfast',
+    qty:`${whole} whole + ${whites} whites`,
+    unit:'eggs',
+    calories:Math.round(whole*70 + whites*17 + extraCal),
+    protein:round(whole*6 + whites*3.5),
+    carbs:round(whole*.5 + whites*.2),
+    fats:round(whole*5 + extraFat)
+  };
+}
+
+function v103CalcFoodMacros(){
+  const food = v103SelectedFood();
+  if(!food) return null;
+  if(food.name === 'Egg Dish') return v103EggMacros();
+
+  const qty = Number(document.getElementById('foodQty')?.value || 1);
+  const unit = document.getElementById('foodUnit')?.value || food.unit || 'serving';
+  let factor = qty;
+  if(unit === 'g') factor = qty / 100;
+  if(unit === 'ml') factor = qty / 250;
+
+  return {
+    name:food.name,
+    category:food.category,
+    meal:document.getElementById('mealType')?.value || 'Breakfast',
+    qty,
+    unit,
+    calories:Math.round(Number(food.calories || 0) * factor),
+    protein:round(Number(food.protein || 0) * factor),
+    carbs:round(Number(food.carbs || 0) * factor),
+    fats:round(Number(food.fats || 0) * factor)
+  };
+}
+
+function v103RenderFoodPreview(){
+  const preview = document.getElementById('foodMacroPreview');
+  if(!preview) return;
+  const food = v103SelectedFood();
+  document.getElementById('eggDishBox')?.classList.toggle('hidden', !(food && food.name === 'Egg Dish'));
+  const m = v103CalcFoodMacros();
+  preview.innerHTML = m
+    ? `<strong>${m.name}</strong><br>${m.qty} ${m.unit} • ${m.calories} kcal • Protein ${m.protein}g • Carbs ${m.carbs}g • Fats ${m.fats}g`
+    : 'Select food and quantity to preview macros.';
+}
+
+function v103ExerciseDb(){
+  try{
+    if(typeof EXERCISE_DB_V101 !== 'undefined') return EXERCISE_DB_V101;
+  }catch(e){}
+  return {
+    Strength:{
+      Chest:['Bench Press','Incline Bench Press','Dumbbell Press','Chest Fly','Push-ups'],
+      Back:['Lat Pulldown','Pull-ups','Barbell Row','Seated Cable Row','Deadlift'],
+      Legs:['Squats','Leg Press','Lunges','Leg Curl','Calf Raises'],
+      Shoulders:['Shoulder Press','Lateral Raises','Front Raises','Rear Delt Fly'],
+      Arms:['Barbell Curl','Dumbbell Curl','Tricep Pushdown','Skull Crushers'],
+      Core:['Plank','Crunches','Leg Raises','Russian Twists']
+    },
+    Cardio:['Running Outdoor','Treadmill Running','Walking','Cycling Indoor','Cycling Outdoor','Skipping Jump Rope'],
+    Yoga:['Hatha Yoga','Power Yoga','Stretching Routine','Sun Salutation'],
+    Sports:['Football','Basketball','Cricket','Badminton','Tennis'],
+    Outdoor:['Hiking','Trekking','Swimming','Outdoor Cycling']
+  };
+}
+
+function v103PopulateExercises(force=false){
+  const activity = document.getElementById('activityType');
+  const body = document.getElementById('bodyPart');
+  const exercise = document.getElementById('exerciseName');
+  if(!activity || !exercise) return;
+
+  const type = activity.value || 'Strength';
+  const db = v103ExerciseDb();
+  const isStrength = type === 'Strength';
+
+  document.getElementById('bodyPartWrap')?.classList.toggle('hidden', !isStrength);
+  document.getElementById('strengthSetBox')?.classList.toggle('hidden', !isStrength);
+  document.querySelectorAll('.nonStrengthField').forEach(el => el.classList.toggle('hidden', isStrength));
+
+  if(isStrength && body){
+    const bodyParts = Object.keys(db.Strength || {});
+    const previousBody = body.value;
+
+    // Critical: rebuild body-part options only when activity changes/first load/force.
+    if(force || !V103.exercisePopulated || V103.lastActivity !== type || !body.options.length){
+      body.innerHTML = bodyParts.map(bp => `<option value="${bp}">${bp}</option>`).join('');
+      if(previousBody && bodyParts.includes(previousBody)) body.value = previousBody;
+    }
+
+    const selectedBody = body.value || bodyParts[0] || '';
+    const previousExercise = exercise.value;
+    const exercises = (db.Strength?.[selectedBody] || []).concat((data.customExercises || []).filter(e => e.type === 'Strength' && e.bodyPart === selectedBody).map(e => e.name));
+
+    // Rebuild exercises only when body part changes/activity changes/first load.
+    if(force || !V103.exercisePopulated || V103.lastActivity !== type || V103.lastBodyPart !== selectedBody || !exercise.options.length){
+      exercise.innerHTML = exercises.map(x => `<option value="${x}">${x}</option>`).join('');
+      if(previousExercise && exercises.includes(previousExercise)) exercise.value = previousExercise;
+    }
+
+    V103.lastBodyPart = selectedBody;
+  } else {
+    const previousExercise = exercise.value;
+    const exercises = (db[type] || []).concat((data.customExercises || []).filter(e => e.type === type).map(e => e.name));
+    if(force || !V103.exercisePopulated || V103.lastActivity !== type || !exercise.options.length){
+      exercise.innerHTML = exercises.map(x => `<option value="${x}">${x}</option>`).join('');
+      if(previousExercise && exercises.includes(previousExercise)) exercise.value = previousExercise;
+    }
+    V103.lastBodyPart = '';
+  }
+
+  V103.lastActivity = type;
+  V103.exercisePopulated = true;
+  if(typeof v102RenderCurrentWorkoutPreview === 'function') v102RenderCurrentWorkoutPreview();
+}
+
+function v103BindDropdowns(){
+  const foodCategory = document.getElementById('foodCategory');
+  const foodSearch = document.getElementById('foodSearch');
+  const foodItem = document.getElementById('foodItem');
+
+  if(foodCategory) foodCategory.onchange = () => v103PopulateFoodItems(true);
+  if(foodSearch) foodSearch.oninput = () => v103PopulateFoodItems(true);
+  if(foodItem) foodItem.onchange = v103RenderFoodPreview;
+
+  ['foodQty','foodUnit','wholeEggCount','eggWhiteCount','eggStyle','mealType'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el){ el.oninput = v103RenderFoodPreview; el.onchange = v103RenderFoodPreview; }
+  });
+
+  const addFood = document.getElementById('addFoodBtn');
+  if(addFood) addFood.onclick = () => {
+    const m = v103CalcFoodMacros();
+    if(!m) return alert('Select food first');
+    data.meals[todayKey()] = data.meals[todayKey()] || [];
+    data.meals[todayKey()].push(m);
+    save();
+  };
+
+  const activity = document.getElementById('activityType');
+  const body = document.getElementById('bodyPart');
+  const exercise = document.getElementById('exerciseName');
+
+  if(activity) activity.onchange = () => v103PopulateExercises(true);
+  if(body) body.onchange = () => v103PopulateExercises(true);
+  if(exercise) exercise.onchange = () => { if(typeof v102RenderCurrentWorkoutPreview === 'function') v102RenderCurrentWorkoutPreview(); };
+
+  v103PopulateFoodItems(true);
+  v103PopulateExercises(true);
+}
+
+function v103BindMobileBottomNav(){
+  document.querySelectorAll('[data-mobile-tab]').forEach(btn=>{
+    btn.onclick = () => switchTab(btn.dataset.mobileTab);
+  });
+}
+
+if(typeof switchTab === 'function'){
+  const oldSwitchTabV103 = switchTab;
+  switchTab = function(tab){
+    oldSwitchTabV103(tab);
+    document.querySelectorAll('[data-mobile-tab]').forEach(b => b.classList.toggle('active', b.dataset.mobileTab === tab));
+    setTimeout(()=>{ v103BindDropdowns(); }, 0);
+  };
+}
+
+if(typeof renderAll === 'function'){
+  const oldRenderAllV103 = renderAll;
+  renderAll = function(){
+    oldRenderAllV103();
+    document.querySelectorAll('[data-mobile-tab]').forEach(b => b.classList.toggle('active', b.dataset.mobileTab === currentTab));
+  };
+}
+
+// Disable older render-driven dropdown resets by final rebinding after each render/tab load.
+v103BindDropdowns();
+v103BindMobileBottomNav();
+setTimeout(()=>{ v103BindDropdowns(); v103BindMobileBottomNav(); }, 100);
+try{ renderAll(); }catch(e){ console.error('V10.3 init issue', e); }
 </script>
 <script>
 if ('serviceWorker' in navigator) {
@@ -595,5 +1173,25 @@ if ('serviceWorker' in navigator) {
   });
 }
 </script>
+
+
+<div class="modal hidden" id="legalModal">
+  <div class="modal-card">
+    <div class="header" style="margin-bottom:8px">
+      <div><h1 id="legalTitle">Legal</h1></div>
+      <button class="btn" id="closeLegalBtn">Close</button>
+    </div>
+    <div class="review" id="legalContent"></div>
+  </div>
+</div>
+
+
+<nav class="mobile-bottom-nav" id="mobileBottomNav">
+  <button data-mobile-tab="home" class="active"><span>🏠</span><small>Home</small></button>
+  <button data-mobile-tab="nutrition"><span>🍽️</span><small>Food</small></button>
+  <button data-mobile-tab="workout"><span>🏋️</span><small>Workout</small></button>
+  <button data-mobile-tab="coach"><span>🧠</span><small>Coach</small></button>
+  <button data-mobile-tab="profile"><span>👤</span><small>Profile</small></button>
+</nav>
 
 </body></html>
