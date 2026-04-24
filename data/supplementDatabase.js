@@ -1,10 +1,19 @@
 export const SUPPLEMENT_DATABASE = [
-  {main:"Supplements",sub:"Protein",name:"Whey Protein",defaultQty:1,unit:"scoop",portion:"1 scoop ≈ 30g",calories:120,protein:24,carbs:3,fats:1},
-  {main:"Supplements",sub:"Protein",name:"Mass Gainer",defaultQty:1,unit:"scoop",portion:"1 scoop ≈ 100g",calories:380,protein:24,carbs:62,fats:5},
-  {main:"Supplements",sub:"Performance",name:"Creatine",defaultQty:5,unit:"g",portion:"5g",components:[{name:"Creatine Monohydrate",amount:"5g"}]},
-  {main:"Supplements",sub:"Performance",name:"Pre Workout",defaultQty:1,unit:"scoop",portion:"1 scoop",components:[{name:"Caffeine",amount:"200mg"},{name:"Beta Alanine",amount:"3g"}]},
-  {main:"Supplements",sub:"Vitamins",name:"Multivitamin",defaultQty:1,unit:"tablet",portion:"1 tablet",components:[{name:"Multiple vitamins",amount:"blend"}]},
-  {main:"Supplements",sub:"Vitamins",name:"Vitamin D3 + K2",defaultQty:1,unit:"capsule",portion:"1 capsule",components:[{name:"Vitamin D3",amount:"5000 IU"},{name:"Vitamin K2",amount:"100 mcg"}]},
-  {main:"Supplements",sub:"Recovery",name:"Fish Oil",defaultQty:2,unit:"capsule",portion:"2 capsules",components:[{name:"Omega 3",amount:"1000mg"}]},
-  {main:"Supplements",sub:"Recovery",name:"Electrolytes",defaultQty:1,unit:"serving",portion:"1 serving",components:[{name:"Sodium",amount:"500mg"},{name:"Potassium",amount:"200mg"},{name:"Magnesium",amount:"100mg"}]}
+{main:"Supplements",sub:"Protein",name:"Whey Protein",defaultQty:1,unit:"scoop",portion:"1 scoop ≈ 30g",timing:"Post-workout / anytime protein gap",calories:120,protein:24,carbs:3,fats:1},
+{main:"Supplements",sub:"Protein",name:"Whey Isolate",defaultQty:1,unit:"scoop",portion:"1 scoop ≈ 30g",timing:"Post-workout / anytime protein gap",calories:105,protein:25,carbs:1,fats:0},
+{main:"Supplements",sub:"Protein",name:"Casein Protein",defaultQty:1,unit:"scoop",portion:"1 scoop ≈ 30g",timing:"Before Bed",calories:120,protein:24,carbs:3,fats:1},
+{main:"Supplements",sub:"Protein",name:"Mass Gainer",defaultQty:1,unit:"scoop",portion:"1 scoop ≈ 100g",timing:"Post-workout / calorie gap",calories:380,protein:24,carbs:62,fats:5},
+{main:"Supplements",sub:"Performance",name:"Creatine",defaultQty:5,unit:"g",portion:"5g",timing:"Daily, any time",components:[{name:"Creatine Monohydrate",amount:"5g"}]},
+{main:"Supplements",sub:"Performance",name:"Pre Workout",defaultQty:1,unit:"scoop",portion:"1 scoop",timing:"20–30 min before workout",components:[{name:"Caffeine",amount:"200mg"},{name:"Beta Alanine",amount:"3g"}]},
+{main:"Supplements",sub:"Vitamins",name:"Multivitamin",defaultQty:1,unit:"tablet",portion:"1 tablet",timing:"With breakfast",components:[{name:"Multiple vitamins",amount:"blend"}]},
+{main:"Supplements",sub:"Vitamins",name:"Vitamin D3",defaultQty:1,unit:"capsule",portion:"1 capsule",timing:"With fat-containing meal",components:[{name:"Vitamin D3",amount:"5000 IU"}]},
+{main:"Supplements",sub:"Vitamins",name:"Vitamin D3 + K2",defaultQty:1,unit:"capsule",portion:"1 capsule",timing:"With fat-containing meal",components:[{name:"Vitamin D3",amount:"5000 IU"},{name:"Vitamin K2",amount:"100 mcg"}]},
+{main:"Supplements",sub:"Recovery",name:"Fish Oil",defaultQty:2,unit:"capsule",portion:"2 capsules",timing:"With meal",components:[{name:"Omega 3",amount:"1000mg"}]},
+{main:"Supplements",sub:"Recovery",name:"Electrolytes",defaultQty:1,unit:"serving",portion:"1 serving",timing:"During workout / hot day",components:[{name:"Sodium",amount:"500mg"},{name:"Potassium",amount:"200mg"},{name:"Magnesium",amount:"100mg"}]},
+{main:"Supplements",sub:"Before Bed",name:"Magnesium",defaultQty:1,unit:"tablet",portion:"1 tablet",timing:"Before Bed",components:[{name:"Magnesium",amount:"200mg"}]},
+{main:"Supplements",sub:"Before Bed",name:"ZMA",defaultQty:1,unit:"serving",portion:"1 serving",timing:"Before Bed",components:[{name:"Zinc",amount:"blend"},{name:"Magnesium",amount:"blend"}]},
+{main:"Supplements",sub:"Before Bed",name:"Ashwagandha",defaultQty:1,unit:"capsule",portion:"1 capsule",timing:"Evening / Before Bed",components:[{name:"Ashwagandha",amount:"500mg"}]},
+{main:"Supplements",sub:"Before Bed",name:"Melatonin",defaultQty:1,unit:"tablet",portion:"1 tablet",timing:"Before Bed",components:[{name:"Melatonin",amount:"3mg"}]},
+{main:"Supplements",sub:"Before Bed",name:"Glycine",defaultQty:3,unit:"g",portion:"3g",timing:"Before Bed",components:[{name:"Glycine",amount:"3g"}]},
+{main:"Supplements",sub:"Before Bed",name:"Chamomile Tea",defaultQty:1,unit:"cup",portion:"1 cup ≈ 150ml",timing:"Before Bed",calories:0,protein:0,carbs:0,fats:0}
 ];
