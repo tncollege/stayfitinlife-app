@@ -11,3 +11,9 @@
 .onboarding-progress span{display:block;height:100%;background:linear-gradient(90deg,#20e4ff,#8b5cf6);border-radius:999px;transition:width .25s ease}
 .onboarding-goals .choice-btn{min-height:86px}
 #addSet{margin-top:8px}
+
+/* V12.5 onboarding hard fix: page-rendered onboarding, no modal mount dependency */
+.onboarding-page{animation:onboardPage .28s ease-out both}
+@keyframes onboardPage{from{opacity:.15;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.onboarding-progress{height:8px;background:rgba(255,255,255,.08);border-radius:999px;overflow:hidden;margin:12px 0 18px}
+.onboarding-progress span{display:block;height:100%;background:linear-gradient(90deg,#20e4ff,#8b5cf6);border-radius:999px}

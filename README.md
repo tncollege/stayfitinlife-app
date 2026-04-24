@@ -24,3 +24,9 @@ Legal update:
 - Added Version V12.4 and Last Updated: 25 April 2026.
 - Added onboarding legal acceptance checkbox and acceptance tracking.
 - Added markdown legal files in /legal.
+
+V12.5 emergency onboarding hard fix:
+- Onboarding no longer depends on modal rendering.
+- Start Onboarding renders Step 1 directly in main page.
+- Step 1: Name, Age, Height, Current Weight.
+- Step 2: Goal cards, target, weeks/date, lifestyle, summary, legal acceptance.
