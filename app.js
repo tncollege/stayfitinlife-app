@@ -17,7 +17,124 @@ function recoveryStatus(d=viewDate){let r=data.recovery[d],score=60;if(r){score=
 function switchTab(t){tab=t;document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===t));document.querySelectorAll('[data-mobile-tab]').forEach(b=>b.classList.toggle('active',b.dataset.mobileTab===t));q('sidebar').classList.remove('open');render()}function shell(t,s,c){q('main').innerHTML=`<section><div class="header"><h1>${t}</h1><div class="muted">${s||''}</div></div>${c}</section>`}function dateControls(){return`<div class="pill-row"><button class="pill ${viewDate===todayKey()?'active':''}" data-datepick="${todayKey()}">Today</button><button class="pill ${viewDate===yesterdayKey()?'active':''}" data-datepick="${yesterdayKey()}">Yesterday</button><input id="viewDatePicker" type="date" value="${viewDate}" style="max-width:180px"></div>`}function wireDate(){document.querySelectorAll('[data-datepick]').forEach(b=>b.onclick=()=>{viewDate=b.dataset.datepick;render()});if(q('viewDatePicker'))q('viewDatePicker').onchange=e=>{viewDate=e.target.value;render()}}
 function render(){if(!profileComplete()&&tab!=='settings')return onboardingGate();({home,nutrition,workout,coach,profile,recovery,progress,settings}[tab]||home)()}
 function onboardingGate(){shell('Setup Required','Complete onboarding to activate your targets and dashboard.',`<div class="panel"><div class="panel-title">Welcome to STAYFITINLIFE</div><div class="muted">Your dashboard, macros, water, recovery and workout intelligence need your profile first.</div><button class="btn primary" id="startOnboarding" style="margin-top:16px">Start Onboarding</button></div>`);q('startOnboarding').onclick=openOnboarding}
-function openOnboarding(){q('modal').classList.remove('hidden');q('modalCard').innerHTML=`<div class="wordmark" style="font-size:30px">STAYFITINLIFE</div><div class="panel-title">Onboarding</div><div class="form-grid">${[['name','Name'],['age','Age'],['gender','Gender'],['height','Height cm'],['currentWeight','Current Weight'],['startWeight','Starting Weight'],['goal','Goal'],['targetWeight','Target Weight'],['targetBodyFat','Target Body Fat %'],['activity','Activity'],['diet','Diet Preference'],['mode','Beginner / Advanced']].map(([k,l])=>`<div class="field"><label>${l}</label><input id="ob_${k}"></div>`).join('')}</div><button class="btn primary" id="finishOnboarding" style="margin-top:16px">Activate Dashboard</button><button class="btn" id="closeOnboarding">Close</button>`;q('closeOnboarding').onclick=()=>q('modal').classList.add('hidden');q('finishOnboarding').onclick=()=>{['name','age','gender','height','currentWeight','startWeight','goal','targetWeight','targetBodyFat','activity','diet','mode'].forEach(k=>data.profile[k]=q('ob_'+k).value);q('modal').classList.add('hidden');save()}}
+
+function idealWeightRange(heightCm){
+  const h=Number(heightCm)/100;
+  if(!h) return {min:0,max:0,mid:0};
+  const min=round(18.5*h*h,1);
+  const max=round(24.9*h*h,1);
+  return {min,max,mid:round((min+max)/2,1)};
+}
+function suggestedBodyFat(gender,goal){
+  if(goal==='Muscle Gain') return gender==='Female'?'20-26%':'12-18%';
+  if(goal==='Maintenance') return gender==='Female'?'21-28%':'13-20%';
+  return gender==='Female'?'18-24%':'10-16%';
+}
+function estimatedTargetFromFat(currentWeight,targetBf,gender){
+  const bf=Number(targetBf);
+  const cw=Number(currentWeight);
+  if(!bf||!cw) return '';
+  const assumedCurrentBf=gender==='Female'?30:24;
+  const leanMass=cw*(1-assumedCurrentBf/100);
+  return round(leanMass/(1-bf/100),1);
+}
+function estimatedFatFromTarget(currentWeight,targetWeight,gender){
+  const cw=Number(currentWeight);
+  const tw=Number(targetWeight);
+  if(!cw||!tw) return '';
+  const assumedCurrentBf=gender==='Female'?30:24;
+  const leanMass=cw*(1-assumedCurrentBf/100);
+  const bf=round((1-leanMass/tw)*100,1);
+  return Math.max(6,Math.min(35,bf));
+}
+
+function openOnboarding(){
+ q('modal').classList.remove('hidden');
+ q('modalCard').innerHTML=`<div class="wordmark" style="font-size:30px">STAYFITINLIFE</div>
+ <div class="panel-title">Onboarding</div>
+ <div class="muted">Complete your profile to activate Goal Engine, Calorie Engine, macros, water, recovery and Daily Plan.</div>
+
+ <div class="form-grid" style="margin-top:14px">
+   <div class="field"><label>Name</label><input id="ob_name" placeholder="Your name"></div>
+   <div class="field"><label>Age</label><input id="ob_age" type="number" min="10" max="100"></div>
+   <div class="field"><label>Gender</label><select id="ob_gender"><option>Male</option><option>Female</option><option>Other</option></select></div>
+
+   <div class="field"><label>Height (cm)</label><input id="ob_height" type="number" step="0.1"></div>
+   <div class="field"><label>Current Weight (kg)</label><input id="ob_currentWeight" type="number" step="0.1"></div>
+   <div class="field"><label>Starting Weight (kg)</label><input id="ob_startWeight" type="number" step="0.1" placeholder="Auto-filled from current weight"></div>
+
+   <div class="field"><label>Goal</label><select id="ob_goal"><option>Fat Loss</option><option>Muscle Gain</option><option>Maintenance</option></select></div>
+   <div class="field"><label>Target Type</label><select id="ob_targetType"><option value="weight">Goal Weight</option><option value="bodyfat">Goal Body Fat %</option></select></div>
+   <div class="field"><label>Activity Level</label><select id="ob_activity"><option>Low</option><option selected>Moderate</option><option>High</option></select></div>
+
+   <div class="field"><label>Target Weight (kg)</label><input id="ob_targetWeight" type="number" step="0.1"></div>
+   <div class="field"><label>Target Body Fat %</label><input id="ob_targetBodyFat" type="number" step="0.1"></div>
+   <div class="field"><label>Diet Preference</label><select id="ob_diet"><option>Non-Veg</option><option>Veg</option><option>Vegan</option><option>Mixed</option></select></div>
+
+   <div class="field"><label>Training Mode</label><select id="ob_mode"><option>Beginner</option><option>Advanced</option></select></div>
+ </div>
+
+ <div class="suggestion" id="goalSuggestion" style="margin-top:14px">Enter height, weight and goal to see realistic target guidance.</div>
+
+ <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">
+   <button class="btn primary" id="finishOnboarding">Activate Dashboard</button>
+   <button class="btn" id="closeOnboarding">Close</button>
+ </div>`;
+
+ const ids=['name','age','gender','height','currentWeight','startWeight','goal','targetType','activity','targetWeight','targetBodyFat','diet','mode'];
+ const el=k=>q('ob_'+k);
+
+ const syncOnboarding=()=>{
+   if(el('currentWeight').value && !el('startWeight').value) el('startWeight').value=el('currentWeight').value;
+
+   const goal=el('goal').value;
+   const gender=el('gender').value;
+   const range=idealWeightRange(el('height').value);
+   const current=Number(el('currentWeight').value);
+
+   if(el('targetType').value==='weight' && el('targetWeight').value && !el('targetBodyFat').dataset.userEdited){
+     el('targetBodyFat').value=estimatedFatFromTarget(current,el('targetWeight').value,gender);
+   }
+
+   if(el('targetType').value==='bodyfat' && el('targetBodyFat').value && !el('targetWeight').dataset.userEdited){
+     el('targetWeight').value=estimatedTargetFromFat(current,el('targetBodyFat').value,gender);
+   }
+
+   let msg='';
+   if(range.mid){
+     msg+=`Healthy BMI weight range for your height: ${range.min}–${range.max} kg.<br>`;
+   }
+   msg+=`Suggested body fat range for ${goal}: ${suggestedBodyFat(gender,goal)}.<br>`;
+
+   const tw=Number(el('targetWeight').value);
+   if(tw && range.mid){
+     if(tw<range.min*.92 || tw>range.max*1.35){
+       msg+=`<span style="color:var(--red)">Target looks unrealistic. Adjust target or timeline.</span>`;
+     }else{
+       msg+=`<span style="color:var(--green)">Target looks realistic.</span>`;
+     }
+   }
+   q('goalSuggestion').innerHTML=msg;
+ };
+
+ ['height','currentWeight','startWeight','goal','gender','targetType','activity'].forEach(k=>el(k).oninput=syncOnboarding);
+ el('targetWeight').oninput=()=>{el('targetWeight').dataset.userEdited='1';if(el('targetType').value==='weight'){el('targetBodyFat').dataset.userEdited='';}syncOnboarding()};
+ el('targetBodyFat').oninput=()=>{el('targetBodyFat').dataset.userEdited='1';if(el('targetType').value==='bodyfat'){el('targetWeight').dataset.userEdited='';}syncOnboarding()};
+ el('targetType').onchange=()=>{el('targetWeight').dataset.userEdited='';el('targetBodyFat').dataset.userEdited='';syncOnboarding()};
+
+ q('closeOnboarding').onclick=()=>q('modal').classList.add('hidden');
+ q('finishOnboarding').onclick=()=>{
+   const required=['name','age','gender','height','currentWeight','goal','activity','diet','mode'];
+   const missing=required.filter(k=>!el(k).value);
+   if(missing.length){alert('Please complete: '+missing.join(', '));return;}
+   ids.forEach(k=>data.profile[k]=el(k).value);
+   if(!data.profile.startWeight) data.profile.startWeight=data.profile.currentWeight;
+   q('modal').classList.add('hidden');
+   save();
+ };
+ syncOnboarding();
+}
+
 function morningCheckin(){q('modal').classList.remove('hidden');q('modalCard').innerHTML=`<div class="panel-title">Good Morning 👋</div><div class="field"><label>How long did you sleep?</label><div class="pill-row">${['5h','6h','7h','8h','9h+'].map(x=>`<button class="pill" data-sleep="${x}">${x}</button>`).join('')}</div></div><div class="form-grid"><div class="field"><label>Sleep Quality</label><select id="mc_quality"><option>Poor</option><option selected>Average</option><option>Good</option></select></div><div class="field"><label>Energy</label><select id="mc_energy"><option>Low</option><option selected>Moderate</option><option>High</option></select></div><div class="field"><label>Soreness</label><select id="mc_soreness"><option>Low</option><option selected>Moderate</option><option>High</option></select></div></div><button class="btn primary" id="saveMorning">Save</button>`;let sleep='7';document.querySelectorAll('[data-sleep]').forEach(b=>b.onclick=()=>{sleep=b.dataset.sleep.replace('h+','').replace('h','');document.querySelectorAll('[data-sleep]').forEach(x=>x.classList.remove('active'));b.classList.add('active')});q('saveMorning').onclick=()=>{data.recovery[todayKey()]={sleep,quality:q('mc_quality').value,energy:q('mc_energy').value,soreness:q('mc_soreness').value};q('modal').classList.add('hidden');save()}}
 function home(){let t=targets(),m=mealTotals(todayKey()),w=waterTotal(todayKey()),r=recoveryStatus(todayKey()),rings=[['Protein',m.p,t.protein,'g','--green'],['Carbs',m.c,t.carbs,'g','--purple'],['Fats',m.f,t.fats,'g','--blue'],['Water',w,t.water,'L','--cyan']];shell('Dashboard',new Date().toLocaleDateString(),`<div class="grid-top"><div class="panel"><div class="panel-title">Today’s Progress</div><div class="rings">${rings.map(([n,v,target,u,c])=>{let pct=Math.min(100,Math.round(v/target*100));return`<div class="ring-card"><div class="ring" style="--c:var(${c});--p:${pct}"><div class="ring-inner">${pct}%</div></div><div class="ring-name">${n}</div><div class="ring-sub">${round(v)} / ${target} ${u}</div></div>`}).join('')}</div></div><div class="panel"><div class="panel-title">Next Actions</div>${nextActions().map(x=>`<div class="item">${x}</div>`).join('')}<button class="btn" id="morningBtn" style="margin-top:12px">Good Morning Check-in</button></div></div><div class="panel"><div class="panel-title">Water Quick Add</div><button class="btn" data-water="250">+250ml</button><button class="btn" data-water="500">+500ml</button><button class="btn" data-water="1000">+1L</button></div><div class="cards"><div class="card"><div class="stat-label">Meals</div><div class="stat-number">${meals(todayKey()).length}</div></div><div class="card"><div class="stat-label">Workouts</div><div class="stat-number">${workouts(todayKey()).length}</div></div><div class="card"><div class="stat-label">Recovery</div><div class="stat-number">${r.status}</div><div class="muted">${r.decision}</div></div><div class="card"><div class="stat-label">Water</div><div class="stat-number">${w}L</div></div></div><div class="panel"><button class="btn primary" id="smartPlan">Generate Smart Plan</button>${planHtml()}</div><div class="panel"><div class="panel-title">Weekly Summary</div>${weeklySummary()}</div>`);wireWater(todayKey());q('smartPlan').onclick=smartPlan;q('morningBtn').onclick=morningCheckin}
 function nextActions(){let t=targets(),m=mealTotals(todayKey()),a=[];if(m.p<t.protein)a.push(`Eat ~${Math.round(t.protein-m.p)}g protein.`);if(waterTotal(todayKey())<t.water)a.push(`Drink ~${round(t.water-waterTotal(todayKey()))}L water.`);a.push(`Suggested muscles: ${recommendMuscles().join(' + ')||'Any fresh group'}`);return a}
@@ -32,7 +149,32 @@ function workout(){let exs=selectedMuscles.flatMap(m=>EXERCISE_DATABASE[m].map(e
 function setsFor(ex){return currentSets.filter(s=>s.exercise===ex)}function fmtRest(){return String(Math.floor(restSeconds/60)).padStart(2,'0')+':'+String(restSeconds%60).padStart(2,'0')}function startRest(s){stopRest();restSeconds=s.type==='Warmup'?45:90;if(Number(s.reps)<=5||Number(s.weight)>=100)restSeconds=120;restPaused=false;restInt=setInterval(()=>{if(!restPaused){restSeconds--;if(restSeconds<=0)stopRest();render()}},1000)}function stopRest(){clearInterval(restInt);restInt=null;restSeconds=0}
 function finishWorkout(){if(!currentSets.length)return alert('Add at least one set');let vol=currentSets.reduce((a,s)=>a+Number(s.weight||0)*Number(s.reps||0),0),int=vol>6000?'High':vol>2500?'Moderate':'Light';data.workouts[viewDate]=workouts(viewDate);data.workouts[viewDate].push({name:selectedMuscles.join(' + '),muscles:[...selectedMuscles],sets:[...currentSets],volume:vol,intensity:int});currentSets=[];stopRest();smartPlan();save();alert('Workout saved. Volume: '+vol+'kg')}function recommendMuscles(){let recent=Object.values(data.workouts||{}).flat().slice(-3).flatMap(w=>w.muscles||[]);return Object.keys(EXERCISE_DATABASE).filter(m=>!recent.includes(m)).slice(0,2)}
 function smartPlan(){let t=targets(),m=mealTotals(todayKey()),r=recoveryStatus(todayKey());data.coachPlans[todayKey()]={meal:[`Remaining protein: ${Math.max(0,t.protein-m.p)}g`,`Remaining calories: ${Math.max(0,t.calories-m.cal)} kcal`],workout:[`Recommended: ${recommendMuscles().join(' + ')||'Any fresh group'}`,`${r.decision}: ${r.decision==='Performance Day'?'hard training allowed':'manage intensity'}`],recovery:[`Water target: ${t.water}L`,`Recovery score: ${r.score}/100`]}}function planHtml(){let p=data.coachPlans[todayKey()];if(!p)return'<div class="item">Generate Smart Plan.</div>';return['meal','workout','recovery'].map(k=>`<div class="item"><strong>${k.toUpperCase()}</strong><ul>${p[k].map(i=>`<li>${i}</li>`).join('')}</ul></div>`).join('')}
-function profile(){let p=data.profile,fields=['name','age','gender','height','currentWeight','startWeight','targetWeight','targetBodyFat','goal','activity','diet','mode'];shell('Profile','Correct profile fields',`<div class="panel"><div class="form-grid">${fields.map(k=>`<div class="field"><label>${k}</label><input id="pf_${k}" value="${p[k]||''}"></div>`).join('')}</div><button class="btn primary" id="saveProfile">Save Profile</button></div>`);q('saveProfile').onclick=()=>{fields.forEach(k=>data.profile[k]=q('pf_'+k).value);save()}}
+function profile(){
+ let p=data.profile;
+ shell('Profile','Correct profile fields',`<div class="panel"><div class="form-grid">
+ <div class="field"><label>Name</label><input id="pf_name" value="${p.name||''}"></div>
+ <div class="field"><label>Age</label><input id="pf_age" type="number" value="${p.age||''}"></div>
+ <div class="field"><label>Gender</label><select id="pf_gender"><option ${p.gender==='Male'?'selected':''}>Male</option><option ${p.gender==='Female'?'selected':''}>Female</option><option ${p.gender==='Other'?'selected':''}>Other</option></select></div>
+ <div class="field"><label>Height (cm)</label><input id="pf_height" type="number" step="0.1" value="${p.height||''}"></div>
+ <div class="field"><label>Current Weight</label><input id="pf_currentWeight" type="number" step="0.1" value="${p.currentWeight||''}"></div>
+ <div class="field"><label>Starting Weight</label><input id="pf_startWeight" type="number" step="0.1" value="${p.startWeight||p.currentWeight||''}"></div>
+ <div class="field"><label>Goal</label><select id="pf_goal"><option ${p.goal==='Fat Loss'?'selected':''}>Fat Loss</option><option ${p.goal==='Muscle Gain'?'selected':''}>Muscle Gain</option><option ${p.goal==='Maintenance'?'selected':''}>Maintenance</option></select></div>
+ <div class="field"><label>Target Weight</label><input id="pf_targetWeight" type="number" step="0.1" value="${p.targetWeight||''}"></div>
+ <div class="field"><label>Target Body Fat %</label><input id="pf_targetBodyFat" type="number" step="0.1" value="${p.targetBodyFat||''}"></div>
+ <div class="field"><label>Activity</label><select id="pf_activity"><option ${p.activity==='Low'?'selected':''}>Low</option><option ${p.activity==='Moderate'?'selected':''}>Moderate</option><option ${p.activity==='High'?'selected':''}>High</option></select></div>
+ <div class="field"><label>Diet Preference</label><select id="pf_diet"><option ${p.diet==='Non-Veg'?'selected':''}>Non-Veg</option><option ${p.diet==='Veg'?'selected':''}>Veg</option><option ${p.diet==='Vegan'?'selected':''}>Vegan</option><option ${p.diet==='Mixed'?'selected':''}>Mixed</option></select></div>
+ <div class="field"><label>Training Mode</label><select id="pf_mode"><option ${p.mode==='Beginner'?'selected':''}>Beginner</option><option ${p.mode==='Advanced'?'selected':''}>Advanced</option></select></div>
+ </div><div class="suggestion" id="profileSuggestion"></div><button class="btn primary" id="saveProfile">Save Profile</button></div>`);
+ const fields=['name','age','gender','height','currentWeight','startWeight','targetWeight','targetBodyFat','goal','activity','diet','mode'];
+ const update=()=>{
+   const gender=q('pf_gender').value, goal=q('pf_goal').value, range=idealWeightRange(q('pf_height').value);
+   q('profileSuggestion').innerHTML=range.mid?`Healthy BMI weight range: ${range.min}–${range.max} kg.<br>Suggested body fat for ${goal}: ${suggestedBodyFat(gender,goal)}.`:'';
+ };
+ fields.forEach(k=>{if(q('pf_'+k)){q('pf_'+k).oninput=update;q('pf_'+k).onchange=update}});
+ update();
+ q('saveProfile').onclick=()=>{fields.forEach(k=>data.profile[k]=q('pf_'+k).value);if(!data.profile.startWeight)data.profile.startWeight=data.profile.currentWeight;save()}
+}
+
 function recovery(){let r=recoveryStatus(viewDate);shell('Recovery',`${r.decision}`,`${dateControls()}<div class="panel"><div class="form-grid"><div class="field"><label>Sleep Duration</label><select id="sleep"><option>5</option><option>6</option><option selected>7</option><option>8</option><option>9</option></select></div><div class="field"><label>Sleep Quality</label><select id="quality"><option>Poor</option><option selected>Average</option><option>Good</option></select></div><div class="field"><label>Energy</label><select id="energy"><option>Low</option><option selected>Moderate</option><option>High</option></select></div><div class="field"><label>Soreness</label><select id="sore"><option>Low</option><option selected>Moderate</option><option>High</option></select></div></div><button class="btn primary" id="saveRec">Save Recovery</button></div><div class="panel"><div class="panel-title">${r.status} • ${r.decision}</div><div class="item">Score ${r.score}/100 • Water ${waterTotal(viewDate)}L</div></div>`);wireDate();q('saveRec').onclick=()=>{data.recovery[viewDate]={sleep:q('sleep').value,quality:q('quality').value,energy:q('energy').value,soreness:q('sore').value};save()}}
 function progress(){shell('Progress','Goal progress and weight trend',`<div class="panel"><div class="field"><label>Weight</label><input id="weight"></div><button class="btn primary" id="addWeight">Add Weight</button></div><div class="panel">${data.weights.map((w,i)=>`<div class="log-card">${w.weight}kg • ${w.date}<button class="btn danger" data-delweight="${i}">Delete</button></div>`).join('')||'<div class="item">No logs.</div>'}</div>`);q('addWeight').onclick=()=>{data.weights.unshift({date:todayKey(),weight:q('weight').value});save()};document.querySelectorAll('[data-delweight]').forEach(b=>b.onclick=()=>{data.weights.splice(Number(b.dataset.delweight),1);save()})}
 function coach(){let u=data.aiCoachUsage;if(u.date!==todayKey())u=data.aiCoachUsage={date:todayKey(),count:0};shell('AI Coach','5 AI questions/day',`<div class="panel"><div class="item">AI Coach: <strong>${u.count}/5</strong> used today</div><div class="field"><label>Question</label><textarea id="question"></textarea></div><button class="btn primary" id="ask">Ask AI Coach</button><button class="btn" id="quick">Quick Local Advice</button><div class="suggestion" id="answer"></div></div>`);q('quick').onclick=()=>q('answer').innerHTML=localCoach();q('ask').onclick=askCoach}function localCoach(){return`Recovery: ${recoveryStatus(todayKey()).status}<br>Recommended: ${recommendMuscles().join(' + ')||'Any fresh group'}<br>Protein remaining: ${Math.max(0,targets().protein-mealTotals(todayKey()).p)}g`}async function askCoach(){let u=data.aiCoachUsage;if(u.count>=5){q('answer').innerHTML='Daily limit reached.';return}q('answer').innerHTML='Thinking...';try{let r=await fetch('/.netlify/functions/ai-coach',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question:q('question').value,context:data})});if(!r.ok)throw Error();let j=await r.json();u.count++;save();q('answer').innerHTML=j.answer}catch{q('answer').innerHTML=localCoach()+'<br><span class="muted">AI unavailable; fallback shown.</span>'}}
