@@ -1,6 +1,6 @@
 # Privacy Policy – STAYFITINLIFE
 
-**Version:** V12.4  
+**Version:** V13.1  
 **Last Updated:** 25 April 2026
 
 STAYFITINLIFE respects your privacy and stores your data locally in this version. We collect profile, nutrition, workout, water, recovery, and app usage data to personalize your fitness experience. We do not sell your personal data.

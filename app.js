@@ -2,7 +2,7 @@ import { FOOD_DATABASE } from './data/foodDatabase.js';
 import { EXERCISE_DATABASE, SPLITS } from './data/exerciseDatabase.js';
 import { SUPPLEMENT_DATABASE } from './data/supplementDatabase.js';
 
-const STORE='stayfitinlife_v13_1_final';
+const STORE='stayfitinlife_v13_1_final_clean';
 const APP_VERSION='V13.1';
 const LAST_UPDATED='25 April 2026';
 
@@ -804,4 +804,4 @@ function bind(){
 }
 bind();
 render();
-if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js?v=12.6').catch(()=>{}));
+if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js?v=13.1-final-clean').catch(()=>{}));

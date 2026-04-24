@@ -1,28 +1,14 @@
-# STAYFITINLIFE V13.1 Final Production UI
+# STAYFITINLIFE V13.1 Final Clean
 
-GitHub + Netlify ready.
+This is the corrected V13.1 final production UI package.
 
-## Included
-- Final mobile-first UI with fixed STAYFITINLIFE branding
-- Desktop 3-column dashboard:
-  - Left fixed sidebar
-  - Center dashboard with 1 calorie ring + macro/water progress bars
-  - Right Coach/Insights panel
-- Dual Mode Coach Engine:
-  - Beginner = guided meal + workout plan
-  - Advanced = targets + insights + optional plan
-- Coach tab:
-  - Today Plan
-  - Meal Plan
-  - Workout Plan
-  - Ask AI
-- Expanded production nutrition database:
-  - Indian tandoori chicken, paneer curry/dry, chaap curry/dry, expanded roti/rice
-  - Expanded vegetables, coffee, dairy
-  - Existing global cuisines, sauces, drinks, fruits, supplements, alcohol retained
-- Stable onboarding from V12.6 retained
-- Legal documentation retained
-- Barcode scanner retained
-- Workout rest timer retained
+## Corrections
+- App shell title is V13.1.
+- Runtime version is V13.1.
+- Local storage key is V13.1-specific.
+- Service worker now clears older caches and fetches current files.
+- CSS and JS links include V13.1 cache-busting.
+- Netlify headers disable stale app-shell caching.
 
-Set `OPENAI_API_KEY` in Netlify environment variables for AI Coach.
+## Deploy
+On Netlify, deploy this ZIP/folder and use: Deploys → Trigger deploy → Clear cache and deploy site.
