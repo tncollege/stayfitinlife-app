@@ -7,6 +7,76 @@ const todayKey=()=>new Date().toISOString().slice(0,10);
 const yesterdayKey=()=>{let d=new Date();d.setDate(d.getDate()-1);return d.toISOString().slice(0,10)};
 const defaultData={profile:{},meals:{},water:{},workouts:{},weights:[],recovery:{},coachPlans:{},customFoods:[],customSupplements:[],aiCoachUsage:{date:todayKey(),count:0}};
 let data=load(),tab='home',viewDate=todayKey(),selectedMeal='Breakfast',mainCat='Indian',subCat='All',selectedFood='Butter Chicken',workoutMode='Custom Muscles',selectedMuscles=['Chest'],selectedExercise='Bench Press',currentSets=[],restSeconds=0,restInt=null,restPaused=false,scannerStream=null,barcodeDetector=null,scannerLoop=null,scannerFacingMode='environment';
+
+const APP_VERSION='V12.4';
+const LAST_UPDATED='25 April 2026';
+
+const LEGAL_DOCS={
+privacy:`<div class="panel-title">Privacy Policy – STAYFITINLIFE</div>
+<div class="muted"><strong>Version:</strong> ${APP_VERSION}<br><strong>Last Updated:</strong> ${LAST_UPDATED}</div>
+<div class="item"><strong>1. Information We Collect</strong><br>
+We may collect personal information such as name, age, height, weight, body metrics and fitness goals. We also store nutrition logs, workout logs, water intake, recovery inputs such as sleep, energy and soreness, and basic device/browser information.</div>
+<div class="item"><strong>2. How We Use Your Data</strong><br>
+Your data is used to generate personalized fitness, nutrition, recovery and AI coaching suggestions, track progress, improve app performance and personalize your experience. We do not sell your personal data.</div>
+<div class="item"><strong>3. Data Storage</strong><br>
+In this version, your data is stored locally on your device/browser. Cloud sync is not enabled in this version. Future versions may introduce secure cloud storage with user login.</div>
+<div class="item"><strong>4. Third-Party Services</strong><br>
+AI services may process limited information required to generate coaching responses. Analytics or cloud services may be introduced in future updates.</div>
+<div class="item"><strong>5. Your Rights</strong><br>
+You can edit, export, import or delete your local data from Settings. You can also delete individual meals, water logs, workout sets and weight logs where supported.</div>
+<div class="item"><strong>6. Security</strong><br>
+We follow local-first storage and reasonable security practices, but no system is 100% secure. You are responsible for device and browser security.</div>
+<div class="item"><strong>7. Children’s Privacy</strong><br>
+STAYFITINLIFE is not intended for users under 13 years of age.</div>
+<div class="item"><strong>8. Policy Updates</strong><br>
+We may update this Privacy Policy. Continued use of the app means you accept the latest version.</div>`,
+
+terms:`<div class="panel-title">Terms of Use – STAYFITINLIFE</div>
+<div class="muted"><strong>Version:</strong> ${APP_VERSION}<br><strong>Last Updated:</strong> ${LAST_UPDATED}</div>
+<div class="item"><strong>1. Acceptable Use</strong><br>
+You agree to use STAYFITINLIFE for personal fitness, nutrition, recovery and habit tracking only. You agree not to misuse, exploit, copy, reverse engineer or disrupt the app.</div>
+<div class="item"><strong>2. Not Medical Advice</strong><br>
+STAYFITINLIFE is not a medical service. It does not replace doctors, dietitians, physiotherapists, certified trainers or other health professionals.</div>
+<div class="item"><strong>3. User Responsibility</strong><br>
+You are responsible for your workouts, diet choices, supplement use and health decisions. Stop any activity that causes pain, dizziness or discomfort and consult a professional where needed.</div>
+<div class="item"><strong>4. Data Accuracy</strong><br>
+Calories, macros, recovery scores and AI recommendations are estimates. We do not guarantee perfect accuracy.</div>
+<div class="item"><strong>5. App Changes</strong><br>
+We may add, change or remove features, content, calculations, layouts or functionality at any time.</div>
+<div class="item"><strong>6. Limitation of Liability</strong><br>
+STAYFITINLIFE is not liable for injuries, health problems, incorrect user input, inaccurate food data, or results from following app or AI suggestions.</div>
+<div class="item"><strong>7. Intellectual Property</strong><br>
+The STAYFITINLIFE name, design, branding, interface and app logic belong to STAYFITINLIFE unless otherwise stated.</div>
+<div class="item"><strong>8. Termination</strong><br>
+We may restrict access or future services if the app is misused.</div>`,
+
+ai:`<div class="panel-title">AI Disclaimer – STAYFITINLIFE</div>
+<div class="muted"><strong>Version:</strong> ${APP_VERSION}<br><strong>Last Updated:</strong> ${LAST_UPDATED}</div>
+<div class="item"><strong>1. Nature of AI Coach</strong><br>
+The AI Coach provides automated fitness, nutrition, recovery and habit suggestions based on your inputs and app data.</div>
+<div class="item"><strong>2. Not Professional Advice</strong><br>
+AI responses are not medical advice, dietitian advice, mental health advice, physiotherapy advice or certified personal training plans.</div>
+<div class="item"><strong>3. Input-Based Output</strong><br>
+AI output depends on your entered data. Inaccurate or incomplete inputs may produce inaccurate recommendations.</div>
+<div class="item"><strong>4. No Guarantees</strong><br>
+We do not guarantee weight loss, muscle gain, injury prevention, performance improvement or specific health outcomes.</div>
+<div class="item"><strong>5. Use at Your Own Risk</strong><br>
+Use AI suggestions at your own discretion. Stop any exercise or diet change that causes discomfort, pain, dizziness or adverse effects.</div>
+<div class="item"><strong>6. Consult Professionals</strong><br>
+Before starting intense workouts, making major diet changes, taking supplements, or managing medical conditions, consult a qualified professional.</div>`
+};
+
+function openLegalDoc(type){
+ const modal=q('modal'), card=q('modalCard');
+ modal.classList.remove('hidden');
+ card.classList.add('onboarding-card','slide-in');
+ card.innerHTML=`${LEGAL_DOCS[type]||LEGAL_DOCS.privacy}
+ <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">
+  <button class="btn primary" id="closeLegal">Close</button>
+ </div>`;
+ q('closeLegal').onclick=()=>{modal.classList.add('hidden');card.innerHTML='';card.classList.remove('slide-in')};
+}
+
 const q=id=>document.getElementById(id), round=(n,d=1)=>Math.round((Number(n)||0)*10**d)/10**d;
 function load(){try{return {...defaultData,...JSON.parse(localStorage.getItem(STORE)||'{}')}}catch{return structuredClone(defaultData)}}function save(){localStorage.setItem(STORE,JSON.stringify(data));render()}function profileComplete(){let p=data.profile;return !!(p.name&&p.age&&p.height&&p.currentWeight&&p.goal&&p.activity&&p.diet&&p.mode)}
 function targets(){let p=data.profile,w=Number(p.currentWeight||p.startWeight)||70,c=w*30;if(p.goal==='Fat Loss')c-=450;if(p.goal==='Muscle Gain')c+=300;return{calories:Math.round(c),protein:Math.round(w*1.8),carbs:Math.round(c*.42/4),fats:Math.round(c*.25/9),water:round(Math.max(2,w*.035+(p.goal==='Fat Loss'?.3:0)+(p.goal==='Muscle Gain'?.5:0)+(p.activity==='High'?.5:0)))}}
@@ -200,7 +270,30 @@ function profile(){
 function recovery(){let r=recoveryStatus(viewDate);shell('Recovery',`${r.decision}`,`${dateControls()}<div class="panel"><div class="form-grid"><div class="field"><label>Sleep Duration</label><select id="sleep"><option>5</option><option>6</option><option selected>7</option><option>8</option><option>9</option></select></div><div class="field"><label>Sleep Quality</label><select id="quality"><option>Poor</option><option selected>Average</option><option>Good</option></select></div><div class="field"><label>Energy</label><select id="energy"><option>Low</option><option selected>Moderate</option><option>High</option></select></div><div class="field"><label>Soreness</label><select id="sore"><option>Low</option><option selected>Moderate</option><option>High</option></select></div></div><button class="btn primary" id="saveRec">Save Recovery</button></div><div class="panel"><div class="panel-title">${r.status} • ${r.decision}</div><div class="item">Score ${r.score}/100 • Water ${waterTotal(viewDate)}L</div></div>`);wireDate();q('saveRec').onclick=()=>{data.recovery[viewDate]={sleep:q('sleep').value,quality:q('quality').value,energy:q('energy').value,soreness:q('sore').value};save()}}
 function progress(){shell('Progress','Goal progress and weight trend',`<div class="panel"><div class="field"><label>Weight</label><input id="weight"></div><button class="btn primary" id="addWeight">Add Weight</button></div><div class="panel">${data.weights.map((w,i)=>`<div class="log-card">${w.weight}kg • ${w.date}<button class="btn danger" data-delweight="${i}">Delete</button></div>`).join('')||'<div class="item">No logs.</div>'}</div>`);q('addWeight').onclick=()=>{data.weights.unshift({date:todayKey(),weight:q('weight').value});save()};document.querySelectorAll('[data-delweight]').forEach(b=>b.onclick=()=>{data.weights.splice(Number(b.dataset.delweight),1);save()})}
 function coach(){let u=data.aiCoachUsage;if(u.date!==todayKey())u=data.aiCoachUsage={date:todayKey(),count:0};shell('AI Coach','5 AI questions/day',`<div class="panel"><div class="item">AI Coach: <strong>${u.count}/5</strong> used today</div><div class="field"><label>Question</label><textarea id="question"></textarea></div><button class="btn primary" id="ask">Ask AI Coach</button><button class="btn" id="quick">Quick Local Advice</button><div class="suggestion" id="answer"></div></div>`);q('quick').onclick=()=>q('answer').innerHTML=localCoach();q('ask').onclick=askCoach}function localCoach(){return`Recovery: ${recoveryStatus(todayKey()).status}<br>Recommended: ${recommendMuscles().join(' + ')||'Any fresh group'}<br>Protein remaining: ${Math.max(0,targets().protein-mealTotals(todayKey()).p)}g`}async function askCoach(){let u=data.aiCoachUsage;if(u.count>=5){q('answer').innerHTML='Daily limit reached.';return}q('answer').innerHTML='Thinking...';try{let r=await fetch('/.netlify/functions/ai-coach',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question:q('question').value,context:data})});if(!r.ok)throw Error();let j=await r.json();u.count++;save();q('answer').innerHTML=j.answer}catch{q('answer').innerHTML=localCoach()+'<br><span class="muted">AI unavailable; fallback shown.</span>'}}
-function settings(){shell('Settings','Cloud Sync removed until login is active.',`<div class="panel"><button class="btn" id="export">Export</button><label class="btn" for="importFile">Import</label><input class="hidden" id="importFile" type="file"><button class="btn danger" id="delete">Delete Local Data</button></div><div class="panel"><button class="btn" onclick="alert('Privacy: local app data only unless cloud sync is later enabled.')">Privacy</button><button class="btn" onclick="alert('Terms: not medical advice.')">Terms</button><button class="btn" onclick="alert('AI Coach gives general guidance only.')">AI Disclaimer</button></div>`);q('export').onclick=()=>{let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));a.download='stayfitinlife-backup.json';a.click()};q('importFile').onchange=async e=>{let f=e.target.files[0];if(f){data={...data,...JSON.parse(await f.text())};save()}};q('delete').onclick=()=>{if(confirm('Delete data?')){localStorage.removeItem(STORE);location.reload()}}}
+function settings(){
+ shell('Settings',`STAYFITINLIFE ${APP_VERSION} • Last Updated: ${LAST_UPDATED}`,
+ `<div class="panel">
+   <div class="panel-title">Data</div>
+   <button class="btn" id="export">Export</button>
+   <label class="btn" for="importFile">Import</label>
+   <input class="hidden" id="importFile" type="file">
+   <button class="btn danger" id="delete">Delete Local Data</button>
+ </div>
+ <div class="panel">
+   <div class="panel-title">Legal Documentation</div>
+   <button class="btn" id="privacyBtn">Privacy Policy</button>
+   <button class="btn" id="termsBtn">Terms of Use</button>
+   <button class="btn" id="aiBtn">AI Disclaimer</button>
+   <div class="muted" style="margin-top:14px">STAYFITINLIFE ${APP_VERSION} • Last Updated: ${LAST_UPDATED}</div>
+ </div>`);
+ q('export').onclick=()=>{let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));a.download='stayfitinlife-backup.json';a.click()};
+ q('importFile').onchange=async e=>{let f=e.target.files[0];if(f){data={...data,...JSON.parse(await f.text())};save()}};
+ q('delete').onclick=()=>{if(confirm('Delete data?')){localStorage.removeItem(STORE);location.reload()}};
+ q('privacyBtn').onclick=()=>openLegalDoc('privacy');
+ q('termsBtn').onclick=()=>openLegalDoc('terms');
+ q('aiBtn').onclick=()=>openLegalDoc('ai');
+}
+
 function stopScannerStream(){if(scannerLoop)cancelAnimationFrame(scannerLoop);scannerLoop=null;if(scannerStream){scannerStream.getTracks().forEach(t=>t.stop());scannerStream=null}}async function openBarcodeScanner(){q('modal').classList.remove('hidden');q('modalCard').innerHTML=`<div class="panel-title">Scan Barcode</div><div class="muted">Rear camera opens by default. You can switch or close camera.</div><video id="scannerVideo" autoplay playsinline muted style="width:100%;max-height:55vh;border-radius:20px;background:#000;margin-top:12px"></video><div class="field"><label>Mode</label><select id="cameraFacingSelect"><option value="environment">Rear Camera</option><option value="user">Front Camera</option></select></div><div class="suggestion" id="scannerStatus">Starting rear camera...</div><button class="btn" id="switchCameraBtn">Switch Camera</button> <button class="btn" id="manualScannerEntry">Enter Barcode</button> <button class="btn danger" id="closeScanner">Close Camera</button>`;q('closeScanner').onclick=closeBarcodeScanner;q('manualScannerEntry').onclick=()=>{closeBarcodeScanner();manualBarcodeEntry()};q('switchCameraBtn').onclick=()=>{scannerFacingMode=scannerFacingMode==='environment'?'user':'environment';startBarcodeCamera()};q('cameraFacingSelect').onchange=()=>{scannerFacingMode=q('cameraFacingSelect').value;startBarcodeCamera()};startBarcodeCamera()}
 async function startBarcodeCamera(){try{stopScannerStream();scannerStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:scannerFacingMode}}});let v=q('scannerVideo');v.srcObject=scannerStream;await v.play().catch(()=>{});if('BarcodeDetector'in window){barcodeDetector=new BarcodeDetector({formats:['ean_13','ean_8','upc_a','upc_e','code_128','qr_code']});q('scannerStatus').innerHTML='Camera ready. Align barcode.';detectBarcodeLoop()}else q('scannerStatus').innerHTML='Camera opened. Browser lacks automatic detection; use manual entry.'}catch(e){q('scannerStatus').innerHTML='Camera permission failed. Use manual entry.'}}async function detectBarcodeLoop(){let v=q('scannerVideo');if(!v||!barcodeDetector)return;try{if(v.readyState>=2){let codes=await barcodeDetector.detect(v);if(codes&&codes.length){let code=codes[0].rawValue;closeBarcodeScanner();handleBarcodeResult(code);return}}}catch(e){}scannerLoop=requestAnimationFrame(detectBarcodeLoop)}function closeBarcodeScanner(){stopScannerStream();q('modal').classList.add('hidden');q('modalCard').innerHTML=''}function manualBarcodeEntry(){let code=prompt('Enter barcode number');if(code)handleBarcodeResult(code.trim())}function handleBarcodeResult(code){let match=foodList().find(f=>String(f.barcode||'')===String(code));if(match){mainCat=match.main;subCat=match.sub;selectedFood=match.name;alert('Found: '+match.name);nutrition();return}let name=prompt('Barcode not found. Enter product/supplement name:','Custom Product');if(!name)return;let isSupp=confirm('Is this a supplement? OK = Supplement, Cancel = Food');let item={main:isSupp?'Supplements':'Custom',sub:'Barcode',name,barcode:code,defaultQty:1,unit:'serving',portion:'1 serving',calories:Number(prompt('Calories:','0')||0),protein:Number(prompt('Protein:','0')||0),carbs:Number(prompt('Carbs:','0')||0),fats:Number(prompt('Fats:','0')||0)};if(isSupp){data.customSupplements.push(item);mainCat='Supplements'}else{data.customFoods.push(item);mainCat='Custom'}subCat='Barcode';selectedFood=name;save()}
 function bind(){q('mobileMenuBtn').onclick=()=>q('sidebar').classList.toggle('open');document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));document.querySelectorAll('[data-mobile-tab]').forEach(b=>b.onclick=()=>switchTab(b.dataset.mobileTab))}

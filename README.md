@@ -11,3 +11,16 @@ V12.3 final:
 - Added Fruits groups, Vegetables groups, Drinks, Cheat Meals, complete Alcohol, Supplements, and Subway-style Sauces.
 - Added sauces with tbsp/tsp default units and hidden-calorie tracking.
 - Workout Add Set spacing polished to prevent overlap.
+
+V12.4 patched:
+- Fixed onboarding modal content not rendering after Start Onboarding.
+- Added smooth animated 2-step onboarding transitions.
+- Screen 1: Name, Age, Height, Current Weight.
+- Screen 2: Goal cards, target weight/body fat, timeline weeks/date sync, lifestyle, smart summary.
+- Starting weight is internal only.
+
+Legal update:
+- Added Privacy Policy, Terms of Use, and AI Disclaimer modals in Settings.
+- Added Version V12.4 and Last Updated: 25 April 2026.
+- Added onboarding legal acceptance checkbox and acceptance tracking.
+- Added markdown legal files in /legal.
