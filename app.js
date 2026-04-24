@@ -8,7 +8,7 @@ const yesterdayKey=()=>{let d=new Date();d.setDate(d.getDate()-1);return d.toISO
 const defaultData={profile:{},meals:{},water:{},workouts:{},weights:[],recovery:{},coachPlans:{},customFoods:[],customSupplements:[],aiCoachUsage:{date:todayKey(),count:0}};
 let data=load(),tab='home',viewDate=todayKey(),selectedMeal='Breakfast',mainCat='Indian',subCat='All',selectedFood='Butter Chicken',workoutMode='Custom Muscles',selectedMuscles=['Chest'],selectedExercise='Bench Press',currentSets=[],restSeconds=0,restInt=null,restPaused=false,scannerStream=null,barcodeDetector=null,scannerLoop=null,scannerFacingMode='environment';
 const q=id=>document.getElementById(id), round=(n,d=1)=>Math.round((Number(n)||0)*10**d)/10**d;
-function load(){try{return {...defaultData,...JSON.parse(localStorage.getItem(STORE)||'{}')}}catch{return structuredClone(defaultData)}}function save(){localStorage.setItem(STORE,JSON.stringify(data));render()}function profileComplete(){let p=data.profile;return !!(p.name&&p.age&&p.gender&&p.height&&p.currentWeight&&p.goal&&p.activity&&p.diet&&p.mode)}
+function load(){try{return {...defaultData,...JSON.parse(localStorage.getItem(STORE)||'{}')}}catch{return structuredClone(defaultData)}}function save(){localStorage.setItem(STORE,JSON.stringify(data));render()}function profileComplete(){let p=data.profile;return !!(p.name&&p.age&&p.height&&p.currentWeight&&p.goal&&p.activity&&p.diet&&p.mode)}
 function targets(){let p=data.profile,w=Number(p.currentWeight||p.startWeight)||70,c=w*30;if(p.goal==='Fat Loss')c-=450;if(p.goal==='Muscle Gain')c+=300;return{calories:Math.round(c),protein:Math.round(w*1.8),carbs:Math.round(c*.42/4),fats:Math.round(c*.25/9),water:round(Math.max(2,w*.035+(p.goal==='Fat Loss'?.3:0)+(p.goal==='Muscle Gain'?.5:0)+(p.activity==='High'?.5:0)))}}
 const meals=(d=viewDate)=>data.meals[d]||[],waterLogs=(d=viewDate)=>data.water[d]||[],workouts=(d=viewDate)=>data.workouts[d]||[];
 function mealTotals(d=viewDate){return meals(d).reduce((a,m)=>({cal:a.cal+Number(m.calories||0),p:a.p+Number(m.protein||0),c:a.c+Number(m.carbs||0),f:a.f+Number(m.fats||0)}),{cal:0,p:0,c:0,f:0})}
@@ -16,123 +16,142 @@ function waterTotal(d=viewDate){return round(waterLogs(d).reduce((a,w)=>a+Number
 function recoveryStatus(d=viewDate){let r=data.recovery[d],score=60;if(r){score=50;if(Number(r.sleep)>=8)score+=25;else if(Number(r.sleep)>=7)score+=15;else if(Number(r.sleep)<6)score-=20;if(r.quality==='Good')score+=10;if(r.quality==='Poor')score-=10;if(r.energy==='High')score+=15;if(r.energy==='Low')score-=15;if(r.soreness==='Low')score+=10;if(r.soreness==='High')score-=20}score+=Math.min(10,waterTotal(d)*2);if(meals(d).some(m=>m.main==='Alcohol'))score-=10;score=Math.max(0,Math.min(100,score));return{score,status:score>=85?'Peak':score>=70?'High':score>=50?'Moderate':'Low',decision:score>=85?'Performance Day':score>=70?'Progress Day':score>=50?'Maintain Day':'Recovery Day'}}
 function switchTab(t){tab=t;document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===t));document.querySelectorAll('[data-mobile-tab]').forEach(b=>b.classList.toggle('active',b.dataset.mobileTab===t));q('sidebar').classList.remove('open');render()}function shell(t,s,c){q('main').innerHTML=`<section><div class="header"><h1>${t}</h1><div class="muted">${s||''}</div></div>${c}</section>`}function dateControls(){return`<div class="pill-row"><button class="pill ${viewDate===todayKey()?'active':''}" data-datepick="${todayKey()}">Today</button><button class="pill ${viewDate===yesterdayKey()?'active':''}" data-datepick="${yesterdayKey()}">Yesterday</button><input id="viewDatePicker" type="date" value="${viewDate}" style="max-width:180px"></div>`}function wireDate(){document.querySelectorAll('[data-datepick]').forEach(b=>b.onclick=()=>{viewDate=b.dataset.datepick;render()});if(q('viewDatePicker'))q('viewDatePicker').onchange=e=>{viewDate=e.target.value;render()}}
 function render(){if(!profileComplete()&&tab!=='settings')return onboardingGate();({home,nutrition,workout,coach,profile,recovery,progress,settings}[tab]||home)()}
-function onboardingGate(){shell('Setup Required','Complete onboarding to activate your targets and dashboard.',`<div class="panel"><div class="panel-title">Welcome to STAYFITINLIFE</div><div class="muted">Your dashboard, macros, water, recovery and workout intelligence need your profile first.</div><button class="btn primary" id="startOnboarding" style="margin-top:16px">Start Onboarding</button></div>`);q('startOnboarding').onclick=openOnboarding}
-
-function idealWeightRange(heightCm){
-  const h=Number(heightCm)/100;
-  if(!h) return {min:0,max:0,mid:0};
-  const min=round(18.5*h*h,1);
-  const max=round(24.9*h*h,1);
-  return {min,max,mid:round((min+max)/2,1)};
-}
-function suggestedBodyFat(gender,goal){
-  if(goal==='Muscle Gain') return gender==='Female'?'20-26%':'12-18%';
-  if(goal==='Maintenance') return gender==='Female'?'21-28%':'13-20%';
-  return gender==='Female'?'18-24%':'10-16%';
-}
-function estimatedTargetFromFat(currentWeight,targetBf,gender){
-  const bf=Number(targetBf);
-  const cw=Number(currentWeight);
-  if(!bf||!cw) return '';
-  const assumedCurrentBf=gender==='Female'?30:24;
-  const leanMass=cw*(1-assumedCurrentBf/100);
-  return round(leanMass/(1-bf/100),1);
-}
-function estimatedFatFromTarget(currentWeight,targetWeight,gender){
-  const cw=Number(currentWeight);
-  const tw=Number(targetWeight);
-  if(!cw||!tw) return '';
-  const assumedCurrentBf=gender==='Female'?30:24;
-  const leanMass=cw*(1-assumedCurrentBf/100);
-  const bf=round((1-leanMass/tw)*100,1);
-  return Math.max(6,Math.min(35,bf));
-}
-
+function onboardingGate(){shell('Setup Required','Complete 2-step onboarding to activate your targets and dashboard.',`<div class="panel"><div class="panel-title">Welcome to STAYFITINLIFE</div><div class="muted">Step 1 captures your basic info. Step 2 builds your goal plan.</div><button class="btn primary" id="startOnboarding" style="margin-top:16px">Start Onboarding</button></div>`);q('startOnboarding').onclick=openOnboarding}
 function openOnboarding(){
  q('modal').classList.remove('hidden');
  q('modalCard').innerHTML=`<div class="wordmark" style="font-size:30px">STAYFITINLIFE</div>
- <div class="panel-title">Onboarding</div>
- <div class="muted">Complete your profile to activate Goal Engine, Calorie Engine, macros, water, recovery and Daily Plan.</div>
+ <div id="obContent"></div>`;
 
- <div class="form-grid" style="margin-top:14px">
-   <div class="field"><label>Name</label><input id="ob_name" placeholder="Your name"></div>
-   <div class="field"><label>Age</label><input id="ob_age" type="number" min="10" max="100"></div>
-   <div class="field"><label>Gender</label><select id="ob_gender"><option>Male</option><option>Female</option><option>Other</option></select></div>
+ let step=1;
+ let temp={...data.profile};
+ if(!temp.timelineWeeks) temp.timelineWeeks='8';
+ if(!temp.targetDate) temp.targetDate=dateFromWeeks(temp.timelineWeeks);
+ if(!temp.goal) temp.goal='Fat Loss';
+ if(!temp.targetType) temp.targetType='weight';
+ if(!temp.activity) temp.activity='Moderate';
+ if(!temp.diet) temp.diet='Non-Veg';
+ if(!temp.mode) temp.mode='Beginner';
 
-   <div class="field"><label>Height (cm)</label><input id="ob_height" type="number" step="0.1"></div>
-   <div class="field"><label>Current Weight (kg)</label><input id="ob_currentWeight" type="number" step="0.1"></div>
-   <div class="field"><label>Starting Weight (kg)</label><input id="ob_startWeight" type="number" step="0.1" placeholder="Auto-filled from current weight"></div>
+ const renderStep=()=>{
+   if(step===1){
+     q('obContent').innerHTML=`<div class="muted">Step 1 of 2</div>
+     <div class="panel-title">Basic Info</div>
+     <div class="form-grid" style="margin-top:14px">
+       <div class="field"><label>Name</label><input id="ob_name" value="${temp.name||''}" placeholder="Your name"></div>
+       <div class="field"><label>Age</label><input id="ob_age" type="number" min="10" max="100" value="${temp.age||''}"></div>
+       <div class="field"><label>Height (cm)</label><input id="ob_height" type="number" step="0.1" value="${temp.height||''}"></div>
+       <div class="field"><label>Current Weight (kg)</label><input id="ob_currentWeight" type="number" step="0.1" value="${temp.currentWeight||''}"></div>
+     </div>
+     <div class="suggestion">Starting weight will be saved internally as your current weight. You don’t need to enter it separately.</div>
+     <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">
+       <button class="btn primary" id="nextOb">Next: Goal</button>
+       <button class="btn" id="closeOb">Close</button>
+     </div>`;
+     q('closeOb').onclick=()=>q('modal').classList.add('hidden');
+     q('nextOb').onclick=()=>{
+       ['name','age','height','currentWeight'].forEach(k=>temp[k]=q('ob_'+k).value);
+       const missing=['name','age','height','currentWeight'].filter(k=>!temp[k]);
+       if(missing.length){alert('Please complete: '+missing.join(', '));return}
+       temp.startWeight=temp.currentWeight;
+       step=2;
+       renderStep();
+     };
+   }else{
+     const range=idealWeightRange(temp.height);
+     q('obContent').innerHTML=`<div class="muted">Step 2 of 2</div>
+     <div class="panel-title">Choose Your Goal</div>
+     <div class="choice-list">
+       <button class="choice-btn ${temp.goal==='Fat Loss'?'active':''}" data-goal="Fat Loss">🔥 Fat Loss<br><span class="muted">Lose weight and body fat</span></button>
+       <button class="choice-btn ${temp.goal==='Muscle Gain'?'active':''}" data-goal="Muscle Gain">💪 Muscle Gain<br><span class="muted">Build muscle and strength</span></button>
+       <button class="choice-btn ${temp.goal==='Maintenance'?'active':''}" data-goal="Maintenance">⚖️ Maintenance<br><span class="muted">Stay fit and balanced</span></button>
+     </div>
 
-   <div class="field"><label>Goal</label><select id="ob_goal"><option>Fat Loss</option><option>Muscle Gain</option><option>Maintenance</option></select></div>
-   <div class="field"><label>Target Type</label><select id="ob_targetType"><option value="weight">Goal Weight</option><option value="bodyfat">Goal Body Fat %</option></select></div>
-   <div class="field"><label>Activity Level</label><select id="ob_activity"><option>Low</option><option selected>Moderate</option><option>High</option></select></div>
+     <div class="panel-title" style="font-size:18px;margin-top:18px">Target</div>
+     <div class="pill-row">
+       <button class="pill ${temp.targetType==='weight'?'active':''}" data-targettype="weight">Goal Weight</button>
+       <button class="pill ${temp.targetType==='bodyfat'?'active':''}" data-targettype="bodyfat">Body Fat %</button>
+     </div>
+     <div class="form-grid">
+       <div class="field"><label>Target Weight (kg)</label><input id="ob_targetWeight" type="number" step="0.1" value="${temp.targetWeight||''}"></div>
+       <div class="field"><label>Target Body Fat %</label><input id="ob_targetBodyFat" type="number" step="0.1" value="${temp.targetBodyFat||''}"></div>
+       <div class="field"><label>Timeline Weeks</label><select id="ob_timelineWeeks"><option>6</option><option>8</option><option>10</option><option>12</option><option>14</option><option>16</option><option>20</option><option>24</option></select></div>
+       <div class="field"><label>Target Date</label><input id="ob_targetDate" type="date" value="${temp.targetDate||dateFromWeeks(temp.timelineWeeks)}"></div>
+       <div class="field"><label>Activity Level</label><select id="ob_activity"><option>Low</option><option>Moderate</option><option>High</option></select></div>
+       <div class="field"><label>Diet Preference</label><select id="ob_diet"><option>Non-Veg</option><option>Veg</option><option>Vegan</option><option>Mixed</option></select></div>
+       <div class="field"><label>Training Mode</label><select id="ob_mode"><option>Beginner</option><option>Advanced</option></select></div>
+     </div>
 
-   <div class="field"><label>Target Weight (kg)</label><input id="ob_targetWeight" type="number" step="0.1"></div>
-   <div class="field"><label>Target Body Fat %</label><input id="ob_targetBodyFat" type="number" step="0.1"></div>
-   <div class="field"><label>Diet Preference</label><select id="ob_diet"><option>Non-Veg</option><option>Veg</option><option>Vegan</option><option>Mixed</option></select></div>
+     <div class="suggestion" id="goalSummary"></div>
+     <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">
+       <button class="btn" id="backOb">Back</button>
+       <button class="btn primary" id="finishOnboarding">Generate My Plan 🚀</button>
+     </div>`;
+     q('ob_timelineWeeks').value=temp.timelineWeeks||'8';
+     q('ob_activity').value=temp.activity||'Moderate';
+     q('ob_diet').value=temp.diet||'Non-Veg';
+     q('ob_mode').value=temp.mode||'Beginner';
 
-   <div class="field"><label>Training Mode</label><select id="ob_mode"><option>Beginner</option><option>Advanced</option></select></div>
- </div>
+     const sync=()=>{
+       temp.targetWeight=q('ob_targetWeight').value;
+       temp.targetBodyFat=q('ob_targetBodyFat').value;
+       temp.timelineWeeks=q('ob_timelineWeeks').value;
+       temp.targetDate=q('ob_targetDate').value;
+       temp.activity=q('ob_activity').value;
+       temp.diet=q('ob_diet').value;
+       temp.mode=q('ob_mode').value;
 
- <div class="suggestion" id="goalSuggestion" style="margin-top:14px">Enter height, weight and goal to see realistic target guidance.</div>
+       const current=Number(temp.currentWeight);
+       if(temp.targetType==='weight' && temp.targetWeight && !q('ob_targetBodyFat').dataset.userEdited){
+         q('ob_targetBodyFat').value=estimatedFatFromTarget(current,temp.targetWeight);
+         temp.targetBodyFat=q('ob_targetBodyFat').value;
+       }
+       if(temp.targetType==='bodyfat' && temp.targetBodyFat && !q('ob_targetWeight').dataset.userEdited){
+         q('ob_targetWeight').value=estimatedTargetFromFat(current,temp.targetBodyFat);
+         temp.targetWeight=q('ob_targetWeight').value;
+       }
 
- <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">
-   <button class="btn primary" id="finishOnboarding">Activate Dashboard</button>
-   <button class="btn" id="closeOnboarding">Close</button>
- </div>`;
+       const tw=Number(temp.targetWeight);
+       const weeks=Number(temp.timelineWeeks||weeksFromDate(temp.targetDate));
+       const change=tw?round(Math.abs(current-tw),1):0;
+       const weekly=weeks&&change?round(change/weeks,2):0;
+       let status='Enter target weight/body fat to validate.';
+       let color='var(--muted)';
+       if(tw&&weeks){
+         if(temp.goal==='Fat Loss'){
+           if(weekly>1){status='Aggressive. Consider extending timeline.';color='var(--red)'}
+           else if(weekly>=0.4&&weekly<=0.9){status='Realistic and sustainable.';color='var(--green)'}
+           else {status='Slow and sustainable.';color='var(--green)'}
+         }else if(temp.goal==='Muscle Gain'){
+           if(weekly>0.5){status='Aggressive muscle gain target.';color='var(--red)'}
+           else {status='Realistic muscle gain pace.';color='var(--green)'}
+         }else {status='Maintenance goal selected.';color='var(--green)'}
+       }
+       q('goalSummary').innerHTML=`Healthy weight range estimate: ${range.min}-${range.max} kg.<br>
+       Suggested body fat range for ${temp.goal}: ${suggestedBodyFat(temp.goal)}.<br>
+       Timeline: ${weeks} weeks • Target date: ${temp.targetDate||dateFromWeeks(weeks)}<br>
+       ${tw?`Change required: ${change} kg → ${weekly} kg/week.<br>`:''}
+       <strong style="color:${color}">${status}</strong>`;
+     };
 
- const ids=['name','age','gender','height','currentWeight','startWeight','goal','targetType','activity','targetWeight','targetBodyFat','diet','mode'];
- const el=k=>q('ob_'+k);
-
- const syncOnboarding=()=>{
-   if(el('currentWeight').value && !el('startWeight').value) el('startWeight').value=el('currentWeight').value;
-
-   const goal=el('goal').value;
-   const gender=el('gender').value;
-   const range=idealWeightRange(el('height').value);
-   const current=Number(el('currentWeight').value);
-
-   if(el('targetType').value==='weight' && el('targetWeight').value && !el('targetBodyFat').dataset.userEdited){
-     el('targetBodyFat').value=estimatedFatFromTarget(current,el('targetWeight').value,gender);
+     document.querySelectorAll('[data-goal]').forEach(b=>b.onclick=()=>{temp.goal=b.dataset.goal;renderStep()});
+     document.querySelectorAll('[data-targettype]').forEach(b=>b.onclick=()=>{temp.targetType=b.dataset.targettype;q('ob_targetWeight').dataset.userEdited='';q('ob_targetBodyFat').dataset.userEdited='';renderStep()});
+     q('ob_timelineWeeks').onchange=()=>{q('ob_targetDate').value=dateFromWeeks(q('ob_timelineWeeks').value);sync()};
+     q('ob_targetDate').onchange=()=>{const w=weeksFromDate(q('ob_targetDate').value);temp.timelineWeeks=String(w);sync()};
+     q('ob_targetWeight').oninput=()=>{q('ob_targetWeight').dataset.userEdited='1';if(temp.targetType==='weight')q('ob_targetBodyFat').dataset.userEdited='';sync()};
+     q('ob_targetBodyFat').oninput=()=>{q('ob_targetBodyFat').dataset.userEdited='1';if(temp.targetType==='bodyfat')q('ob_targetWeight').dataset.userEdited='';sync()};
+     ['activity','diet','mode'].forEach(k=>q('ob_'+k).onchange=sync);
+     q('backOb').onclick=()=>{step=1;renderStep()};
+     q('finishOnboarding').onclick=()=>{
+       sync();
+       if(!temp.targetWeight && !temp.targetBodyFat){alert('Please enter target weight or body fat.');return}
+       data.profile={...temp,startWeight:temp.currentWeight};
+       q('modal').classList.add('hidden');
+       save();
+     };
+     sync();
    }
-
-   if(el('targetType').value==='bodyfat' && el('targetBodyFat').value && !el('targetWeight').dataset.userEdited){
-     el('targetWeight').value=estimatedTargetFromFat(current,el('targetBodyFat').value,gender);
-   }
-
-   let msg='';
-   if(range.mid){
-     msg+=`Healthy BMI weight range for your height: ${range.min}–${range.max} kg.<br>`;
-   }
-   msg+=`Suggested body fat range for ${goal}: ${suggestedBodyFat(gender,goal)}.<br>`;
-
-   const tw=Number(el('targetWeight').value);
-   if(tw && range.mid){
-     if(tw<range.min*.92 || tw>range.max*1.35){
-       msg+=`<span style="color:var(--red)">Target looks unrealistic. Adjust target or timeline.</span>`;
-     }else{
-       msg+=`<span style="color:var(--green)">Target looks realistic.</span>`;
-     }
-   }
-   q('goalSuggestion').innerHTML=msg;
  };
-
- ['height','currentWeight','startWeight','goal','gender','targetType','activity'].forEach(k=>el(k).oninput=syncOnboarding);
- el('targetWeight').oninput=()=>{el('targetWeight').dataset.userEdited='1';if(el('targetType').value==='weight'){el('targetBodyFat').dataset.userEdited='';}syncOnboarding()};
- el('targetBodyFat').oninput=()=>{el('targetBodyFat').dataset.userEdited='1';if(el('targetType').value==='bodyfat'){el('targetWeight').dataset.userEdited='';}syncOnboarding()};
- el('targetType').onchange=()=>{el('targetWeight').dataset.userEdited='';el('targetBodyFat').dataset.userEdited='';syncOnboarding()};
-
- q('closeOnboarding').onclick=()=>q('modal').classList.add('hidden');
- q('finishOnboarding').onclick=()=>{
-   const required=['name','age','gender','height','currentWeight','goal','activity','diet','mode'];
-   const missing=required.filter(k=>!el(k).value);
-   if(missing.length){alert('Please complete: '+missing.join(', '));return;}
-   ids.forEach(k=>data.profile[k]=el(k).value);
-   if(!data.profile.startWeight) data.profile.startWeight=data.profile.currentWeight;
-   q('modal').classList.add('hidden');
-   save();
- };
- syncOnboarding();
+ renderStep();
 }
 
 function morningCheckin(){q('modal').classList.remove('hidden');q('modalCard').innerHTML=`<div class="panel-title">Good Morning 👋</div><div class="field"><label>How long did you sleep?</label><div class="pill-row">${['5h','6h','7h','8h','9h+'].map(x=>`<button class="pill" data-sleep="${x}">${x}</button>`).join('')}</div></div><div class="form-grid"><div class="field"><label>Sleep Quality</label><select id="mc_quality"><option>Poor</option><option selected>Average</option><option>Good</option></select></div><div class="field"><label>Energy</label><select id="mc_energy"><option>Low</option><option selected>Moderate</option><option>High</option></select></div><div class="field"><label>Soreness</label><select id="mc_soreness"><option>Low</option><option selected>Moderate</option><option>High</option></select></div></div><button class="btn primary" id="saveMorning">Save</button>`;let sleep='7';document.querySelectorAll('[data-sleep]').forEach(b=>b.onclick=()=>{sleep=b.dataset.sleep.replace('h+','').replace('h','');document.querySelectorAll('[data-sleep]').forEach(x=>x.classList.remove('active'));b.classList.add('active')});q('saveMorning').onclick=()=>{data.recovery[todayKey()]={sleep,quality:q('mc_quality').value,energy:q('mc_energy').value,soreness:q('mc_soreness').value};q('modal').classList.add('hidden');save()}}
@@ -151,26 +170,29 @@ function finishWorkout(){if(!currentSets.length)return alert('Add at least one s
 function smartPlan(){let t=targets(),m=mealTotals(todayKey()),r=recoveryStatus(todayKey());data.coachPlans[todayKey()]={meal:[`Remaining protein: ${Math.max(0,t.protein-m.p)}g`,`Remaining calories: ${Math.max(0,t.calories-m.cal)} kcal`],workout:[`Recommended: ${recommendMuscles().join(' + ')||'Any fresh group'}`,`${r.decision}: ${r.decision==='Performance Day'?'hard training allowed':'manage intensity'}`],recovery:[`Water target: ${t.water}L`,`Recovery score: ${r.score}/100`]}}function planHtml(){let p=data.coachPlans[todayKey()];if(!p)return'<div class="item">Generate Smart Plan.</div>';return['meal','workout','recovery'].map(k=>`<div class="item"><strong>${k.toUpperCase()}</strong><ul>${p[k].map(i=>`<li>${i}</li>`).join('')}</ul></div>`).join('')}
 function profile(){
  let p=data.profile;
- shell('Profile','Correct profile fields',`<div class="panel"><div class="form-grid">
+ shell('Profile','Matches onboarding. Starting weight is stored internally from onboarding current weight.',`<div class="panel"><div class="form-grid">
  <div class="field"><label>Name</label><input id="pf_name" value="${p.name||''}"></div>
  <div class="field"><label>Age</label><input id="pf_age" type="number" value="${p.age||''}"></div>
- <div class="field"><label>Gender</label><select id="pf_gender"><option ${p.gender==='Male'?'selected':''}>Male</option><option ${p.gender==='Female'?'selected':''}>Female</option><option ${p.gender==='Other'?'selected':''}>Other</option></select></div>
  <div class="field"><label>Height (cm)</label><input id="pf_height" type="number" step="0.1" value="${p.height||''}"></div>
  <div class="field"><label>Current Weight</label><input id="pf_currentWeight" type="number" step="0.1" value="${p.currentWeight||''}"></div>
- <div class="field"><label>Starting Weight</label><input id="pf_startWeight" type="number" step="0.1" value="${p.startWeight||p.currentWeight||''}"></div>
  <div class="field"><label>Goal</label><select id="pf_goal"><option ${p.goal==='Fat Loss'?'selected':''}>Fat Loss</option><option ${p.goal==='Muscle Gain'?'selected':''}>Muscle Gain</option><option ${p.goal==='Maintenance'?'selected':''}>Maintenance</option></select></div>
  <div class="field"><label>Target Weight</label><input id="pf_targetWeight" type="number" step="0.1" value="${p.targetWeight||''}"></div>
  <div class="field"><label>Target Body Fat %</label><input id="pf_targetBodyFat" type="number" step="0.1" value="${p.targetBodyFat||''}"></div>
+ <div class="field"><label>Timeline Weeks</label><input id="pf_timelineWeeks" type="number" value="${p.timelineWeeks||''}"></div>
+ <div class="field"><label>Target Date</label><input id="pf_targetDate" type="date" value="${p.targetDate||''}"></div>
  <div class="field"><label>Activity</label><select id="pf_activity"><option ${p.activity==='Low'?'selected':''}>Low</option><option ${p.activity==='Moderate'?'selected':''}>Moderate</option><option ${p.activity==='High'?'selected':''}>High</option></select></div>
  <div class="field"><label>Diet Preference</label><select id="pf_diet"><option ${p.diet==='Non-Veg'?'selected':''}>Non-Veg</option><option ${p.diet==='Veg'?'selected':''}>Veg</option><option ${p.diet==='Vegan'?'selected':''}>Vegan</option><option ${p.diet==='Mixed'?'selected':''}>Mixed</option></select></div>
  <div class="field"><label>Training Mode</label><select id="pf_mode"><option ${p.mode==='Beginner'?'selected':''}>Beginner</option><option ${p.mode==='Advanced'?'selected':''}>Advanced</option></select></div>
- </div><div class="suggestion" id="profileSuggestion"></div><button class="btn primary" id="saveProfile">Save Profile</button></div>`);
- const fields=['name','age','gender','height','currentWeight','startWeight','targetWeight','targetBodyFat','goal','activity','diet','mode'];
+ </div><div class="suggestion" id="profileSuggestion">Starting weight: ${p.startWeight||p.currentWeight||'-'} kg</div><button class="btn primary" id="saveProfile">Save Profile</button></div>`);
+ const fields=['name','age','height','currentWeight','targetWeight','targetBodyFat','timelineWeeks','targetDate','goal','activity','diet','mode'];
  const update=()=>{
-   const gender=q('pf_gender').value, goal=q('pf_goal').value, range=idealWeightRange(q('pf_height').value);
-   q('profileSuggestion').innerHTML=range.mid?`Healthy BMI weight range: ${range.min}–${range.max} kg.<br>Suggested body fat for ${goal}: ${suggestedBodyFat(gender,goal)}.`:'';
+   const goal=q('pf_goal').value, range=idealWeightRange(q('pf_height').value);
+   q('profileSuggestion').innerHTML=(range.mid?`Healthy BMI weight range: ${range.min}–${range.max} kg.<br>`:'')+
+   `Suggested body fat for ${goal}: ${suggestedBodyFat(goal)}.<br>Starting weight: ${p.startWeight||p.currentWeight||'-'} kg`;
  };
  fields.forEach(k=>{if(q('pf_'+k)){q('pf_'+k).oninput=update;q('pf_'+k).onchange=update}});
+ q('pf_timelineWeeks').onchange=()=>{q('pf_targetDate').value=dateFromWeeks(q('pf_timelineWeeks').value);update()};
+ q('pf_targetDate').onchange=()=>{q('pf_timelineWeeks').value=weeksFromDate(q('pf_targetDate').value);update()};
  update();
  q('saveProfile').onclick=()=>{fields.forEach(k=>data.profile[k]=q('pf_'+k).value);if(!data.profile.startWeight)data.profile.startWeight=data.profile.currentWeight;save()}
 }
