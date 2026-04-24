@@ -1,13 +1,11 @@
 {
   "name": "STAYFITINLIFE",
   "short_name": "Stayfit",
-  "description": "Train \u2022 Fuel \u2022 Recover \u2022 Evolve",
-  "start_url": "/?v=104",
+  "start_url": "/?v=106",
   "scope": "/",
   "display": "standalone",
   "background_color": "#050b1c",
   "theme_color": "#050b1c",
-  "orientation": "portrait-primary",
   "icons": [
     {
       "src": "/icons/icon-192.png",
