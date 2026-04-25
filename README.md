@@ -1,12 +1,18 @@
-# STAYFITINLIFE — Stable Version 1.0.3 Hotfix 2
+# STAYFITINLIFE Stable Version 1.0.2
 
-Rollback-safe hotfix. Preserves onboarding/render flow and patches Nutrition only.
+Deployment-ready build with critical logic fixes and workout expansion.
 
-Fixed:
-- Onboarding preserved
-- Custom Food single-screen modal
-- Serving dropdown
-- Custom Food edit/delete
-- Search keeps focus
-- Local timezone todayKey
-- Mobile bottom nav safe-area
+Included:
+- Dashboard calories adjusted by workout calories burned
+- Calories burned + deficit/surplus shown
+- Workout preview shows today’s activity or Workout Missing
+- Context-aware food suggestions for remaining macros
+- Finish Day feature
+- Custom food option
+- Water logging: +250ml, +500ml, +1L, custom input
+- Strength workout fixes: user-selected workout name, warmup/working set retained, set type visible
+- Cardio section with duration, distance, intensity, auto-calories
+- Sports section with duration, intensity, auto-calories
+- Rest timer alert + vibration
+- Intelligence nutrition data sync
+- Netlify cache headers and clean service worker

@@ -2,8 +2,8 @@ import { FOOD_DATABASE } from './data/foodDatabase.js';
 import { EXERCISE_DATABASE, SPLITS } from './data/exerciseDatabase.js';
 import { SUPPLEMENT_DATABASE } from './data/supplementDatabase.js';
 
-const STORE='stayfitinlife_stable_1_0_3_hotfix_2';
-const APP_VERSION='Stable Version 1.0.3 Hotfix 2 Hotfix 2 2';
+const STORE='stayfitinlife_stable_1_0_2';
+const APP_VERSION='Stable Version 1.0.2';
 const LAST_UPDATED='25 April 2026';
 
 const todayKey=()=>new Date().toISOString().slice(0,10);
@@ -23,7 +23,7 @@ const defaultData={
   coachPlans:{},
   customFoods:[],
   customSupplements:[],
-  aiCoachUsage:{date:todayKey(),count:0},aiCache:{},barcodeCache:{},intelligence:{reports:{},patterns:{}},notifications:[]
+  aiCoachUsage:{date:todayKey(),count:0},aiCache:{},barcodeCache:{},intelligence:{reports:{},patterns:{}},notifications:[],dayClosures:{}
 };
 
 let data=load();
@@ -519,44 +519,33 @@ function desktopCoachPanelHtml(){
   <div class="desktop-panel-card"><div class="panel-title">📊 Weekly Summary</div>${weeklySummary()}</div>`;
 }
 
+
+// ---------- Stable 1.0.2 System Fixes ----------
+const CARDIO_ACTIVITIES=["Walking","Incline Walking","Jogging","Running","Treadmill","Cycling","Stationary Bike","Elliptical","Stair Climber","Rowing Machine","Skipping / Jump Rope","Swimming","HIIT","Sprint Intervals","Battle Ropes"];
+const SPORTS_ACTIVITIES=["Football / Soccer","Cricket","Basketball","Badminton","Tennis","Table Tennis","Volleyball","Boxing","Martial Arts","Swimming","Hiking","Cycling","Running","Yoga","Pilates","Dance / Zumba","Functional Training","CrossFit"];
+const CARDIO_METS={"Walking":3.5,"Incline Walking":5.5,"Jogging":7,"Running":10,"Treadmill":7,"Cycling":7.5,"Stationary Bike":6.5,"Elliptical":5.5,"Stair Climber":8.8,"Rowing Machine":7,"Skipping / Jump Rope":11,"Swimming":8,"HIIT":10,"Sprint Intervals":12,"Battle Ropes":10};
+const SPORTS_METS={"Football / Soccer":8,"Cricket":5,"Basketball":8,"Badminton":5.5,"Tennis":7,"Table Tennis":4,"Volleyball":4.5,"Boxing":9,"Martial Arts":10,"Swimming":8,"Hiking":6,"Cycling":7.5,"Running":10,"Yoga":3,"Pilates":3.5,"Dance / Zumba":6.5,"Functional Training":8,"CrossFit":10};
+function intensityFactor(intensity){return intensity==='Light'?0.8:intensity==='Intense'?1.25:1}
+function estimateActivityCalories(activity,duration,intensity,type='cardio'){const kg=Number(data.profile.currentWeight||data.profile.startWeight||70);const mets=(type==='sports'?SPORTS_METS:CARDIO_METS)[activity]||6;return Math.max(0,Math.round(mets*kg*((Number(duration)||0)/60)*intensityFactor(intensity)))}
+function workoutCalories(date=todayKey()){return workouts(date).reduce((s,w)=>s+Number(w.caloriesBurned||0),0)}
+function dayMetrics(date=todayKey()){const t=targets(),m=mealTotals(date),burned=workoutCalories(date),adjustedCalories=t.calories+burned,deficit=adjustedCalories-m.cal;return{targets:t,meals:m,burned,adjustedCalories,deficit,netCalories:m.cal-burned}}
+function deficitText(v){if(v>0)return `${Math.round(v)} kcal remaining / deficit`;if(v<0)return `${Math.abs(Math.round(v))} kcal surplus`;return 'On target'}
+function suggestedFoodForMacros(){const d=dayMetrics(),t=d.targets,m=d.meals,p=Math.max(0,Math.round(t.protein-m.p)),c=Math.max(0,Math.round(t.carbs-m.c)),f=Math.max(0,Math.round(t.fats-m.f));if(p>=30)return 'Suggested: whey protein, chicken tikka, paneer bhurji, eggs or Greek yogurt.';if(c>=40)return 'Suggested: rice, roti, banana, oats or potatoes.';if(f>=15)return 'Suggested: nuts, peanut butter, paneer, avocado or olive oil.';return 'Suggested: choose a balanced light meal and hydrate.'}
+function finishDay(){const d=dayMetrics();const projection=d.deficit>0?'If repeated consistently, today supports your fat-loss goal.':'If repeated consistently, this may slow fat loss due to surplus calories.';data.dayClosures=data.dayClosures||{};data.dayClosures[todayKey()]={date:todayKey(),calories:d.meals.cal,burned:d.burned,adjustedTarget:d.adjustedCalories,deficit:d.deficit,projection,closedAt:new Date().toISOString()};localStorage.setItem(STORE,JSON.stringify(data));alert(`Day Finished\n\nFood: ${Math.round(d.meals.cal)} kcal\nBurned: ${d.burned} kcal\nAdjusted Target: ${d.adjustedCalories} kcal\nResult: ${deficitText(d.deficit)}\n\n${projection}`);render()}
+function addCustomFood(){const name=prompt('Food name');if(!name)return;const calories=Number(prompt('Calories per serving','100')||0),protein=Number(prompt('Protein (g)','0')||0),carbs=Number(prompt('Carbs (g)','0')||0),fats=Number(prompt('Fats (g)','0')||0),portion=prompt('Portion','1 serving')||'1 serving';const food={main:'Custom',sub:'User Food',name,defaultQty:1,unit:'serving',portion,calories,protein,carbs,fats};data.customFoods=data.customFoods||[];data.customFoods.push(food);localStorage.setItem(STORE,JSON.stringify(data));selectedFood=food.name;mainCat='Custom';render()}
+function addCustomWater(){const ml=Number(prompt('Enter water amount in ml','750')||0);if(!ml||ml<=0)return alert('Enter valid water amount.');addWater(ml)}
+function activitySummaryHtml(date=todayKey()){const ws=workouts(date);if(!ws.length)return '<div class="item">Workout Missing</div>';return ws.map(w=>`<div class="item"><strong>${w.name}</strong><br>${w.category||'Strength'} • ${w.caloriesBurned||0} kcal burned<br>${(w.sets||[]).slice(0,5).map(s=>`${s.type?`[${s.type}] `:''}${s.exercise}: ${s.weight||'-'} x ${s.reps||'-'}`).join('<br>')}</div>`).join('')}
+function startRestAlert(){const sec=Number(prompt('Rest time in seconds','60')||60);if(!sec)return;setTimeout(()=>{if(navigator.vibrate)navigator.vibrate([250,120,250]);alert('Rest over! Start your next set.')},sec*1000)}
+
 // ---------- Dashboard ----------
 
 function home(){
-  const t=targets(),m=mealTotals(todayKey()),w=waterTotal(todayKey()),r=recoveryStatus(todayKey());
-  const calPct=Math.min(100,Math.round((m.cal/Math.max(1,t.calories))*100));
+  const d=dayMetrics(todayKey()),t=d.targets,m=d.meals,w=waterTotal(todayKey()),r=recoveryStatus(todayKey());
+  const calPct=Math.min(100,Math.round((m.cal/Math.max(1,d.adjustedCalories))*100));
   const coachTitle=isBeginnerMode()?'Today’s Plan':'Today’s Targets + Insights';
-  shell('Dashboard',new Date().toLocaleDateString(),
-  `<div class="desktop-dashboard-grid">
-    <div class="dashboard-main">
-      <div class="hero-card">
-        <div class="calorie-ring" style="--p:${calPct}">
-          <div><strong>${calPct}%</strong><span>${m.cal} / ${t.calories} kcal</span></div>
-        </div>
-        <div class="hero-copy">
-          <div class="mode-badge">${isBeginnerMode()?'Beginner Guided Mode':'Advanced Pro Mode'}</div>
-          <h2>${coachTitle}</h2>
-          <p>${r.status} recovery • ${r.decision}</p>
-          <button class="btn primary" id="smartPlan">Generate Coach Plan</button>
-        </div>
-      </div>
-      <div class="panel">
-        <div class="panel-title">Nutrition Progress</div>
-        ${progressBar('Protein',m.p,t.protein,'g')}
-        ${progressBar('Carbs',m.c,t.carbs,'g')}
-        ${progressBar('Fats',m.f,t.fats,'g')}
-        ${progressBar('Water',displayWater(w),displayWater(t.water),unitLabels().water)}
-      </div>
-      <div class="panel"><div class="panel-title">${coachTitle}</div>${planHtml()}</div>
-      <div class="panel"><div class="panel-title">Workout Preview</div><div class="item">Suggested muscles: ${recommendMuscles().join(' + ')||'Flexible'}<br>Recovery status: ${r.status}</div></div><div class="panel"><div class="panel-title">Context-Aware Suggestion</div><div class="item">${contextSuggestion()}</div></div>
-    </div>
-    <aside class="desktop-coach-panel" id="desktopCoachPanel">${desktopCoachPanelHtml()}</aside>
-  </div>`);
-  q('smartPlan').onclick=smartPlan;
-  const sideGenerate=q('sideGenerate'); if(sideGenerate) sideGenerate.onclick=smartPlan;
-  const sideMeal=q('sideMeal'); if(sideMeal) sideMeal.onclick=()=>switchTab('nutrition');
-  const sideWorkout=q('sideWorkout'); if(sideWorkout) sideWorkout.onclick=()=>switchTab('workout');
+  shell('Dashboard',new Date().toLocaleDateString(),`<div class="desktop-dashboard-grid"><div class="dashboard-main"><div class="hero-card"><div class="calorie-ring" style="--p:${calPct}"><div><strong>${calPct}%</strong><span>${Math.round(m.cal)} / ${d.adjustedCalories} kcal</span></div></div><div class="hero-copy"><div class="mode-badge">${isBeginnerMode()?'Beginner Guided Mode':'Advanced Pro Mode'}</div><h2>${coachTitle}</h2><p>${r.status} recovery • ${r.decision}</p><div class="item">Base Target: ${t.calories} kcal<br>Calories Burned: ${d.burned} kcal<br>Adjusted Target: ${d.adjustedCalories} kcal<br><strong>${deficitText(d.deficit)}</strong></div><button class="btn primary" id="smartPlan">Generate Coach Plan</button><button class="btn" id="finishDayBtn">Finish Day</button></div></div><div class="panel"><div class="panel-title">Nutrition Progress</div>${progressBar('Protein',m.p,t.protein,'g')}${progressBar('Carbs',m.c,t.carbs,'g')}${progressBar('Fats',m.f,t.fats,'g')}${progressBar('Water',displayWater(w),displayWater(t.water),unitLabels().water)}</div><div class="panel"><div class="panel-title">${coachTitle}</div>${planHtml()}</div><div class="panel"><div class="panel-title">Workout Preview</div>${activitySummaryHtml(todayKey())}</div><div class="panel"><div class="panel-title">Context-Aware Suggestion</div><div class="item">${contextSuggestion()}<br>${suggestedFoodForMacros()}</div></div></div><aside class="desktop-coach-panel" id="desktopCoachPanel">${desktopCoachPanelHtml()}</aside></div>`);
+  q('smartPlan').onclick=smartPlan;q('finishDayBtn').onclick=finishDay;const sideGenerate=q('sideGenerate');if(sideGenerate)sideGenerate.onclick=smartPlan;const sideMeal=q('sideMeal');if(sideMeal)sideMeal.onclick=()=>switchTab('nutrition');const sideWorkout=q('sideWorkout');if(sideWorkout)sideWorkout.onclick=()=>switchTab('workout');
 }
-
 function nextActions(){
   const t=targets(),m=mealTotals(todayKey());
   const a=[];
@@ -574,40 +563,45 @@ function weeklySummary(){
 function foodList(){return FOOD_DATABASE.concat(SUPPLEMENT_DATABASE).concat(data.customFoods||[]).concat(data.customSupplements||[])}
 function topCategories(){return ['Cuisines','Fruits','Vegetables','Drinks','Cheat Meals','Alcohol','Sauces','Supplements','Custom'].filter(c=>foodList().some(f=>f.main===c))}
 function cuisineList(){return [...new Set(foodList().filter(f=>f.main==='Cuisines').map(f=>f.cuisine))]}
-
 function nutrition(){
-  shell('Nutrition',`Meal Type → Food Category → Food ${safeDateSelectorHtml()}`,
-  `<div class="panel">
-    <div class="field"><label>Search / Barcode</label><input id="foodSearch" placeholder="Search food, cuisine, sauce or barcode" autocomplete="off" value="${nutritionSearchValue||''}"></div>
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin:12px 0">
-      <button class="btn" id="addCustomFoodBtn">+ Custom Food</button>
-      <button class="btn primary" id="scanBarcode">📷 Scan Barcode</button>
-      <button class="btn" id="manualBarcode">⌨️ Enter Barcode</button>
-    </div>
-    <div id="foodList" class="food-list-clean"></div>
+  const all=foodList();
+  const search=(q('foodSearch')?.value||'').toLowerCase();
+  let list=[];
+  if(search)list=all.filter(f=>[f.name,f.main,f.cuisine||'',f.sub,f.barcode||''].join(' ').toLowerCase().includes(search));
+  else if(mainCat==='Cuisines'){
+    if(!selectedCuisine||!cuisineList().includes(selectedCuisine))selectedCuisine=cuisineList()[0]||'Indian';
+    list=all.filter(f=>f.main==='Cuisines'&&f.cuisine===selectedCuisine&&(subCat==='All'||f.sub===subCat));
+  }else list=all.filter(f=>f.main===mainCat&&(subCat==='All'||f.sub===subCat));
+  const subSource=mainCat==='Cuisines'?all.filter(f=>f.main==='Cuisines'&&f.cuisine===selectedCuisine):all.filter(f=>f.main===mainCat);
+  const subs=['All',...new Set(subSource.map(f=>f.sub))];
+  if(!list.some(f=>f.name===selectedFood))selectedFood=list[0]?.name||'';
+  const f=all.find(x=>x.name===selectedFood);
+  shell('Nutrition','Meal Type → Food Category → Subcategory → Food',
+  `${dateControls()}<div class="panel">
+    <div class="pill-row">${['Breakfast','Lunch','Dinner','Snacks'].map(x=>`<button class="pill ${selectedMeal===x?'active':''}" data-meal="${x}">${x}</button>`).join('')}</div>
+    <div class="pill-row">${topCategories().map(x=>`<button class="pill ${mainCat===x?'active':''}" data-main="${x}">${x}</button>`).join('')}</div>
+    ${mainCat==='Cuisines'?`<div class="pill-row">${cuisineList().map(x=>`<button class="pill ${selectedCuisine===x?'active':''}" data-cuisine="${x}">${x}</button>`).join('')}</div>`:''}
+    <div class="pill-row">${subs.map(x=>`<button class="pill ${subCat===x?'active':''}" data-sub="${x}">${x}</button>`).join('')}</div>
+    <div class="field"><label>Search / Barcode</label><input id="foodSearch" value="${search}" placeholder="Search food, cuisine, sauce or barcode"></div>
+    <button class="btn" id="addCustomFoodBtn">+ Custom Food</button> <button class="btn primary" id="scanBarcodeBtn">📷 Scan Barcode</button> <button class="btn" id="manualBarcodeBtn">⌨ Enter Barcode</button>
+    <div class="choice-list">${list.map(x=>`<button class="choice-btn ${selectedFood===x.name?'active':''}" data-food="${x.name}">${x.name}<br><span class="muted">${x.main==='Cuisines'?x.cuisine+' → '+x.sub:x.main+' → '+x.sub}</span></button>`).join('')}</div>
   </div>
-  <div class="panel"><div class="panel-title">Water Log</div>
-    <button class="btn" data-water="250">+250ml</button>
-    <button class="btn" data-water="500">+500ml</button>
-    <button class="btn" data-water="1000">+1L</button>
-    <button class="btn" id="customWaterBtn">+ Custom</button>
-  </div>
-  <div class="panel"><div class="panel-title">Logs for ${safeViewDate()}</div>
-    ${(data.meals&&data.meals[safeViewDate()]&&data.meals[safeViewDate()].length)?data.meals[safeViewDate()].map(x=>`<div class="log-card"><strong>${x.name}</strong><br>${x.meal||''} • ${x.timeLabel||''}<br>${x.calories||0} kcal • P${x.protein||0} C${x.carbs||0} F${x.fats||0}</div>`).join(''):'<div class="item">No logs.</div>'}
-  </div>`);
-  bindSafeDateSelector();
-  const search=q('foodSearch');
-  if(search){
-    search.oninput=()=>{nutritionSearchValue=search.value;renderHotfixFoodList();search.focus()};
-  }
-  q('addCustomFoodBtn').onclick=()=>customFoodForm();
-  if(q('scanBarcode'))q('scanBarcode').onclick=openBarcodeScanner;
-  if(q('manualBarcode'))q('manualBarcode').onclick=()=>{const code=prompt('Enter barcode');if(code)handleBarcodeResult(code)};
-  document.querySelectorAll('[data-water]').forEach(b=>b.onclick=()=>addWater(Number(b.dataset.water)));
-  q('customWaterBtn').onclick=()=>{const ml=Number(prompt('Enter water amount in ml','750')||0);if(ml>0)addWater(ml)};
-  renderHotfixFoodList();
+  <div class="panel">${foodEditor(f)}</div>
+  <div class="panel"><div class="panel-title">Water Log</div><button class="btn" data-water="250">+250ml</button><button class="btn" data-water="500">+500ml</button><button class="btn" data-water="1000">+1L</button><button class="btn" id="customWaterBtn">+ Custom</button>${waterLogs(viewDate).map((w,i)=>`<div class="log-card">${w.amount}ml <button class="btn danger" data-delwater="${i}">Delete</button></div>`).join('')}</div>
+  <div class="panel"><div class="panel-title">Logs for ${viewDate}</div>${meals(viewDate).map((m,i)=>`<div class="log-card"><div><strong>${m.name}</strong><div class="muted">${m.meal||m.main} • ${m.calories||0} kcal • P${m.protein||0} C${m.carbs||0} F${m.fats||0}</div></div><button class="btn danger" data-delmeal="${i}">Delete</button></div>`).join('')||'<div class="item">No logs.</div>'}</div>`);
+  wireDate();
+  q('foodSearch').oninput=nutrition;
+  document.querySelectorAll('[data-meal]').forEach(b=>b.onclick=()=>{selectedMeal=b.dataset.meal;nutrition()});
+  document.querySelectorAll('[data-main]').forEach(b=>b.onclick=()=>{mainCat=b.dataset.main;subCat='All';selectedFood='';nutrition()});
+  document.querySelectorAll('[data-cuisine]').forEach(b=>b.onclick=()=>{selectedCuisine=b.dataset.cuisine;subCat='All';selectedFood='';nutrition()});
+  document.querySelectorAll('[data-sub]').forEach(b=>b.onclick=()=>{subCat=b.dataset.sub;selectedFood='';nutrition()});
+  document.querySelectorAll('[data-food]').forEach(b=>b.onclick=()=>{selectedFood=b.dataset.food;nutrition()});
+  wireFood();wireWater(viewDate);
+  const cf=q('addCustomFoodBtn'); if(cf) cf.onclick=addCustomFood;
+  q('scanBarcodeBtn').onclick=openBarcodeScanner;q('manualBarcodeBtn').onclick=manualBarcodeEntry;
+  document.querySelectorAll('[data-delwater]').forEach(b=>b.onclick=()=>{data.water[viewDate].splice(Number(b.dataset.delwater),1);save()});
+  document.querySelectorAll('[data-delmeal]').forEach(b=>b.onclick=()=>{data.meals[viewDate].splice(Number(b.dataset.delmeal),1);save()});
 }
-
 function foodEditor(f){
   if(!f)return'<div class="item">Select item.</div>';
   if(f.builder==='egg')return`<div class="panel-title">Egg Dish</div><div class="form-grid"><div class="field"><label>Whole Eggs</label><input id="wholeEggs" type="number" value="2"></div><div class="field"><label>Egg Whites</label><input id="eggWhites" type="number" value="0"></div><div class="field"><label>Style</label><select id="eggStyle"><option>Boiled</option><option>Omelette</option><option>Bhurji</option><option>Fried</option></select></div></div><div id="foodPreview" class="suggestion"></div><button class="btn primary" id="addFood">Add</button>`;
@@ -637,28 +631,18 @@ function wireFood(){
   update();
   q('addFood').onclick=()=>{data.meals[viewDate]=meals(viewDate);data.meals[viewDate].push(calcFood());smartPlan();save()};
 }
-function wireWater(d){document.querySelectorAll('[data-water]').forEach(b=>b.onclick=()=>{data.water[d]=waterLogs(d);data.water[d].push({amount:Number(b.dataset.water),time:Date.now()});save()})}
+function wireWater(d){const cw=q('customWaterBtn'); if(cw) cw.onclick=addCustomWater;
+  document.querySelectorAll('[data-water]').forEach(b=>b.onclick=()=>{data.water[d]=waterLogs(d);data.water[d].push({amount:Number(b.dataset.water),time:Date.now()});save()})}
 
 // ---------- Workout ----------
 function workout(){
-  const exs=selectedMuscles.flatMap(m=>(EXERCISE_DATABASE[m]||[]).map(e=>({m,e})));
-  if(!exs.some(x=>x.e===selectedExercise))selectedExercise=exs[0]?.e||'';
-  shell('Workouts','Smart Split or Custom Muscles. Max 3 muscles.',
-  `${dateControls()}<div class="panel"><div class="pill-row"><button class="pill ${workoutMode==='Smart Split'?'active':''}" data-mode="Smart Split">Smart Split</button><button class="pill ${workoutMode==='Custom Muscles'?'active':''}" data-mode="Custom Muscles">Custom Muscles</button></div>${workoutMode==='Smart Split'?`<div class="pill-row">${Object.keys(SPLITS).map(s=>`<button class="pill" data-split="${s}">${s}</button>`).join('')}</div>`:`<div class="pill-row">${Object.keys(EXERCISE_DATABASE).map(m=>`<button class="pill ${selectedMuscles.includes(m)?'active':''}" data-muscle="${m}">${m}</button>`).join('')}</div>`}<div class="suggestion">Selected: ${selectedMuscles.join(' + ')}</div></div>
-  <div class="panel"><div class="panel-title">Exercises</div>${selectedMuscles.map(m=>`<div class="panel-title" style="font-size:16px">${m}</div><div class="choice-list">${EXERCISE_DATABASE[m].map(e=>`<button class="choice-btn ${selectedExercise===e?'active':''}" data-ex="${e}">${e}</button>`).join('')}</div>`).join('')}</div>
-  <div class="panel"><div class="panel-title">${selectedExercise}</div><div class="form-grid"><div class="field"><label>Set Type</label><select id="setType"><option>Warmup</option><option selected>Working</option></select></div><div class="field"><label>Set No.</label><input id="setNo" readonly value="${setsFor(selectedExercise).length+1}"></div><div class="field"><label>Weight</label><input id="setWeight" type="number"></div><div class="field"><label>Reps</label><input id="setReps" type="number"></div></div><div style="margin-top:18px"><button class="btn primary" id="addSet">Add Set</button></div><div id="restBox" class="suggestion ${restSeconds?'':'hidden'}"><strong>Rest Timer</strong><div style="font-size:34px;font-weight:950">${fmtRest()}</div><button class="btn" id="pauseRest">${restPaused?'Resume':'Pause'}</button><button class="btn" id="skipRest">Skip</button><button class="btn" id="addRest">+30 sec</button></div>${currentSets.map((s,i)=>`<div class="log-card">${s.exercise} • Set ${s.setNo} • ${s.weight}kg x ${s.reps}<button class="btn danger" data-delset="${i}">Delete</button></div>`).join('')}</div>
-  <div class="panel"><button class="btn" id="finishWorkout">Finish Workout</button><div class="panel-title">History for ${viewDate}</div>${workouts(viewDate).map(w=>`<div class="log-card"><div><strong>${w.name}</strong><div class="muted">${w.muscles.join('+')} • ${w.volume}kg • ${w.intensity}<br>${w.sets.map(s=>`${s.exercise} Set ${s.setNo}: ${s.weight}kg x ${s.reps}`).join('<br>')}</div></div></div>`).join('')||'<div class="item">No workouts logged.</div>'}</div>`);
+  const today=workouts(viewDate);
+  shell('Workouts','Strength, Cardio, Sports and History',`${dateControls()}<div class="panel"><div class="pill-row"><button class="pill active" data-wtab="strength">Strength</button><button class="pill" data-wtab="cardio">Cardio</button><button class="pill" data-wtab="sports">Sports</button></div><div id="workoutForm"></div></div><div class="panel"><div class="panel-title">Activity for ${viewDate}</div>${today.length?today.map((w,i)=>`<div class="log-card"><strong>${w.name}</strong><br>${w.category||'Strength'} • ${w.caloriesBurned||0} kcal<br>${(w.sets||[]).map(s=>`${s.type?`[${s.type}] `:''}${s.exercise}: ${s.weight||'-'} x ${s.reps||'-'}`).join('<br>')}<button class="btn danger" data-delworkout="${i}">Delete</button></div>`).join(''):'<div class="item">Workout Missing</div>'}</div>`);
   wireDate();
-  document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{workoutMode=b.dataset.mode;workout()});
-  document.querySelectorAll('[data-split]').forEach(b=>b.onclick=()=>{selectedMuscles=SPLITS[b.dataset.split].slice(0,3);selectedExercise='';workout()});
-  document.querySelectorAll('[data-muscle]').forEach(b=>b.onclick=()=>{const m=b.dataset.muscle;if(selectedMuscles.includes(m))selectedMuscles=selectedMuscles.filter(x=>x!==m);else if(selectedMuscles.length<3)selectedMuscles.push(m);selectedExercise='';workout()});
-  document.querySelectorAll('[data-ex]').forEach(b=>b.onclick=()=>{selectedExercise=b.dataset.ex;workout()});
-  q('addSet').onclick=()=>{const s={exercise:selectedExercise,setNo:setsFor(selectedExercise).length+1,type:q('setType').value,weight:q('setWeight').value,reps:q('setReps').value};currentSets.push(s);startRest(s);workout()};
-  document.querySelectorAll('[data-delset]').forEach(b=>b.onclick=()=>{currentSets.splice(Number(b.dataset.delset),1);workout()});
-  q('finishWorkout').onclick=finishWorkout;
-  if(q('pauseRest'))q('pauseRest').onclick=()=>{restPaused=!restPaused;workout()};
-  if(q('skipRest'))q('skipRest').onclick=()=>{stopRest();workout()};
-  if(q('addRest'))q('addRest').onclick=()=>{restSeconds+=30;workout()};
+  const renderStrength=()=>{const exs=selectedMuscles.flatMap(m=>(EXERCISE_DATABASE[m]||[]).map(e=>({m,e})));if(!exs.some(x=>x.e===selectedExercise))selectedExercise=exs[0]?.e||'';q('workoutForm').innerHTML=`<div class="form-grid"><div class="field"><label>Workout Name</label><input id="workoutName" value="${selectedMuscles.join(' + ')||'Strength Workout'}"></div><div class="field"><label>Set Type</label><select id="setType"><option>Warmup</option><option selected>Working</option></select></div><div class="field"><label>Equipment</label><select id="equipment"><option>Machine</option><option>Barbell</option><option>Dumbbell</option><option>Cable</option><option>Bodyweight</option></select></div></div><div class="pill-row">${Object.keys(EXERCISE_DATABASE).map(m=>`<button class="pill ${selectedMuscles.includes(m)?'active':''}" data-muscle="${m}">${m}</button>`).join('')}</div><div class="choice-list">${exs.map(x=>`<button class="choice-btn ${selectedExercise===x.e?'active':''}" data-ex="${x.e}">${x.e}<br><span class="muted">${x.m}</span></button>`).join('')}</div><div class="form-grid"><div class="field"><label>Exercise</label><input id="exerciseManual" value="${selectedExercise}"></div><div class="field"><label>Weight</label><input id="setWeight" type="number"></div><div class="field"><label>Reps</label><input id="setReps" type="number"></div></div><button class="btn primary" id="addSet">Add Set</button><button class="btn" id="restAlertBtn">Rest Alert</button><button class="btn" id="finishWorkout">Finish Workout</button>${currentSets.map((s,i)=>`<div class="log-card">[${s.type}] ${s.exercise} • Set ${s.setNo} • ${s.weight}kg x ${s.reps} • ${s.equipment||''}<button class="btn danger" data-delset="${i}">Delete</button></div>`).join('')}`;document.querySelectorAll('[data-muscle]').forEach(b=>b.onclick=()=>{const m=b.dataset.muscle;if(selectedMuscles.includes(m))selectedMuscles=selectedMuscles.filter(x=>x!==m);else if(selectedMuscles.length<3)selectedMuscles.push(m);selectedExercise='';renderStrength()});document.querySelectorAll('[data-ex]').forEach(b=>b.onclick=()=>{selectedExercise=b.dataset.ex;renderStrength()});q('addSet').onclick=()=>{const ex=q('exerciseManual').value.trim()||selectedExercise;currentSets.push({exercise:ex,setNo:currentSets.filter(x=>x.exercise===ex).length+1,type:q('setType').value,equipment:q('equipment').value,weight:q('setWeight').value,reps:q('setReps').value});renderStrength()};document.querySelectorAll('[data-delset]').forEach(b=>b.onclick=()=>{currentSets.splice(Number(b.dataset.delset),1);renderStrength()});q('finishWorkout').onclick=finishWorkout;q('restAlertBtn').onclick=startRestAlert};
+  const renderCardio=()=>{q('workoutForm').innerHTML=`<div class="form-grid"><div class="field"><label>Activity</label><select id="cardioActivity">${CARDIO_ACTIVITIES.map(a=>`<option>${a}</option>`).join('')}</select></div><div class="field"><label>Duration (minutes)</label><input id="cardioDuration" type="number" placeholder="30"></div><div class="field"><label>Distance (optional)</label><input id="cardioDistance" type="number" step="0.1"></div><div class="field"><label>Intensity</label><select id="cardioIntensity"><option>Light</option><option selected>Moderate</option><option>Intense</option></select><div class="muted">Light = easy pace, Moderate = challenging but sustainable, Intense = hard/HIIT.</div></div></div><div class="suggestion" id="cardioEstimate"></div><button class="btn primary" id="saveCardio">Save Cardio</button>`;const update=()=>q('cardioEstimate').innerHTML=`Estimated calories: ${estimateActivityCalories(q('cardioActivity').value,q('cardioDuration').value,q('cardioIntensity').value,'cardio')} kcal`;['cardioActivity','cardioDuration','cardioIntensity'].forEach(id=>q(id).oninput=update);q('saveCardio').onclick=()=>{const activity=q('cardioActivity').value,duration=q('cardioDuration').value,intensity=q('cardioIntensity').value,cal=estimateActivityCalories(activity,duration,intensity,'cardio');data.workouts[viewDate]=workouts(viewDate);data.workouts[viewDate].push({name:activity,category:'Cardio',duration,distance:q('cardioDistance').value,intensity,caloriesBurned:cal,sets:[],muscles:[]});save()};update()};
+  const renderSports=()=>{q('workoutForm').innerHTML=`<div class="form-grid"><div class="field"><label>Sport</label><select id="sportActivity">${SPORTS_ACTIVITIES.map(a=>`<option>${a}</option>`).join('')}</select></div><div class="field"><label>Duration (minutes)</label><input id="sportDuration" type="number" placeholder="45"></div><div class="field"><label>Intensity</label><select id="sportIntensity"><option>Light</option><option selected>Moderate</option><option>Intense</option></select></div><div class="field"><label>Notes</label><input id="sportNotes"></div></div><div class="suggestion" id="sportEstimate"></div><button class="btn primary" id="saveSport">Save Sport</button>`;const update=()=>q('sportEstimate').innerHTML=`Estimated calories: ${estimateActivityCalories(q('sportActivity').value,q('sportDuration').value,q('sportIntensity').value,'sports')} kcal`;['sportActivity','sportDuration','sportIntensity'].forEach(id=>q(id).oninput=update);q('saveSport').onclick=()=>{const activity=q('sportActivity').value,duration=q('sportDuration').value,intensity=q('sportIntensity').value,cal=estimateActivityCalories(activity,duration,intensity,'sports');data.workouts[viewDate]=workouts(viewDate);data.workouts[viewDate].push({name:activity,category:'Sports',duration,intensity,notes:q('sportNotes').value,caloriesBurned:cal,sets:[],muscles:[]});save()};update()};
+  document.querySelectorAll('[data-wtab]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-wtab]').forEach(x=>x.classList.remove('active'));b.classList.add('active');if(b.dataset.wtab==='strength')renderStrength();if(b.dataset.wtab==='cardio')renderCardio();if(b.dataset.wtab==='sports')renderSports()});document.querySelectorAll('[data-delworkout]').forEach(b=>b.onclick=()=>{data.workouts[viewDate].splice(Number(b.dataset.delworkout),1);save()});renderStrength()
 }
 function setsFor(ex){return currentSets.filter(s=>s.exercise===ex)}
 function fmtRest(){return String(Math.floor(restSeconds/60)).padStart(2,'0')+':'+String(restSeconds%60).padStart(2,'0')}
@@ -668,7 +652,8 @@ function finishWorkout(){
   if(!currentSets.length)return alert('Add at least one set');
   const vol=currentSets.reduce((a,s)=>a+Number(s.weight||0)*Number(s.reps||0),0),int=vol>6000?'High':vol>2500?'Moderate':'Light';
   data.workouts[viewDate]=workouts(viewDate);
-  data.workouts[viewDate].push({name:selectedMuscles.join(' + '),muscles:[...selectedMuscles],sets:[...currentSets],volume:vol,intensity:int});
+  const chosenName=(q('workoutName')?.value||'').trim()||selectedMuscles.join(' + ')||'Strength Workout';
+  data.workouts[viewDate].push({name:chosenName,category:'Strength',muscles:[...selectedMuscles],sets:[...currentSets],volume:vol,intensity:int,caloriesBurned:Math.round(vol/20)});
   currentSets=[];stopRest();smartPlan();save();alert('Workout saved. Volume: '+vol+'kg');
 }
 function recommendMuscles(){
@@ -682,12 +667,8 @@ function lastNDays(n){return [...Array(n)].map((_,i)=>{const d=new Date();d.setD
 function avg(nums){const a=nums.filter(x=>Number.isFinite(Number(x)));return a.length?round(a.reduce((s,x)=>s+Number(x),0)/a.length,1):0}
 function nutritionPatterns(days=7){
   const t=targets(), keys=lastNDays(days);
-  const daily=keys.map(d=>({date:d,...mealTotals(d),water:waterTotal(d),meals:meals(d).length}));
-  return {daily,avgCal:avg(daily.map(x=>x.cal)),avgProtein:avg(daily.map(x=>x.p)),avgWater:avg(daily.map(x=>x.water)),
-    lowProteinDays:daily.filter(x=>x.p<t.protein*.8).length,
-    highCalDays:daily.filter(x=>x.cal>t.calories*1.1).length,
-    lowWaterDays:daily.filter(x=>x.water<t.water*.75).length,
-    weekendHigh:daily.filter(x=>['Sat','Sun'].includes(new Date(x.date).toLocaleDateString('en-US',{weekday:'short'}))&&x.cal>t.calories*1.1).length};
+  const daily=keys.map(d=>({date:d,...mealTotals(d),water:waterTotal(d),meals:meals(d).length,burned:workoutCalories(d)}));
+  return {daily,avgCal:avg(daily.map(x=>x.cal)),avgProtein:avg(daily.map(x=>x.p)),avgWater:avg(daily.map(x=>x.water)),lowProteinDays:daily.filter(x=>x.p<t.protein*.8).length,highCalDays:daily.filter(x=>x.cal>t.calories*1.1).length,lowWaterDays:daily.filter(x=>x.water<t.water*.75).length,weekendHigh:daily.filter(x=>['Sat','Sun'].includes(new Date(x.date).toLocaleDateString('en-US',{weekday:'short'}))&&x.cal>t.calories*1.1).length};
 }
 function workoutPatterns(days=7){
   const keys=lastNDays(days), daily=keys.map(d=>({date:d,workouts:workouts(d),count:workouts(d).length,muscles:workouts(d).flatMap(w=>w.muscles||[])}));
@@ -1015,129 +996,6 @@ async function openBarcodeScanner(){
   }
 }
 
-
-// ---------- Stable 1.0.3 Hotfix 2: Safe Nutrition Helpers ----------
-let selectedDateSafe = todayKey();
-let nutritionSearchValue = "";
-const CUSTOM_PORTION_OPTIONS = [
-  ["per 100g","per 100g"],
-  ["serving","1 serving"],
-  ["bowl","1 bowl"],
-  ["cup","1 cup"],
-  ["tbsp","1 tbsp / spoon"],
-  ["tsp","1 tsp"],
-  ["piece","1 piece"]
-];
-
-function safeViewDate(){ return selectedDateSafe || todayKey(); }
-function setSafeViewDate(d){ selectedDateSafe=d; }
-function safeDateSelectorHtml(){
-  const d=safeViewDate();
-  const yd=new Date(); yd.setDate(yd.getDate()-1);
-  const y=`${yd.getFullYear()}-${String(yd.getMonth()+1).padStart(2,'0')}-${String(yd.getDate()).padStart(2,'0')}`;
-  return `<div class="pill-row">
-    <button class="pill ${d===todayKey()?'active':''}" id="safeToday">Today</button>
-    <button class="pill ${d===y?'active':''}" id="safeYesterday">Yesterday</button>
-    <input id="safeDatePicker" type="date" value="${d}">
-  </div>`;
-}
-function bindSafeDateSelector(){
-  const yd=new Date(); yd.setDate(yd.getDate()-1);
-  const y=`${yd.getFullYear()}-${String(yd.getMonth()+1).padStart(2,'0')}-${String(yd.getDate()).padStart(2,'0')}`;
-  if(q('safeToday')) q('safeToday').onclick=()=>{setSafeViewDate(todayKey());render()};
-  if(q('safeYesterday')) q('safeYesterday').onclick=()=>{setSafeViewDate(y);render()};
-  if(q('safeDatePicker')) q('safeDatePicker').onchange=()=>{setSafeViewDate(q('safeDatePicker').value);render()};
-}
-function hotfixFoodList(){
-  return [
-    ...(typeof FOOD_DATABASE!=='undefined'?FOOD_DATABASE:[]),
-    ...(typeof SUPPLEMENT_DATABASE!=='undefined'?SUPPLEMENT_DATABASE:[]),
-    ...(data.customFoods||[])
-  ];
-}
-function hotfixCategory(f){
-  if(f.main==='Custom')return'Custom';
-  if(f.main==='Supplements')return'Supplements';
-  if(f.main==='Sauces')return'Sauces';
-  if(f.main==='Drinks')return'Drinks';
-  if(f.main==='Fruits'||f.sub==='Fruits')return'Fruits';
-  if(f.main==='Vegetables'||f.sub==='Vegetables')return'Vegetables';
-  if(f.main==='Alcohol')return'Alcohol';
-  if(f.main==='Cheat Meals')return'Cheat Meals';
-  return f.main||'Cuisines';
-}
-function hotfixFilteredFoods(search){
-  const s=(search||'').toLowerCase().trim();
-  return hotfixFoodList().filter(f=>!s || `${f.name||''} ${f.main||''} ${f.sub||''} ${f.cuisine||''}`.toLowerCase().includes(s));
-}
-function customFoodForm(existing=null,index=null){
-  const f=existing||{};
-  const modal=q('modal'), card=q('modalCard');
-  modal.classList.remove('hidden');
-  card.innerHTML=`<div class="panel-title">${existing?'Edit':'Add'} Custom Food</div>
-  <div class="form-grid">
-    <div class="field"><label>Food Name</label><input id="cfName" value="${f.name||''}" placeholder="e.g. Lauki Sabzi"></div>
-    <div class="field"><label>Serving / Portion Type</label><select id="cfUnit">${CUSTOM_PORTION_OPTIONS.map(([v,l])=>`<option value="${v}" ${f.unit===v?'selected':''}>${l}</option>`).join('')}</select></div>
-    <div class="field"><label>Portion Display</label><input id="cfPortion" value="${f.portion||''}" placeholder="e.g. 1 cup / 150g"></div>
-    <div class="field"><label>Calories</label><input id="cfCal" type="number" step="0.1" value="${f.calories??''}"></div>
-    <div class="field"><label>Protein (g)</label><input id="cfProtein" type="number" step="0.1" value="${f.protein??''}"></div>
-    <div class="field"><label>Carbs (g)</label><input id="cfCarbs" type="number" step="0.1" value="${f.carbs??''}"></div>
-    <div class="field"><label>Fats (g)</label><input id="cfFats" type="number" step="0.1" value="${f.fats??''}"></div>
-  </div>
-  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
-    <button class="btn primary" id="saveCF">${existing?'Save Changes':'Save Food'}</button>
-    <button class="btn" id="cancelCF">Cancel</button>
-  </div>`;
-  q('cancelCF').onclick=()=>{modal.classList.add('hidden');card.innerHTML=''};
-  q('saveCF').onclick=()=>{
-    const food={
-      main:'Custom', sub:'User Food',
-      name:q('cfName').value.trim(),
-      defaultQty:1,
-      unit:q('cfUnit').value,
-      portion:q('cfPortion').value.trim()||q('cfUnit').selectedOptions[0].textContent,
-      calories:Number(q('cfCal').value||0),
-      protein:Number(q('cfProtein').value||0),
-      carbs:Number(q('cfCarbs').value||0),
-      fats:Number(q('cfFats').value||0)
-    };
-    if(!food.name){alert('Enter food name');return}
-    data.customFoods=data.customFoods||[];
-    if(index!==null&&index!==undefined)data.customFoods[index]=food;else data.customFoods.push(food);
-    localStorage.setItem(STORE,JSON.stringify(data));
-    modal.classList.add('hidden');card.innerHTML='';
-    render();
-  };
-}
-function deleteCustomFood(index){
-  if(confirm('Delete this custom food? Past logs remain unchanged.')){
-    data.customFoods.splice(index,1);
-    localStorage.setItem(STORE,JSON.stringify(data));
-    render();
-  }
-}
-function renderHotfixFoodList(){
-  const box=q('foodList');
-  if(!box)return;
-  const list=hotfixFilteredFoods(nutritionSearchValue).slice(0,120);
-  box.innerHTML=list.length?list.map((f,i)=>{
-    const ci=f.main==='Custom'?(data.customFoods||[]).findIndex(x=>x.name===f.name&&x.calories===f.calories):-1;
-    return `<div class="food-card-clean">
-      <div><strong>${f.name}</strong><br><span>${hotfixCategory(f)} → ${f.sub||f.cuisine||''}</span><br><small>${f.portion||''} • ${f.calories||0} kcal • P${f.protein||0} C${f.carbs||0} F${f.fats||0}</small></div>
-      <div class="food-card-actions">${safeViewDate()===todayKey()?`<button class="btn primary" data-addfood="${i}">Add</button>`:''}${ci>=0?`<button class="btn" data-editcf="${ci}">Edit</button><button class="btn danger" data-delcf="${ci}">Delete</button>`:''}</div>
-    </div>`;
-  }).join(''):'<div class="item">No foods found.</div>';
-  document.querySelectorAll('[data-addfood]').forEach(b=>b.onclick=()=>{
-    const f=list[Number(b.dataset.addfood)];
-    data.meals[todayKey()]=data.meals[todayKey()]||[];
-    data.meals[todayKey()].push({...f,meal:'Breakfast',qty:f.defaultQty||1,time:Date.now(),timeLabel:new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})});
-    localStorage.setItem(STORE,JSON.stringify(data));
-    render();
-  });
-  document.querySelectorAll('[data-editcf]').forEach(b=>b.onclick=()=>customFoodForm(data.customFoods[Number(b.dataset.editcf)],Number(b.dataset.editcf)));
-  document.querySelectorAll('[data-delcf]').forEach(b=>b.onclick=()=>deleteCustomFood(Number(b.dataset.delcf)));
-}
-
 // ---------- Init ----------
 function bind(){
   q('mobileMenuBtn').onclick=()=>q('sidebar').classList.toggle('open');
@@ -1146,22 +1004,4 @@ function bind(){
 }
 bind();
 render();
-if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js?v=stable-1-0-3-hotfix-2').catch(()=>{}));
-
-
-
-function todayKey(){
-  const d=new Date();
-  const y=d.getFullYear();
-  const m=String(d.getMonth()+1).padStart(2,'0');
-  const day=String(d.getDate()).padStart(2,'0');
-  return `${y}-${m}-${day}`;
-}
-
-
-
-
-function addCustomFood(){
-  customFoodForm();
-}
-
+if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js?v=stable-1-0-2').catch(()=>{}));
