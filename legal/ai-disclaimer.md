@@ -1,10 +1,10 @@
 # AI Disclaimer
 
-**Version:** Stable Version 1.0.3  
+**Version:** Stable Version 1.0.3 Hotfix  
 **Last Updated:** April 26, 2026
 
-The AI Coach and rule-based coach suggestions provide general fitness and nutrition guidance. They are not a doctor, registered dietitian, physical therapist, or certified personal trainer.
+STAYFITINLIFE provides fitness, nutrition, workout, recovery, supplement, and coaching support for general wellness use.
 
-AI and automated suggestions may be inaccurate, incomplete, or unsuitable. Review all suggestions carefully and use your own judgment.
+All calorie, macro, workout, supplement, and coach outputs are estimates and should not replace qualified medical, nutrition, or fitness advice.
 
-For reliability and cost control, STAYFITINLIFE uses local logic first, cached responses when available, and AI only when requested.
+AI or automated suggestions may be incomplete or inaccurate. Use your judgment and consult qualified professionals for health conditions, injuries, medications, supplements, or major diet/training changes.

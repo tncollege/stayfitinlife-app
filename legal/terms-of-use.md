@@ -1,10 +1,10 @@
 # Terms of Use
 
-**Version:** Stable Version 1.0.3  
+**Version:** Stable Version 1.0.3 Hotfix  
 **Last Updated:** April 26, 2026
 
-By using STAYFITINLIFE, you agree to use it for general fitness, nutrition, workout tracking, recovery, supplement tracking, and habit guidance.
+STAYFITINLIFE provides fitness, nutrition, workout, recovery, supplement, and coaching support for general wellness use.
 
-All calorie, macro, workout, supplement, coach, and AI outputs are estimates. You are responsible for your health, food choices, supplement use, exercise technique, and safety.
+All calorie, macro, workout, supplement, and coach outputs are estimates and should not replace qualified medical, nutrition, or fitness advice.
 
-Consult qualified professionals for medical conditions, injuries, medications, supplements, specialized diet requirements, or major training changes.
+AI or automated suggestions may be incomplete or inaccurate. Use your judgment and consult qualified professionals for health conditions, injuries, medications, supplements, or major diet/training changes.

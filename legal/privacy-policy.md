@@ -1,12 +1,10 @@
 # Privacy Policy
 
-**Version:** Stable Version 1.0.3  
+**Version:** Stable Version 1.0.3 Hotfix  
 **Last Updated:** April 26, 2026
 
-STAYFITINLIFE stores your profile, nutrition, workouts, water logs, recovery, progress, coach plans, custom foods, custom exercises, supplement reminders, barcode cache, and daily summaries to provide fitness tracking and coaching features.
+STAYFITINLIFE provides fitness, nutrition, workout, recovery, supplement, and coaching support for general wellness use.
 
-Your data is used to calculate calorie targets, macros, workout calories burned, deficit or surplus, daily history, coach suggestions, and progress insights.
+All calorie, macro, workout, supplement, and coach outputs are estimates and should not replace qualified medical, nutrition, or fitness advice.
 
-AI Coach features may use external AI services only when you actively ask AI questions. Rule-based suggestions are used where possible to reduce cost and improve speed.
-
-STAYFITINLIFE is not a medical device and does not provide medical diagnosis. Do not use the app for emergency or safety-critical decisions.
+AI or automated suggestions may be incomplete or inaccurate. Use your judgment and consult qualified professionals for health conditions, injuries, medications, supplements, or major diet/training changes.

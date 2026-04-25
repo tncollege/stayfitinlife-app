@@ -26,8 +26,3 @@
   for = "/manifest.webmanifest"
   [headers.values]
     Cache-Control = "no-cache, no-store, must-revalidate"
-
-[[headers]]
-  for = "/legal/*"
-  [headers.values]
-    Cache-Control = "no-cache, no-store, must-revalidate"

@@ -1,7 +1,7 @@
 {
   "name": "STAYFITINLIFE",
   "short_name": "SFL",
-  "start_url": "/?v=stable-1-0-3-final",
+  "start_url": "/?v=stable-1-0-3-hotfix-final",
   "scope": "/",
   "display": "standalone",
   "background_color": "#0B1220",

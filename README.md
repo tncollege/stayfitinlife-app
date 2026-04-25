@@ -1,15 +1,16 @@
-# STAYFITINLIFE — Stable Version 1.0.3
+# STAYFITINLIFE — Stable Version 1.0.3 Hotfix
 
 Last Updated: April 26, 2026
 
-Deployment-ready production ZIP.
+Final clean hotfix production ZIP.
 
-Includes:
-- Version updated to Stable Version 1.0.3
-- Legal docs updated with version and last updated date
-- Browser tab title remains STAYFITINLIFE
-- Manifest cache tag updated
-- Service worker reset to avoid stale deployments
-- Netlify no-cache headers included
-
-Deploy on Netlify with: Clear cache and deploy site.
+Fixed active code paths:
+- Custom Food no longer uses old prompt flow
+- Custom Food uses one-screen modal with serving dropdown
+- Custom Food Add/Edit/Delete visible in Custom category
+- Search updates food list only and keeps cursor focus
+- todayKey uses local timezone
+- selectedDate syncs to current day on app open
+- Dashboard and Nutrition use one date source
+- Mobile bottom navigation safe-area spacing
+- Deployment-safe service worker and Netlify no-cache headers
