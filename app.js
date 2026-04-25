@@ -2,8 +2,8 @@ import { FOOD_DATABASE } from './data/foodDatabase.js';
 import { EXERCISE_DATABASE, SPLITS } from './data/exerciseDatabase.js';
 import { SUPPLEMENT_DATABASE } from './data/supplementDatabase.js';
 
-const STORE='stayfitinlife_v14_1_complete';
-const APP_VERSION='V14.1';
+const STORE='stayfitinlife_stable_1_0';
+const APP_VERSION='Stable Version 1.0';
 const LAST_UPDATED='25 April 2026';
 
 const todayKey=()=>new Date().toISOString().slice(0,10);
@@ -13,6 +13,7 @@ const round=(n,d=1)=>Math.round((Number(n)||0)*10**d)/10**d;
 
 const defaultData={
   profile:{},
+  introSeen:false,
   units:{system:'metric'},
   meals:{},
   water:{},
@@ -99,7 +100,7 @@ function setActiveNav(){
   document.querySelectorAll('[data-mobile-tab]').forEach(b=>b.classList.toggle('active',b.dataset.mobileTab===tab));
 }
 function switchTab(t){tab=t;appMode='app';q('sidebar')?.classList.remove('open');render()}
-function render(){
+function render(){if(profileComplete() && !data.introSeen && appMode!=='onboarding'){showAppGuide();return}
   setActiveNav();
   if(!profileComplete() || appMode==='onboarding'){
     renderOnboarding();
@@ -109,7 +110,7 @@ function render(){
 }
 
 
-// ---------- V14.1 Global Units System ----------
+// ---------- Stable Version 1.0 Global Units System ----------
 function unitSystem(){ return (data.units&&data.units.system)||data.profile.unitsSystem||'metric'; }
 function isImperial(){ return unitSystem()==='imperial'; }
 function unitLabels(){
@@ -120,10 +121,10 @@ function unitLabels(){
 function kgToLb(kg){return round((Number(kg)||0)*2.20462,1)}
 function lbToKg(lb){return round((Number(lb)||0)*0.453592,1)}
 function cmToFtIn(cm){
-  const inches=(Number(cm)||0)*0.393701;
-  const ft=Math.floor(inches/12);
-  const inch=Math.round(inches-ft*12);
-  return `${ft}'${inch}"`;
+  const total=Math.round((Number(cm)||0)*0.393701);
+  const ft=Math.floor(total/12);
+  const inch=total-ft*12;
+  return {ft,inch};
 }
 function ftInToCm(ft,inch){return round(((Number(ft)||0)*12+(Number(inch)||0))*2.54,1)}
 function lToOz(l){return round((Number(l)||0)*33.814,1)}
@@ -132,7 +133,13 @@ function gToOz(g){return round((Number(g)||0)/28.3495,1)}
 function ozToG(oz){return round((Number(oz)||0)*28.3495,1)}
 function displayWeight(kg){return isImperial()?kgToLb(kg):round(kg,1)}
 function inputWeightToKg(v){return isImperial()?lbToKg(v):Number(v)}
-function displayHeight(cm){return isImperial()?cmToFtIn(cm):round(cm,1)}
+function displayHeight(cm){
+  if(isImperial()){
+    const h=cmToFtIn(cm);
+    return `${h.ft}'${h.inch}"`;
+  }
+  return round(cm,1);
+}
 function displayWater(l){return isImperial()?lToOz(l):round(l,1)}
 function unitGuide(unit, portion=''){
   const metric={
@@ -211,32 +218,46 @@ function startOnboarding(){
   onboardingTemp={...data.profile,unitsSystem:unitSystem()};
   render();
 }
+
 function renderOnboarding(){
   if(profileComplete() && appMode!=='onboarding'){home();return}
   if(onboardingStep===0){
     shell('Setup Required','Complete 2-step onboarding to activate your targets and dashboard.',
     `<div class="panel onboarding-page"><div class="panel-title">Welcome to STAYFITINLIFE</div>
-     <div class="muted">Step 1 captures your basic info. Step 2 builds your goal plan.</div>
+     <div class="muted">Step 1 captures your basic info and preferred units. Step 2 builds your goal plan.</div>
      <button class="btn primary" id="startOnboarding" style="margin-top:16px">Start Onboarding</button></div>`);
     q('startOnboarding').onclick=startOnboarding;
     return;
   }
+
   if(onboardingStep===1){
     const t=onboardingTemp;
+    const h=cmToFtIn(t.height||162.5);
     shell('Onboarding','Step 1 of 2 — Basic Info',
     `<div class="panel onboarding-page">
       <div class="onboarding-progress"><span style="width:50%"></span></div>
       <div class="panel-title" style="font-size:18px;margin-top:8px">Preferred Units</div>
       <div class="pill-row">
-        <button class="pill ${((onboardingTemp.unitsSystem||unitSystem())==='metric')?'active':''}" data-unit-system="metric">Metric (kg, cm, L, g)</button>
-        <button class="pill ${((onboardingTemp.unitsSystem||unitSystem())==='imperial')?'active':''}" data-unit-system="imperial">Imperial (lb, ft-in, oz)</button>
+        <button class="pill ${((t.unitsSystem||unitSystem())==='metric')?'active':''}" data-unit-system="metric">Metric (kg, cm, L, g)</button>
+        <button class="pill ${((t.unitsSystem||unitSystem())==='imperial')?'active':''}" data-unit-system="imperial">Imperial (lb, ft-in, oz)</button>
       </div>
+
       <div class="form-grid">
         <div class="field"><label>Name</label><input id="ob_name" value="${t.name||''}" placeholder="Your name"></div>
         <div class="field"><label>Age</label><input id="ob_age" type="number" min="10" max="100" value="${t.age||''}" placeholder="43"></div>
-        <div class="field"><label>Height (${unitLabels().height})</label><input id="ob_height" type="number" step="0.1" value="${t.height||''}" placeholder="${isImperial()?'5\'4\"':'162.5'}"></div>
+        ${isImperial()?`
+          <div class="field"><label>Height</label>
+            <div class="inline-fields">
+              <input id="ob_height_ft" type="number" min="1" max="8" value="${h.ft||5}" placeholder="5"><span>ft</span>
+              <input id="ob_height_in" type="number" min="0" max="11" value="${h.inch||4}" placeholder="4"><span>in</span>
+            </div>
+          </div>
+        `:`
+          <div class="field"><label>Height (cm)</label><input id="ob_height_cm" type="number" step="0.1" value="${t.height||''}" placeholder="162.5"></div>
+        `}
         <div class="field"><label>Current Weight (${unitLabels().weight})</label><input id="ob_currentWeight" type="number" step="0.1" value="${t.currentWeight?displayWeight(t.currentWeight):''}" placeholder="${isImperial()?'176':'80.1'}"></div>
       </div>
+
       <div class="suggestion">Starting weight is saved internally as your current weight. No separate input needed.</div>
       <div style="display:flex;gap:10px;margin-top:18px;flex-wrap:wrap">
         <button class="btn primary" id="obNext">Next: Goal</button>
@@ -244,7 +265,11 @@ function renderOnboarding(){
     </div>`);
     document.querySelectorAll('[data-unit-system]').forEach(b=>b.onclick=()=>{onboardingTemp.unitsSystem=b.dataset.unitSystem;data.units={system:b.dataset.unitSystem};render()});
     q('obNext').onclick=()=>{
-      ['name','age','height'].forEach(k=>onboardingTemp[k]=q('ob_'+k).value.trim()); onboardingTemp.currentWeight=inputWeightToKg(q('ob_currentWeight').value.trim()); onboardingTemp.unitsSystem=unitSystem();
+      onboardingTemp.name=q('ob_name').value.trim();
+      onboardingTemp.age=q('ob_age').value.trim();
+      onboardingTemp.unitsSystem=unitSystem();
+      onboardingTemp.height=isImperial()?ftInToCm(q('ob_height_ft').value,q('ob_height_in').value):q('ob_height_cm').value.trim();
+      onboardingTemp.currentWeight=inputWeightToKg(q('ob_currentWeight').value.trim());
       const missing=['name','age','height','currentWeight'].filter(k=>!onboardingTemp[k]);
       if(missing.length){alert('Please complete: '+missing.join(', '));return}
       onboardingTemp.startWeight=onboardingTemp.currentWeight;
@@ -260,6 +285,7 @@ function renderOnboarding(){
     };
     return;
   }
+
   if(onboardingStep===2){
     const t=onboardingTemp;
     const range=idealWeightRange(t.height);
@@ -272,13 +298,15 @@ function renderOnboarding(){
         <button class="choice-btn ${t.goal==='Muscle Gain'?'active':''}" data-obgoal="Muscle Gain">💪 Muscle Gain<br><span class="muted">Build muscle and strength</span></button>
         <button class="choice-btn ${t.goal==='Maintenance'?'active':''}" data-obgoal="Maintenance">⚖️ Maintenance<br><span class="muted">Stay fit and balanced</span></button>
       </div>
+
       <div class="panel-title" style="font-size:18px;margin-top:18px">Target</div>
       <div class="pill-row">
         <button class="pill ${t.targetType==='weight'?'active':''}" data-obtarget="weight">Goal Weight</button>
         <button class="pill ${t.targetType==='bodyfat'?'active':''}" data-obtarget="bodyfat">Body Fat %</button>
       </div>
+
       <div class="form-grid">
-        <div class="field"><label>Target Weight (kg)</label><input id="ob_targetWeight" type="number" step="0.1" value="${t.targetWeight||''}" placeholder="72"></div>
+        <div class="field"><label>Target Weight (${unitLabels().weight})</label><input id="ob_targetWeight" type="number" step="0.1" value="${t.targetWeight?displayWeight(t.targetWeight):''}" placeholder="${isImperial()?'158':'72'}"></div>
         <div class="field"><label>Target Body Fat %</label><input id="ob_targetBodyFat" type="number" step="0.1" value="${t.targetBodyFat||''}" placeholder="15"></div>
         <div class="field"><label>Timeline Weeks</label><select id="ob_timelineWeeks">${['6','8','10','12','14','16','20','24'].map(w=>`<option ${String(t.timelineWeeks)===w?'selected':''}>${w}</option>`).join('')}</select></div>
         <div class="field"><label>Target Date</label><input id="ob_targetDate" type="date" value="${t.targetDate||dateFromWeeks(t.timelineWeeks)}"></div>
@@ -286,6 +314,7 @@ function renderOnboarding(){
         <div class="field"><label>Diet Preference</label><select id="ob_diet"><option ${t.diet==='Non-Veg'?'selected':''}>Non-Veg</option><option ${t.diet==='Veg'?'selected':''}>Veg</option><option ${t.diet==='Vegan'?'selected':''}>Vegan</option><option ${t.diet==='Mixed'?'selected':''}>Mixed</option></select></div>
         <div class="field"><label>Training Mode</label><select id="ob_mode"><option ${t.mode==='Beginner'?'selected':''}>Beginner</option><option ${t.mode==='Advanced'?'selected':''}>Advanced</option></select></div>
       </div>
+
       <div class="suggestion" id="goalSummary"></div>
       <label class="item" style="display:flex;gap:10px;align-items:flex-start">
         <input id="legalAccept" type="checkbox" style="width:auto;min-height:auto;margin-top:4px">
@@ -296,8 +325,9 @@ function renderOnboarding(){
         <button class="btn primary" id="obFinish">Generate My Plan 🚀</button>
       </div>
     </div>`);
+
     const sync=()=>{
-      t.targetWeight=q('ob_targetWeight').value;
+      t.targetWeight=inputWeightToKg(q('ob_targetWeight').value);
       t.targetBodyFat=q('ob_targetBodyFat').value;
       t.timelineWeeks=q('ob_timelineWeeks').value;
       t.targetDate=q('ob_targetDate').value;
@@ -306,17 +336,13 @@ function renderOnboarding(){
       t.mode=q('ob_mode').value;
       const current=Number(t.currentWeight);
       if(t.targetType==='weight' && t.targetWeight && !q('ob_targetBodyFat').dataset.userEdited){
-        q('ob_targetBodyFat').value=estimatedFatFromTarget(current,t.targetWeight);
-        t.targetBodyFat=q('ob_targetBodyFat').value;
+        q('ob_targetBodyFat').value=estimatedFatFromTarget(current,t.targetWeight); t.targetBodyFat=q('ob_targetBodyFat').value;
       }
       if(t.targetType==='bodyfat' && t.targetBodyFat && !q('ob_targetWeight').dataset.userEdited){
-        q('ob_targetWeight').value=estimatedTargetFromFat(current,t.targetBodyFat);
-        t.targetWeight=q('ob_targetWeight').value;
+        const est=estimatedTargetFromFat(current,t.targetBodyFat); q('ob_targetWeight').value=displayWeight(est); t.targetWeight=est;
       }
-      const tw=Number(t.targetWeight);
-      const weeks=Number(t.timelineWeeks||weeksFromDate(t.targetDate));
-      const change=tw?round(Math.abs(current-tw),1):0;
-      const weekly=weeks&&change?round(change/weeks,2):0;
+      const tw=Number(t.targetWeight), weeks=Number(t.timelineWeeks||weeksFromDate(t.targetDate));
+      const change=tw?round(Math.abs(current-tw),1):0, weekly=weeks&&change?round(change/weeks,2):0;
       let status='Enter target weight/body fat to validate.', color='var(--muted)';
       if(tw&&weeks){
         if(t.goal==='Fat Loss'){
@@ -324,14 +350,13 @@ function renderOnboarding(){
           else if(weekly>=0.4&&weekly<=0.9){status='Realistic and sustainable.';color='var(--green)'}
           else {status='Slow and sustainable.';color='var(--green)'}
         }else if(t.goal==='Muscle Gain'){
-          if(weekly>0.5){status='Aggressive muscle gain target.';color='var(--red)'}
-          else {status='Realistic muscle gain pace.';color='var(--green)'}
+          if(weekly>0.5){status='Aggressive muscle gain target.';color='var(--red)'} else {status='Realistic muscle gain pace.';color='var(--green)'}
         }else {status='Maintenance goal selected.';color='var(--green)'}
       }
-      q('goalSummary').innerHTML=`Healthy weight estimate: ${range.min}-${range.max} kg.<br>
+      q('goalSummary').innerHTML=`Healthy weight estimate: ${displayWeight(range.min)}-${displayWeight(range.max)} ${unitLabels().weight}.<br>
       Suggested body fat range for ${t.goal}: ${suggestedBodyFat(t.goal)}.<br>
       Timeline: ${weeks} weeks • Target date: ${t.targetDate||dateFromWeeks(weeks)}<br>
-      ${tw?`Change required: ${change} kg → ${weekly} kg/week.<br>`:''}
+      ${tw?`Change required: ${displayWeight(change)} ${unitLabels().weight} → ${displayWeight(weekly)} ${unitLabels().weight}/week.<br>`:''}
       <strong style="color:${color}">${status}</strong>`;
     };
     document.querySelectorAll('[data-obgoal]').forEach(b=>b.onclick=()=>{t.goal=b.dataset.obgoal;render()});
@@ -346,15 +371,106 @@ function renderOnboarding(){
       sync();
       if(!t.targetWeight && !t.targetBodyFat){alert('Please enter target weight or body fat.');return}
       if(!q('legalAccept').checked){alert('Please accept the Privacy Policy, Terms of Use, and AI Disclaimer.');return}
-      data.units={system:t.unitsSystem||unitSystem()}; data.profile={...t,startWeight:t.currentWeight,legalAccepted:true,legalVersion:APP_VERSION,legalAcceptedAt:new Date().toISOString()};
-      appMode='app';
-      onboardingStep=0;
-      onboardingTemp={};
-      tab='home';
-      save();
+      data.units={system:t.unitsSystem||unitSystem()};
+      data.profile={...t,startWeight:t.currentWeight,legalAccepted:true,legalVersion:APP_VERSION,legalAcceptedAt:new Date().toISOString()};
+      data.introSeen=false;
+      appMode='app'; onboardingStep=0; onboardingTemp={}; tab='home'; save();
     };
     sync();
   }
+}
+
+
+
+// ---------- Stable 1.0 App Guide ----------
+function appGuideHtml(){
+  return `<div class="panel onboarding-page app-guide">
+    <div class="panel-title">Welcome to STAYFITINLIFE</div>
+    <div class="muted">Track your fitness, nutrition, workouts and progress — all in one place.</div>
+    <div class="item"><strong>🏠 Dashboard</strong><br>Monitor calories, macros, water, recovery and today’s plan.</div>
+    <div class="item"><strong>🍽 Nutrition</strong><br>Log meals, scan barcodes and track supplements.</div>
+    <div class="item"><strong>🏋️ Workouts</strong><br>Track exercises, sets, reps and performance.</div>
+    <div class="item"><strong>🧠 Coach</strong><br>Generate smart meal and workout plans.</div>
+    <div class="item"><strong>📈 Progress</strong><br>Analyze trends with intelligent insights.</div>
+    <div class="suggestion"><strong>For the best experience on mobile:</strong><br>👉 Add this app to your Home Screen.<br><br>This allows faster access, full-screen usage, and a smoother app-like experience.<br><br><strong>On iPhone:</strong> Tap Share → Add to Home Screen<br><strong>On Android:</strong> Tap ⋮ → Add to Home Screen</div>
+    <button class="btn primary" id="startUsingApp">Start Using App</button>
+  </div>`;
+}
+function showAppGuide(){
+  shell('App Guide','How to get the best from STAYFITINLIFE',appGuideHtml());
+  q('startUsingApp').onclick=()=>{data.introSeen=true;save()};
+}
+
+
+// ---------- Stable 1.0 Barcode Scanner ----------
+let html5QrScanner=null;
+async function openScanner(){
+  const modal=document.createElement('div');
+  modal.className='modal';
+  modal.innerHTML=`<div class="modal-card">
+    <h2>Scan Barcode</h2>
+    <p class="muted">Rear camera opens by default. Align the barcode inside the frame.</p>
+    <div class="scanner-wrap">
+      <div id="scannerVideo" class="scanner-box"></div>
+      <div class="scan-frame">Align barcode here</div>
+    </div>
+    <div class="field"><label>Mode</label><select id="scanMode"><option value="environment">Rear Camera</option><option value="user">Front Camera</option></select></div>
+    <div class="suggestion" id="scannerStatus">Starting scanner...</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn" id="switchCam">Switch Camera</button>
+      <button class="btn" id="manualBarcode">Enter Barcode</button>
+      <button class="btn primary" id="closeScanner">Close</button>
+    </div>
+  </div>`;
+  document.body.appendChild(modal);
+
+  const stop=async()=>{
+    try{ if(html5QrScanner){await html5QrScanner.stop(); await html5QrScanner.clear(); html5QrScanner=null;} }catch(e){}
+  };
+  const close=async()=>{await stop();modal.remove()};
+
+  async function start(mode='environment'){
+    await stop();
+    q('scannerStatus').innerHTML='Scanning... move barcode inside the frame.';
+    if(window.Html5Qrcode){
+      html5QrScanner=new Html5Qrcode("scannerVideo");
+      html5QrScanner.start(
+        {facingMode:mode},
+        {fps:10,qrbox:{width:260,height:110},formatsToSupport:[
+          Html5QrcodeSupportedFormats.EAN_13,
+          Html5QrcodeSupportedFormats.EAN_8,
+          Html5QrcodeSupportedFormats.UPC_A,
+          Html5QrcodeSupportedFormats.UPC_E,
+          Html5QrcodeSupportedFormats.CODE_128,
+          Html5QrcodeSupportedFormats.CODE_39
+        ]},
+        async decodedText=>{
+          q('scannerStatus').innerHTML='✔ Barcode detected: '+decodedText;
+          if(navigator.vibrate) navigator.vibrate(120);
+          const search=q('foodSearch'); if(search){search.value=decodedText; search.dispatchEvent(new Event('input'));}
+          await stop();
+          setTimeout(()=>modal.remove(),650);
+        },
+        err=>{}
+      ).catch(e=>{
+        q('scannerStatus').innerHTML='Scanner could not start. Use Enter Barcode below.';
+      });
+    }else{
+      q('scannerStatus').innerHTML='Scanner library unavailable. Use Enter Barcode below.';
+    }
+  }
+
+  q('closeScanner').onclick=close;
+  q('manualBarcode').onclick=async()=>{
+    const code=prompt('Enter barcode number');
+    if(code){
+      const search=q('foodSearch'); if(search){search.value=code; search.dispatchEvent(new Event('input'));}
+      await close();
+    }
+  };
+  q('switchCam').onclick=()=>{const s=q('scanMode');s.value=s.value==='environment'?'user':'environment';start(s.value)};
+  q('scanMode').onchange=()=>start(q('scanMode').value);
+  start('environment');
 }
 
 // ---------- Core calculations ----------
@@ -635,7 +751,7 @@ function recommendMuscles(){
 }
 
 
-// ---------- V14 Zero-Cost Intelligence Engine ----------
+// ---------- Stable Version 1.0 Zero-Cost Intelligence Engine ----------
 function lastNDays(n){return [...Array(n)].map((_,i)=>{const d=new Date();d.setDate(d.getDate()-i);return d.toISOString().slice(0,10)}).reverse()}
 function avg(nums){const a=nums.filter(x=>Number.isFinite(Number(x)));return a.length?round(a.reduce((s,x)=>s+Number(x),0)/a.length,1):0}
 function nutritionPatterns(days=7){
@@ -802,11 +918,12 @@ function closeModal(){q('modal').classList.add('hidden');q('modalCard').innerHTM
 function openLegalDoc(type){openModal(LEGAL_DOCS[type]||LEGAL_DOCS.privacy)}
 function settings(){
   shell('Settings',`STAYFITINLIFE ${APP_VERSION} • Last Updated: ${LAST_UPDATED}`,
-  `<div class="panel"><div class="panel-title">Data</div><button class="btn" id="export">Export</button><label class="btn" for="importFile">Import</label><input class="hidden" id="importFile" type="file"><button class="btn danger" id="delete">Delete Local Data</button></div><div class="panel"><div class="panel-title">Legal Documentation</div><button class="btn" id="privacyBtn">Privacy Policy</button><button class="btn" id="termsBtn">Terms of Use</button><button class="btn" id="aiBtn">AI Disclaimer</button><div class="muted" style="margin-top:14px">STAYFITINLIFE ${APP_VERSION} • Last Updated: ${LAST_UPDATED}</div></div>`);
+  `<div class="panel"><div class="panel-title">Data</div><button class="btn" id="export">Export</button><label class="btn" for="importFile">Import</label><input class="hidden" id="importFile" type="file"><button class="btn danger" id="delete">Delete Local Data</button></div><div class="panel"><div class="panel-title">App</div><div class="item">App Version: <strong>Stable Version 1.0</strong></div><button class="btn primary" id="appGuideBtn">Open App Guide</button></div><div class="panel"><div class="panel-title">Legal Documentation</div><button class="btn" id="privacyBtn">Privacy Policy</button><button class="btn" id="termsBtn">Terms of Use</button><button class="btn" id="aiBtn">AI Disclaimer</button><div class="muted" style="margin-top:14px">STAYFITINLIFE ${APP_VERSION} • Last Updated: ${LAST_UPDATED}</div></div>`);
   q('export').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));a.download='stayfitinlife-backup.json';a.click()};
   q('importFile').onchange=async e=>{const f=e.target.files[0];if(f){data={...data,...JSON.parse(await f.text())};save()}};
   q('delete').onclick=()=>{if(confirm('Delete data?')){localStorage.removeItem(STORE);location.reload()}};
-  q('privacyBtn').onclick=()=>openLegalDoc('privacy');
+  q('appGuideBtn').onclick=()=>showAppGuide();
+ q('privacyBtn').onclick=()=>openLegalDoc('privacy');
   q('termsBtn').onclick=()=>openLegalDoc('terms');
   q('aiBtn').onclick=()=>openLegalDoc('ai');
 }
@@ -853,4 +970,4 @@ function bind(){
 }
 bind();
 render();
-if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js?v=14.1-complete').catch(()=>{}));
+if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js?v=stable-1-0').catch(()=>{}));
