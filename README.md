@@ -1,18 +1,15 @@
-# STAYFITINLIFE Stable Version 1.0.2
+# STAYFITINLIFE — Stable Version 1.0.3
 
-Deployment-ready build with critical logic fixes and workout expansion.
+Last Updated: April 26, 2026
 
-Included:
-- Dashboard calories adjusted by workout calories burned
-- Calories burned + deficit/surplus shown
-- Workout preview shows today’s activity or Workout Missing
-- Context-aware food suggestions for remaining macros
-- Finish Day feature
-- Custom food option
-- Water logging: +250ml, +500ml, +1L, custom input
-- Strength workout fixes: user-selected workout name, warmup/working set retained, set type visible
-- Cardio section with duration, distance, intensity, auto-calories
-- Sports section with duration, intensity, auto-calories
-- Rest timer alert + vibration
-- Intelligence nutrition data sync
-- Netlify cache headers and clean service worker
+Deployment-ready production ZIP.
+
+Includes:
+- Version updated to Stable Version 1.0.3
+- Legal docs updated with version and last updated date
+- Browser tab title remains STAYFITINLIFE
+- Manifest cache tag updated
+- Service worker reset to avoid stale deployments
+- Netlify no-cache headers included
+
+Deploy on Netlify with: Clear cache and deploy site.
