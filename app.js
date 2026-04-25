@@ -2,8 +2,8 @@ import { FOOD_DATABASE } from './data/foodDatabase.js';
 import { EXERCISE_DATABASE, SPLITS } from './data/exerciseDatabase.js';
 import { SUPPLEMENT_DATABASE } from './data/supplementDatabase.js';
 
-const STORE='stayfitinlife_v14_logic_system';
-const APP_VERSION='V14';
+const STORE='stayfitinlife_v14_1_complete';
+const APP_VERSION='V14.1';
 const LAST_UPDATED='25 April 2026';
 
 const todayKey=()=>new Date().toISOString().slice(0,10);
@@ -13,6 +13,7 @@ const round=(n,d=1)=>Math.round((Number(n)||0)*10**d)/10**d;
 
 const defaultData={
   profile:{},
+  units:{system:'metric'},
   meals:{},
   water:{},
   workouts:{},
@@ -107,6 +108,68 @@ function render(){
   ({home,nutrition,workout,coach,profile,recovery,progress,settings}[tab]||home)();
 }
 
+
+// ---------- V14.1 Global Units System ----------
+function unitSystem(){ return (data.units&&data.units.system)||data.profile.unitsSystem||'metric'; }
+function isImperial(){ return unitSystem()==='imperial'; }
+function unitLabels(){
+  return isImperial()
+    ? {weight:'lb',height:'ft-in',water:'oz',food:'oz',workout:'lb'}
+    : {weight:'kg',height:'cm',water:'L',food:'g',workout:'kg'};
+}
+function kgToLb(kg){return round((Number(kg)||0)*2.20462,1)}
+function lbToKg(lb){return round((Number(lb)||0)*0.453592,1)}
+function cmToFtIn(cm){
+  const inches=(Number(cm)||0)*0.393701;
+  const ft=Math.floor(inches/12);
+  const inch=Math.round(inches-ft*12);
+  return `${ft}'${inch}"`;
+}
+function ftInToCm(ft,inch){return round(((Number(ft)||0)*12+(Number(inch)||0))*2.54,1)}
+function lToOz(l){return round((Number(l)||0)*33.814,1)}
+function ozToL(oz){return round((Number(oz)||0)/33.814,2)}
+function gToOz(g){return round((Number(g)||0)/28.3495,1)}
+function ozToG(oz){return round((Number(oz)||0)*28.3495,1)}
+function displayWeight(kg){return isImperial()?kgToLb(kg):round(kg,1)}
+function inputWeightToKg(v){return isImperial()?lbToKg(v):Number(v)}
+function displayHeight(cm){return isImperial()?cmToFtIn(cm):round(cm,1)}
+function displayWater(l){return isImperial()?lToOz(l):round(l,1)}
+function unitGuide(unit, portion=''){
+  const metric={
+    bowl:'1 bowl ≈ 250g',
+    cup:'1 cup ≈ 240ml / 200g',
+    tbsp:'1 tbsp ≈ 15ml / 14g',
+    tsp:'1 tsp ≈ 5ml / 4–5g',
+    plate:'1 plate ≈ 250–350g',
+    piece:'1 piece = item specific',
+    serving:'1 serving = product specific',
+    scoop:'1 scoop ≈ 30g',
+    g:'grams',
+    ml:'milliliters'
+  };
+  const imperial={
+    bowl:'1 bowl ≈ 8.8 oz',
+    cup:'1 cup ≈ 8 fl oz / 7 oz',
+    tbsp:'1 tbsp ≈ 0.5 fl oz',
+    tsp:'1 tsp ≈ 0.17 fl oz',
+    plate:'1 plate ≈ 9–12 oz',
+    piece:'1 piece = item specific',
+    serving:'1 serving = product specific',
+    scoop:'1 scoop ≈ 1.1 oz',
+    g:'grams',
+    ml:'milliliters'
+  };
+  if(portion) return portion;
+  return (isImperial()?imperial:metric)[unit]||`${unit}`;
+}
+function unitOptionLabel(unit, portion=''){
+  const guide=unitGuide(unit, portion);
+  return `${unit} — ${guide}`;
+}
+function quantityLine(qty, unit, portion=''){
+  return `${qty} ${unit} • ${unitGuide(unit,portion)}`;
+}
+
 // ---------- Onboarding: stable page route, no modal ----------
 function idealWeightRange(heightCm){
   const h=Number(heightCm)/100;
@@ -145,7 +208,7 @@ function weeksFromDate(dateStr){
 function startOnboarding(){
   appMode='onboarding';
   onboardingStep=1;
-  onboardingTemp={...data.profile};
+  onboardingTemp={...data.profile,unitsSystem:unitSystem()};
   render();
 }
 function renderOnboarding(){
@@ -163,19 +226,25 @@ function renderOnboarding(){
     shell('Onboarding','Step 1 of 2 — Basic Info',
     `<div class="panel onboarding-page">
       <div class="onboarding-progress"><span style="width:50%"></span></div>
+      <div class="panel-title" style="font-size:18px;margin-top:8px">Preferred Units</div>
+      <div class="pill-row">
+        <button class="pill ${((onboardingTemp.unitsSystem||unitSystem())==='metric')?'active':''}" data-unit-system="metric">Metric (kg, cm, L, g)</button>
+        <button class="pill ${((onboardingTemp.unitsSystem||unitSystem())==='imperial')?'active':''}" data-unit-system="imperial">Imperial (lb, ft-in, oz)</button>
+      </div>
       <div class="form-grid">
         <div class="field"><label>Name</label><input id="ob_name" value="${t.name||''}" placeholder="Your name"></div>
         <div class="field"><label>Age</label><input id="ob_age" type="number" min="10" max="100" value="${t.age||''}" placeholder="43"></div>
-        <div class="field"><label>Height (cm)</label><input id="ob_height" type="number" step="0.1" value="${t.height||''}" placeholder="162.5"></div>
-        <div class="field"><label>Current Weight (kg)</label><input id="ob_currentWeight" type="number" step="0.1" value="${t.currentWeight||''}" placeholder="80.1"></div>
+        <div class="field"><label>Height (${unitLabels().height})</label><input id="ob_height" type="number" step="0.1" value="${t.height||''}" placeholder="${isImperial()?'5\'4\"':'162.5'}"></div>
+        <div class="field"><label>Current Weight (${unitLabels().weight})</label><input id="ob_currentWeight" type="number" step="0.1" value="${t.currentWeight?displayWeight(t.currentWeight):''}" placeholder="${isImperial()?'176':'80.1'}"></div>
       </div>
       <div class="suggestion">Starting weight is saved internally as your current weight. No separate input needed.</div>
       <div style="display:flex;gap:10px;margin-top:18px;flex-wrap:wrap">
         <button class="btn primary" id="obNext">Next: Goal</button>
       </div>
     </div>`);
+    document.querySelectorAll('[data-unit-system]').forEach(b=>b.onclick=()=>{onboardingTemp.unitsSystem=b.dataset.unitSystem;data.units={system:b.dataset.unitSystem};render()});
     q('obNext').onclick=()=>{
-      ['name','age','height','currentWeight'].forEach(k=>onboardingTemp[k]=q('ob_'+k).value.trim());
+      ['name','age','height'].forEach(k=>onboardingTemp[k]=q('ob_'+k).value.trim()); onboardingTemp.currentWeight=inputWeightToKg(q('ob_currentWeight').value.trim()); onboardingTemp.unitsSystem=unitSystem();
       const missing=['name','age','height','currentWeight'].filter(k=>!onboardingTemp[k]);
       if(missing.length){alert('Please complete: '+missing.join(', '));return}
       onboardingTemp.startWeight=onboardingTemp.currentWeight;
@@ -277,7 +346,7 @@ function renderOnboarding(){
       sync();
       if(!t.targetWeight && !t.targetBodyFat){alert('Please enter target weight or body fat.');return}
       if(!q('legalAccept').checked){alert('Please accept the Privacy Policy, Terms of Use, and AI Disclaimer.');return}
-      data.profile={...t,startWeight:t.currentWeight,legalAccepted:true,legalVersion:APP_VERSION,legalAcceptedAt:new Date().toISOString()};
+      data.units={system:t.unitsSystem||unitSystem()}; data.profile={...t,startWeight:t.currentWeight,legalAccepted:true,legalVersion:APP_VERSION,legalAcceptedAt:new Date().toISOString()};
       appMode='app';
       onboardingStep=0;
       onboardingTemp={};
@@ -429,7 +498,7 @@ function home(){
         ${progressBar('Protein',m.p,t.protein,'g')}
         ${progressBar('Carbs',m.c,t.carbs,'g')}
         ${progressBar('Fats',m.f,t.fats,'g')}
-        ${progressBar('Water',w,t.water,'L')}
+        ${progressBar('Water',displayWater(w),displayWater(t.water),unitLabels().water)}
       </div>
       <div class="panel"><div class="panel-title">${coachTitle}</div>${planHtml()}</div>
       <div class="panel"><div class="panel-title">Workout Preview</div><div class="item">Suggested muscles: ${recommendMuscles().join(' + ')||'Flexible'}<br>Recovery status: ${r.status}</div></div><div class="panel"><div class="panel-title">Context-Aware Suggestion</div><div class="item">${contextSuggestion()}</div></div>
@@ -500,7 +569,7 @@ function nutrition(){
 function foodEditor(f){
   if(!f)return'<div class="item">Select item.</div>';
   if(f.builder==='egg')return`<div class="panel-title">Egg Dish</div><div class="form-grid"><div class="field"><label>Whole Eggs</label><input id="wholeEggs" type="number" value="2"></div><div class="field"><label>Egg Whites</label><input id="eggWhites" type="number" value="0"></div><div class="field"><label>Style</label><select id="eggStyle"><option>Boiled</option><option>Omelette</option><option>Bhurji</option><option>Fried</option></select></div></div><div id="foodPreview" class="suggestion"></div><button class="btn primary" id="addFood">Add</button>`;
-  return`<div class="panel-title">${f.name}</div><div class="muted">${f.portion||''}${f.timing?`<br>Preferred timing: ${f.timing}`:''}</div><div class="form-grid"><div class="field"><label>Quantity</label><input id="foodQty" type="number" value="${f.defaultQty||1}" step=".1"></div><div class="field"><label>Unit</label><select id="foodUnit"><option>${f.unit||'serving'}</option><option>g</option><option>ml</option><option>bowl</option><option>cup</option><option>piece</option><option>tbsp</option><option>tsp</option></select></div>${f.typeOptions?`<div class="field"><label>Type</label><select id="foodType"><option>Home</option><option>Restaurant</option></select></div>`:''}</div>${f.components?`<div class="item">Contains:<br>${f.components.map(c=>`• ${c.name}: ${c.amount}`).join('<br>')}</div>`:''}<div id="foodPreview" class="suggestion"></div><button class="btn primary" id="addFood">Add</button>`;
+  return`<div class="panel-title">${f.name}</div><div class="muted">${quantityLine(f.defaultQty||1,f.unit||'serving',f.portion||'')}${f.timing?`<br>Preferred timing: ${f.timing}`:''}</div><div class="form-grid"><div class="field"><label>Quantity</label><input id="foodQty" type="number" value="${f.defaultQty||1}" step=".1"></div><div class="field"><label>Unit</label><select id="foodUnit">${['serving','g','ml','bowl','cup','plate','piece','tbsp','tsp','scoop'].map(u=>`<option value="${u}" ${(f.unit||'serving')===u?'selected':''}>${unitOptionLabel(u,(f.unit===u?f.portion:'')||'')}</option>`).join('')}</select><div class="muted" id="unitGuide"></div></div>${f.typeOptions?`<div class="field"><label>Type</label><select id="foodType"><option>Home</option><option>Restaurant</option></select></div>`:''}</div>${f.components?`<div class="item">Contains:<br>${f.components.map(c=>`• ${c.name}: ${c.amount}`).join('<br>')}</div>`:''}<div id="foodPreview" class="suggestion"></div><button class="btn primary" id="addFood">Add</button>`;
 }
 function calcFood(){
   const f=foodList().find(x=>x.name===selectedFood); if(!f)return null;
@@ -514,12 +583,13 @@ function calcFood(){
   if(unit==='g')factor=qty/250;
   if(unit==='ml')factor=qty/200;
   if(unit==='tbsp'||unit==='tsp')factor=qty;
-  return{...f,meal:selectedMeal,qty,unit,calories:Math.round((base||0)*factor),protein:round((f.protein||0)*factor),carbs:round((f.carbs||0)*factor),fats:round((f.fats||0)*factor)};
+  return{...f,meal:selectedMeal,qty,unit,portion:unitGuide(unit,f.portion||''),calories:Math.round((base||0)*factor),protein:round((f.protein||0)*factor),carbs:round((f.carbs||0)*factor),fats:round((f.fats||0)*factor)};
 }
 function wireFood(){
   const update=()=>{
     const m=calcFood(),t=targets(),cur=mealTotals(viewDate);
-    q('foodPreview').innerHTML=m?`${m.qty} ${m.unit} • ${m.calories||0} kcal • P${m.protein||0} C${m.carbs||0} F${m.fats||0}<br><span class="muted">After adding: ${cur.cal+(m.calories||0)} / ${t.calories} kcal • ${cur.p+(m.protein||0)} / ${t.protein}g protein</span>`:'';
+    if(q('unitGuide')) q('unitGuide').innerHTML=unitGuide(q('foodUnit')?.value||m?.unit||'serving',m?.portion||'');
+    q('foodPreview').innerHTML=m?`${quantityLine(m.qty,m.unit,m.portion||'')} • ${m.calories||0} kcal • P${m.protein||0} C${m.carbs||0} F${m.fats||0}<br><span class="muted">After adding: ${cur.cal+(m.calories||0)} / ${t.calories} kcal • ${cur.p+(m.protein||0)} / ${t.protein}g protein</span>`:'';
   };
   ['foodQty','foodUnit','foodType','wholeEggs','eggWhites','eggStyle'].forEach(id=>q(id)&&(q(id).oninput=update,q(id).onchange=update));
   update();
@@ -641,7 +711,7 @@ function morningCheckin(){
 }
 function profile(){
   const p=data.profile;
-  shell('Profile','Matches onboarding. Starting weight is stored internally from onboarding current weight.',
+  shell('Profile','Matches onboarding. Units follow your global setting.',
   `<div class="panel"><div class="form-grid">
     ${['name','age','height','currentWeight','targetWeight','targetBodyFat','timelineWeeks','targetDate'].map(k=>`<div class="field"><label>${k}</label><input id="pf_${k}" value="${p[k]||''}"></div>`).join('')}
     <div class="field"><label>Goal</label><select id="pf_goal"><option ${p.goal==='Fat Loss'?'selected':''}>Fat Loss</option><option ${p.goal==='Muscle Gain'?'selected':''}>Muscle Gain</option><option ${p.goal==='Maintenance'?'selected':''}>Maintenance</option></select></div>
@@ -744,7 +814,7 @@ function settings(){
 // ---------- Barcode scanner ----------
 function stopScannerStream(){if(scannerLoop)cancelAnimationFrame(scannerLoop);scannerLoop=null;if(scannerStream){scannerStream.getTracks().forEach(t=>t.stop());scannerStream=null}}
 async function openBarcodeScanner(){
-  openModal(`<div class="panel-title">Scan Barcode</div><div class="muted">Rear camera opens by default. You can switch or close camera.</div><video id="scannerVideo" autoplay playsinline muted style="width:100%;max-height:55vh;border-radius:20px;background:#000;margin-top:12px"></video><div class="field"><label>Mode</label><select id="cameraFacingSelect"><option value="environment">Rear Camera</option><option value="user">Front Camera</option></select></div><div class="suggestion" id="scannerStatus">Starting rear camera...</div><button class="btn" id="switchCameraBtn">Switch Camera</button> <button class="btn" id="manualScannerEntry">Enter Barcode</button>`);
+  openModal(`<div class="panel-title">Scan Barcode</div><div class="muted">Rear camera opens by default. You can switch or close camera.</div><div class="scanner-wrap"><video id="scannerVideo" autoplay playsinline muted style="width:100%;max-height:55vh;border-radius:20px;background:#000;margin-top:12px"></video><div class="scan-frame">Align barcode here</div></div><div class="field"><label>Mode</label><select id="cameraFacingSelect"><option value="environment">Rear Camera</option><option value="user">Front Camera</option></select></div><div class="suggestion" id="scannerStatus">Starting rear camera...</div><button class="btn" id="switchCameraBtn">Switch Camera</button> <button class="btn" id="manualScannerEntry">Enter Barcode</button>`);
   q('closeModal').onclick=()=>{stopScannerStream();closeModal()};
   q('manualScannerEntry').onclick=()=>{stopScannerStream();closeModal();manualBarcodeEntry()};
   q('switchCameraBtn').onclick=()=>{scannerFacingMode=scannerFacingMode==='environment'?'user':'environment';startBarcodeCamera()};
@@ -757,7 +827,7 @@ async function startBarcodeCamera(){
     scannerStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:scannerFacingMode}}});
     const v=q('scannerVideo');v.srcObject=scannerStream;await v.play().catch(()=>{});
     if('BarcodeDetector'in window){barcodeDetector=new BarcodeDetector({formats:['ean_13','ean_8','upc_a','upc_e','code_128','qr_code']});q('scannerStatus').innerHTML='Camera ready. Align barcode.';detectBarcodeLoop()}
-    else q('scannerStatus').innerHTML='Camera opened. Browser lacks automatic detection; use manual entry.';
+    else q('scannerStatus').innerHTML='Camera opened. This browser does not support automatic barcode detection yet. Use Enter Barcode below as fallback.';
   }catch(e){q('scannerStatus').innerHTML='Camera permission failed. Use manual entry.'}
 }
 async function detectBarcodeLoop(){
@@ -783,4 +853,4 @@ function bind(){
 }
 bind();
 render();
-if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js?v=14-logic-system').catch(()=>{}));
+if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js?v=14.1-complete').catch(()=>{}));

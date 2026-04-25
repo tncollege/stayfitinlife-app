@@ -69,3 +69,8 @@
 
 /* V14 intelligence UI */
 .insight-warning{border-left:4px solid var(--red)}.insight-good{border-left:4px solid var(--green)}.insight-info{border-left:4px solid var(--cyan)}
+
+/* V14.1 Units + Scanner UI */
+.scanner-wrap{position:relative}
+.scan-frame{position:absolute;left:15%;right:15%;top:42%;height:80px;border:3px solid rgba(32,228,255,.9);border-radius:16px;display:grid;place-items:center;color:#fff;font-weight:900;text-shadow:0 2px 8px #000;background:rgba(0,0,0,.12)}
+#unitGuide{margin-top:6px}

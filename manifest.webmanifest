@@ -1,7 +1,7 @@
 {
-  "name": "STAYFITINLIFE V14",
-  "short_name": "Stayfit V14",
-  "start_url": "/?v=14-logic-system",
+  "name": "STAYFITINLIFE V14.1",
+  "short_name": "Stayfit V14.1",
+  "start_url": "/?v=14.1-complete",
   "scope": "/",
   "display": "standalone",
   "background_color": "#050b1c",

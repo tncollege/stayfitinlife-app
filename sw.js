@@ -1,4 +1,4 @@
-const CACHE_NAME = 'stayfitinlife-v14-logic-system';
+const CACHE_NAME = 'stayfitinlife-v14-1-complete';
 self.addEventListener('install', event => { self.skipWaiting(); });
 self.addEventListener('activate', event => {
   event.waitUntil(caches.keys().then(keys => Promise.all(keys.map(key => caches.delete(key)))).then(() => self.clients.claim()));
