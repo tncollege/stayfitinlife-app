@@ -2,7 +2,7 @@ import { FOOD_DATABASE } from './data/foodDatabase.js';
 import { EXERCISE_DATABASE, SPLITS } from './data/exerciseDatabase.js';
 import { SUPPLEMENT_DATABASE } from './data/supplementDatabase.js';
 
-const STORE='stayfitinlife_stable_1_0';
+const STORE='stayfitinlife_stable_1_0_1';
 const APP_VERSION='Stable Version 1.0';
 const LAST_UPDATED='25 April 2026';
 
@@ -970,4 +970,45 @@ function bind(){
 }
 bind();
 render();
-if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js?v=stable-1-0').catch(()=>{}));
+if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js?v=1.0.1').catch(()=>{}));
+
+// ---------- OpenFoodFacts Integration ----------
+async function fetchFoodFromAPI(barcode){
+  if(!barcode) return null;
+  if(data.barcodeCache && data.barcodeCache[barcode]){
+    return data.barcodeCache[barcode];
+  }
+  try{
+    const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
+    const json = await res.json();
+    if(json.status !== 1) return null;
+    const p = json.product;
+    const n = p.nutriments || {};
+    const food = {
+      name: p.product_name || "Unknown Food",
+      calories: n["energy-kcal_serving"] || n["energy-kcal_100g"] || 0,
+      protein: n.proteins_serving || n.proteins_100g || 0,
+      carbs: n.carbohydrates_serving || n.carbohydrates_100g || 0,
+      fats: n.fat_serving || n.fat_100g || 0,
+      portion: p.serving_size || "1 serving"
+    };
+    data.barcodeCache = data.barcodeCache || {};
+    data.barcodeCache[barcode] = food;
+    save();
+    return food;
+  }catch(e){
+    return null;
+  }
+}
+
+async function handleBarcodeResult(code){
+  const status = document.getElementById("scannerStatus");
+  if(status) status.innerHTML = "Fetching food data...";
+  const food = await fetchFoodFromAPI(code);
+  if(!food){
+    alert("Food not found. You can add manually.");
+    return;
+  }
+  alert(`Added: ${food.name}`);
+  // Hook into existing food add logic if present
+}
