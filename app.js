@@ -2,8 +2,8 @@ import { FOOD_DATABASE } from './data/foodDatabase.js';
 import { EXERCISE_DATABASE, SPLITS } from './data/exerciseDatabase.js';
 import { SUPPLEMENT_DATABASE } from './data/supplementDatabase.js';
 
-const STORE='stayfitinlife_stable_1_0_3_hotfix_final';
-const APP_VERSION='Stable Version 1.0.3 Hotfix';
+const STORE='stayfitinlife_stable_1_0_3_hotfix_2';
+const APP_VERSION='Stable Version 1.0.3 Hotfix 2 Hotfix 2 2';
 const LAST_UPDATED='25 April 2026';
 
 const todayKey=()=>new Date().toISOString().slice(0,10);
@@ -23,7 +23,7 @@ const defaultData={
   coachPlans:{},
   customFoods:[],
   customSupplements:[],
-  aiCoachUsage:{date:todayKey(),count:0},aiCache:{},barcodeCache:{},intelligence:{reports:{},patterns:{}},notifications:[],customExercises:[],dayClosures:{},selectedDate:null
+  aiCoachUsage:{date:todayKey(),count:0},aiCache:{},barcodeCache:{},intelligence:{reports:{},patterns:{}},notifications:[]
 };
 
 let data=load();
@@ -521,35 +521,41 @@ function desktopCoachPanelHtml(){
 
 // ---------- Dashboard ----------
 
-
 function home(){
-  const d=viewDate();
-  const t=targets(),m=mealTotals(d),burned=(typeof workoutCalories==='function'?workoutCalories(d):0);
-  const adjusted=t.calories+burned;
-  const deficit=adjusted-m.cal;
-  const calPct=Math.min(100,Math.round((m.cal/Math.max(1,adjusted))*100));
-  shell('Dashboard',`${new Date(d+'T00:00:00').toLocaleDateString()} ${dateSelectorHtml()}`,
+  const t=targets(),m=mealTotals(todayKey()),w=waterTotal(todayKey()),r=recoveryStatus(todayKey());
+  const calPct=Math.min(100,Math.round((m.cal/Math.max(1,t.calories))*100));
+  const coachTitle=isBeginnerMode()?'Today’s Plan':'Today’s Targets + Insights';
+  shell('Dashboard',new Date().toLocaleDateString(),
   `<div class="desktop-dashboard-grid">
     <div class="dashboard-main">
-      <div class="hero-card dashboard-fixed">
-        <div class="calorie-ring" style="--p:${calPct}"><div><strong>${calPct}%</strong><span>${Math.round(m.cal)} / ${adjusted} kcal</span></div></div>
+      <div class="hero-card">
+        <div class="calorie-ring" style="--p:${calPct}">
+          <div><strong>${calPct}%</strong><span>${m.cal} / ${t.calories} kcal</span></div>
+        </div>
         <div class="hero-copy">
-          <div class="mode-badge">${data.profile.mode||'Advanced'} Mode</div>
-          <h2>${isTodayView()?'Today’s Targets + Insights':'History View'}</h2>
-          <div class="item">Base Target: ${t.calories} kcal<br>Calories Burned: ${burned} kcal<br>Adjusted Target: ${adjusted} kcal<br><strong>${deficit>0?Math.round(deficit)+' kcal remaining / deficit':deficit<0?Math.abs(Math.round(deficit))+' kcal surplus':'On target'}</strong></div>
-          ${isTodayView()?`<div class="hero-actions"><button class="btn primary" id="smartPlan">Generate Coach Plan</button><button class="btn" id="finishDayBtn">Finish Day</button></div>`:''}
+          <div class="mode-badge">${isBeginnerMode()?'Beginner Guided Mode':'Advanced Pro Mode'}</div>
+          <h2>${coachTitle}</h2>
+          <p>${r.status} recovery • ${r.decision}</p>
+          <button class="btn primary" id="smartPlan">Generate Coach Plan</button>
         </div>
       </div>
-      <div class="panel"><div class="panel-title">Nutrition Progress</div>${progressBar('Protein',m.p,t.protein,'g')}${progressBar('Carbs',m.c,t.carbs,'g')}${progressBar('Fats',m.f,t.fats,'g')}${progressBar('Water',waterTotal(d),t.water,'L')}</div>
-      <div class="panel"><div class="panel-title">Workout Preview</div>${(data.workouts&&data.workouts[d]&&data.workouts[d].length)?data.workouts[d].map(w=>`<div class="item"><strong>${w.name}</strong><br>${w.category||'Strength'} • ${w.caloriesBurned||0} kcal</div>`).join(''):'<div class="item">Workout Missing</div>'}</div>
+      <div class="panel">
+        <div class="panel-title">Nutrition Progress</div>
+        ${progressBar('Protein',m.p,t.protein,'g')}
+        ${progressBar('Carbs',m.c,t.carbs,'g')}
+        ${progressBar('Fats',m.f,t.fats,'g')}
+        ${progressBar('Water',displayWater(w),displayWater(t.water),unitLabels().water)}
+      </div>
+      <div class="panel"><div class="panel-title">${coachTitle}</div>${planHtml()}</div>
+      <div class="panel"><div class="panel-title">Workout Preview</div><div class="item">Suggested muscles: ${recommendMuscles().join(' + ')||'Flexible'}<br>Recovery status: ${r.status}</div></div><div class="panel"><div class="panel-title">Context-Aware Suggestion</div><div class="item">${contextSuggestion()}</div></div>
     </div>
-    <aside class="desktop-coach-panel">${desktopCoachPanelHtml?desktopCoachPanelHtml():''}</aside>
+    <aside class="desktop-coach-panel" id="desktopCoachPanel">${desktopCoachPanelHtml()}</aside>
   </div>`);
-  bindDateSelector();
-  if(q('smartPlan'))q('smartPlan').onclick=smartPlan;
-  if(q('finishDayBtn'))q('finishDayBtn').onclick=()=>finishDay?finishDay():alert('Day summary saved.');
+  q('smartPlan').onclick=smartPlan;
+  const sideGenerate=q('sideGenerate'); if(sideGenerate) sideGenerate.onclick=smartPlan;
+  const sideMeal=q('sideMeal'); if(sideMeal) sideMeal.onclick=()=>switchTab('nutrition');
+  const sideWorkout=q('sideWorkout'); if(sideWorkout) sideWorkout.onclick=()=>switchTab('workout');
 }
-
 
 function nextActions(){
   const t=targets(),m=mealTotals(todayKey());
@@ -570,14 +576,9 @@ function topCategories(){return ['Cuisines','Fruits','Vegetables','Drinks','Chea
 function cuisineList(){return [...new Set(foodList().filter(f=>f.main==='Cuisines').map(f=>f.cuisine))]}
 
 function nutrition(){
-  const logs=mealLogs(viewDate());
-  shell('Nutrition',`Meal Type → Food Category → Subcategory → Food ${dateSelectorHtml()}`,
-  `<div class="panel nutrition-hotfix">
-    <div class="pill-row meal-tabs">${['Breakfast','Lunch','Dinner','Snacks'].map(m=>`<button class="pill ${nutritionMeal===m?'active':''}" data-meal="${m}">${m}</button>`).join('')}</div>
-    <div class="pill-row">${NUTRITION_CATEGORIES.map(c=>`<button class="pill ${nutritionCategory===c?'active':''}" data-ncat="${c}">${c}</button>`).join('')}</div>
-    ${nutritionCategory==='Cuisines'?`<div class="pill-row cuisine-tabs">${CUISINES.map(c=>`<button class="pill ${nutritionCuisine===c?'active':''}" data-cuisine="${c}">${c}</button>`).join('')}</div>`:''}
-    ${nutritionCategory==='Cuisines'&&nutritionCuisine==='Indian'?`<div class="pill-row sub-tabs">${INDIAN_SUBCATEGORIES.map(s=>`<button class="pill ${nutritionSubcategory===s?'active':''}" data-isub="${s}">${s}</button>`).join('')}</div>`:''}
-    <div class="field"><label>Search / Barcode</label><input id="foodSearch" placeholder="Search food, cuisine, sauce or barcode" autocomplete="off"></div>
+  shell('Nutrition',`Meal Type → Food Category → Food ${safeDateSelectorHtml()}`,
+  `<div class="panel">
+    <div class="field"><label>Search / Barcode</label><input id="foodSearch" placeholder="Search food, cuisine, sauce or barcode" autocomplete="off" value="${nutritionSearchValue||''}"></div>
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin:12px 0">
       <button class="btn" id="addCustomFoodBtn">+ Custom Food</button>
       <button class="btn primary" id="scanBarcode">📷 Scan Barcode</button>
@@ -586,13 +587,25 @@ function nutrition(){
     <div id="foodList" class="food-list-clean"></div>
   </div>
   <div class="panel"><div class="panel-title">Water Log</div>
-    ${isTodayView()?`<button class="btn" data-water="250">+250ml</button><button class="btn" data-water="500">+500ml</button><button class="btn" data-water="1000">+1L</button><button class="btn" id="customWaterBtn">+ Custom</button>`:''}
-    <div class="item">Total: ${waterTotal(viewDate())}L</div>
+    <button class="btn" data-water="250">+250ml</button>
+    <button class="btn" data-water="500">+500ml</button>
+    <button class="btn" data-water="1000">+1L</button>
+    <button class="btn" id="customWaterBtn">+ Custom</button>
   </div>
-  <div class="panel"><div class="panel-title">Logs for ${viewDate()}</div>
-    ${logs.length?logs.map(x=>`<div class="log-card"><strong>${x.name}</strong><br>${x.meal} • ${x.timeLabel||new Date(x.time||Date.now()).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}<br>${x.calories||0} kcal • P${x.protein||0} C${x.carbs||0} F${x.fats||0}</div>`).join(''):'<div class="item">No logs.</div>'}
+  <div class="panel"><div class="panel-title">Logs for ${safeViewDate()}</div>
+    ${(data.meals&&data.meals[safeViewDate()]&&data.meals[safeViewDate()].length)?data.meals[safeViewDate()].map(x=>`<div class="log-card"><strong>${x.name}</strong><br>${x.meal||''} • ${x.timeLabel||''}<br>${x.calories||0} kcal • P${x.protein||0} C${x.carbs||0} F${x.fats||0}</div>`).join(''):'<div class="item">No logs.</div>'}
   </div>`);
-  bindNutritionControls();
+  bindSafeDateSelector();
+  const search=q('foodSearch');
+  if(search){
+    search.oninput=()=>{nutritionSearchValue=search.value;renderHotfixFoodList();search.focus()};
+  }
+  q('addCustomFoodBtn').onclick=()=>customFoodForm();
+  if(q('scanBarcode'))q('scanBarcode').onclick=openBarcodeScanner;
+  if(q('manualBarcode'))q('manualBarcode').onclick=()=>{const code=prompt('Enter barcode');if(code)handleBarcodeResult(code)};
+  document.querySelectorAll('[data-water]').forEach(b=>b.onclick=()=>addWater(Number(b.dataset.water)));
+  q('customWaterBtn').onclick=()=>{const ml=Number(prompt('Enter water amount in ml','750')||0);if(ml>0)addWater(ml)};
+  renderHotfixFoodList();
 }
 
 function foodEditor(f){
@@ -1003,220 +1016,127 @@ async function openBarcodeScanner(){
 }
 
 
-// ---------- Stable 1.0.3 Hotfix Final Core ----------
-const HOTFIX_VERSION='Stable Version 1.0.3 Hotfix';
-const HOTFIX_LAST_UPDATED='April 26, 2026';
-
-let selectedDate = data.selectedDate || todayKey();
-let nutritionMeal = 'Breakfast';
-let nutritionCategory = 'Cuisines';
-let nutritionCuisine = 'Indian';
-let nutritionSubcategory = 'All';
-let currentFoodSearch = '';
-
-const NUTRITION_CATEGORIES = ['Cuisines','Fruits','Vegetables','Drinks','Cheat Meals','Alcohol','Sauces','Supplements','Custom'];
-const CUISINES = ['Global / Basic','Indian','American','Italian','Chinese','Japanese','Korean','Thai','Mexican','Mediterranean','Arabic / Middle Eastern'];
-const INDIAN_SUBCATEGORIES = ['All','Chicken','Paneer','Chaap','Dal / Pulses','Rice & Roti','Breakfast','Chicken - Tandoori','Paneer - Curry','Paneer - Dry','Chaap - Curry','Street','Desserts','High Protein'];
-const CUSTOM_PORTIONS = [
-  {unit:'per 100g', label:'per 100g'},
-  {unit:'serving', label:'1 serving'},
-  {unit:'bowl', label:'1 bowl'},
-  {unit:'cup', label:'1 cup'},
-  {unit:'tbsp', label:'1 tbsp / spoon'},
-  {unit:'tsp', label:'1 tsp'},
-  {unit:'piece', label:'1 piece'}
+// ---------- Stable 1.0.3 Hotfix 2: Safe Nutrition Helpers ----------
+let selectedDateSafe = todayKey();
+let nutritionSearchValue = "";
+const CUSTOM_PORTION_OPTIONS = [
+  ["per 100g","per 100g"],
+  ["serving","1 serving"],
+  ["bowl","1 bowl"],
+  ["cup","1 cup"],
+  ["tbsp","1 tbsp / spoon"],
+  ["tsp","1 tsp"],
+  ["piece","1 piece"]
 ];
 
-function viewDate(){return selectedDate || todayKey()}
-function isTodayView(){return viewDate()===todayKey()}
-function setViewDate(d){selectedDate=d;data.selectedDate=d;save()}
-function previousDateStr(days=1){
-  const d=new Date();
-  d.setDate(d.getDate()-days);
-  const y=d.getFullYear();
-  const m=String(d.getMonth()+1).padStart(2,'0');
-  const day=String(d.getDate()).padStart(2,'0');
-  return `${y}-${m}-${day}`;
-}
-function dateSelectorHtml(){
-  return `<div class="date-selector pill-row">
-    <button class="pill ${isTodayView()?'active':''}" id="dateToday">Today</button>
-    <button class="pill ${viewDate()===previousDateStr(1)?'active':''}" id="dateYesterday">Yesterday</button>
-    <input id="datePicker" type="date" value="${viewDate()}">
+function safeViewDate(){ return selectedDateSafe || todayKey(); }
+function setSafeViewDate(d){ selectedDateSafe=d; }
+function safeDateSelectorHtml(){
+  const d=safeViewDate();
+  const yd=new Date(); yd.setDate(yd.getDate()-1);
+  const y=`${yd.getFullYear()}-${String(yd.getMonth()+1).padStart(2,'0')}-${String(yd.getDate()).padStart(2,'0')}`;
+  return `<div class="pill-row">
+    <button class="pill ${d===todayKey()?'active':''}" id="safeToday">Today</button>
+    <button class="pill ${d===y?'active':''}" id="safeYesterday">Yesterday</button>
+    <input id="safeDatePicker" type="date" value="${d}">
   </div>`;
 }
-function bindDateSelector(){
-  const today=q('dateToday'), yesterday=q('dateYesterday'), picker=q('datePicker');
-  if(today) today.onclick=()=>{setViewDate(todayKey())};
-  if(yesterday) yesterday.onclick=()=>{setViewDate(previousDateStr(1))};
-  if(picker) picker.onchange=()=>{setViewDate(picker.value)};
+function bindSafeDateSelector(){
+  const yd=new Date(); yd.setDate(yd.getDate()-1);
+  const y=`${yd.getFullYear()}-${String(yd.getMonth()+1).padStart(2,'0')}-${String(yd.getDate()).padStart(2,'0')}`;
+  if(q('safeToday')) q('safeToday').onclick=()=>{setSafeViewDate(todayKey());render()};
+  if(q('safeYesterday')) q('safeYesterday').onclick=()=>{setSafeViewDate(y);render()};
+  if(q('safeDatePicker')) q('safeDatePicker').onchange=()=>{setSafeViewDate(q('safeDatePicker').value);render()};
 }
-function allFoodItems(){
+function hotfixFoodList(){
   return [
     ...(typeof FOOD_DATABASE!=='undefined'?FOOD_DATABASE:[]),
     ...(typeof SUPPLEMENT_DATABASE!=='undefined'?SUPPLEMENT_DATABASE:[]),
     ...(data.customFoods||[])
   ];
 }
-function topCategory(f){
-  if(f.main==='Custom') return 'Custom';
-  if(f.main==='Supplements') return 'Supplements';
-  if(f.main==='Sauces') return 'Sauces';
-  if(f.main==='Alcohol') return 'Alcohol';
-  if(f.main==='Cheat Meals') return 'Cheat Meals';
-  if(f.main==='Drinks') return 'Drinks';
-  if(f.main==='Fruits'||f.sub==='Fruits') return 'Fruits';
-  if(f.main==='Vegetables'||f.sub==='Vegetables') return 'Vegetables';
-  if(f.main==='Cuisines'||f.cuisine) return 'Cuisines';
-  return f.main || 'Cuisines';
+function hotfixCategory(f){
+  if(f.main==='Custom')return'Custom';
+  if(f.main==='Supplements')return'Supplements';
+  if(f.main==='Sauces')return'Sauces';
+  if(f.main==='Drinks')return'Drinks';
+  if(f.main==='Fruits'||f.sub==='Fruits')return'Fruits';
+  if(f.main==='Vegetables'||f.sub==='Vegetables')return'Vegetables';
+  if(f.main==='Alcohol')return'Alcohol';
+  if(f.main==='Cheat Meals')return'Cheat Meals';
+  return f.main||'Cuisines';
 }
-function itemCuisine(f){
-  if(f.cuisine) return f.cuisine;
-  if(f.main==='Cuisines') return 'Indian';
-  return 'Global / Basic';
-}
-function itemIndianSubcategory(f){
-  const name=`${f.name||''} ${f.sub||''}`.toLowerCase();
-  if(name.includes('tandoori')) return 'Chicken - Tandoori';
-  if(name.includes('paneer') && (name.includes('curry')||name.includes('masala')||name.includes('butter'))) return 'Paneer - Curry';
-  if(name.includes('paneer')) return 'Paneer';
-  if(name.includes('chaap') && name.includes('curry')) return 'Chaap - Curry';
-  if(name.includes('chaap')) return 'Chaap';
-  if(name.includes('dal')||name.includes('rajma')||name.includes('chole')||name.includes('pulse')) return 'Dal / Pulses';
-  if(name.includes('roti')||name.includes('naan')||name.includes('rice')||name.includes('biryani')||name.includes('paratha')||name.includes('kulcha')) return 'Rice & Roti';
-  if(name.includes('idli')||name.includes('dosa')||name.includes('poha')||name.includes('upma')||name.includes('breakfast')) return 'Breakfast';
-  if(name.includes('chaat')||name.includes('pav')||name.includes('samosa')) return 'Street';
-  if(name.includes('halwa')||name.includes('gulab')||name.includes('kheer')||name.includes('dessert')) return 'Desserts';
-  if((Number(f.protein)||0)>=15) return 'High Protein';
-  if(name.includes('chicken')) return 'Chicken';
-  return f.sub || 'All';
-}
-function visibleFoodItems(search=''){
-  const s=(search||'').trim().toLowerCase();
-  let list=allFoodItems();
-  if(s){
-    return list.filter(f=>`${f.name||''} ${f.main||''} ${f.sub||''} ${f.cuisine||''} ${f.barcode||''}`.toLowerCase().includes(s));
-  }
-  list=list.filter(f=>topCategory(f)===nutritionCategory);
-  if(nutritionCategory==='Cuisines'){
-    list=list.filter(f=>itemCuisine(f)===nutritionCuisine || (nutritionCuisine==='Indian' && itemCuisine(f)==='Indian'));
-    if(nutritionCuisine==='Indian' && nutritionSubcategory!=='All'){
-      list=list.filter(f=>itemIndianSubcategory(f)===nutritionSubcategory || f.sub===nutritionSubcategory);
-    }
-  }
-  return list;
-}
-function mealLogs(d=viewDate()){return (data.meals&&data.meals[d])?data.meals[d]:[]}
-function stampedMeal(food){
-  return {...food,meal:nutritionMeal,time:Date.now(),timeLabel:new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})};
-}
-function logFood(food){
-  if(!isTodayView()){alert('Past days are view-only. Switch to Today to log food.');return}
-  data.meals[todayKey()]=data.meals[todayKey()]||[];
-  data.meals[todayKey()].push(stampedMeal(food));
-  save();
-  showPostMealCoach(food.meal||nutritionMeal);
-}
-function showPostMealCoach(meal){
-  const t=targets(), m=mealTotals(todayKey());
-  const proteinLeft=Math.max(0,Math.round(t.protein-m.p));
-  const calLeft=Math.max(0,Math.round((t.calories+(typeof workoutCalories==='function'?workoutCalories(todayKey()):0))-m.cal));
-  const suggestion=proteinLeft>40?'Protein is low. Consider whey protein, chicken, eggs, paneer or curd.':proteinLeft>25?'Add a protein snack later: whey, eggs, paneer or Greek yogurt.':'You are close on protein. Keep remaining meals balanced.';
-  data.notifications=data.notifications||[];
-  data.notifications.unshift({type:'coach',time:Date.now(),message:`${meal} logged. Remaining: ${calLeft} kcal and ${proteinLeft}g protein. ${suggestion}`});
-  localStorage.setItem(STORE,JSON.stringify(data));
+function hotfixFilteredFoods(search){
+  const s=(search||'').toLowerCase().trim();
+  return hotfixFoodList().filter(f=>!s || `${f.name||''} ${f.main||''} ${f.sub||''} ${f.cuisine||''}`.toLowerCase().includes(s));
 }
 function customFoodForm(existing=null,index=null){
   const f=existing||{};
   const modal=q('modal'), card=q('modalCard');
   modal.classList.remove('hidden');
   card.innerHTML=`<div class="panel-title">${existing?'Edit':'Add'} Custom Food</div>
-    <div class="form-grid custom-food-form">
-      <div class="field"><label>Food Name</label><input id="cfName" value="${f.name||''}" placeholder="e.g., Lauki Sabzi"></div>
-      <div class="field"><label>Serving / Portion Type</label><select id="cfPortion">${CUSTOM_PORTIONS.map(p=>`<option value="${p.unit}" ${f.unit===p.unit?'selected':''}>${p.label}</option>`).join('')}</select></div>
-      <div class="field"><label>Portion Display</label><input id="cfPortionText" value="${f.portion||''}" placeholder="e.g., 1 cup / 150g"></div>
-      <div class="field"><label>Calories</label><input id="cfCalories" type="number" step="0.1" value="${f.calories??''}"></div>
-      <div class="field"><label>Protein (g)</label><input id="cfProtein" type="number" step="0.1" value="${f.protein??''}"></div>
-      <div class="field"><label>Carbs (g)</label><input id="cfCarbs" type="number" step="0.1" value="${f.carbs??''}"></div>
-      <div class="field"><label>Fats (g)</label><input id="cfFats" type="number" step="0.1" value="${f.fats??''}"></div>
-    </div>
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
-      <button class="btn primary" id="saveCustomFood">${existing?'Save Changes':'Save Food'}</button>
-      <button class="btn" id="cancelCustomFood">Cancel</button>
-    </div>`;
-  q('cancelCustomFood').onclick=()=>{modal.classList.add('hidden');card.innerHTML=''};
-  q('saveCustomFood').onclick=()=>{
+  <div class="form-grid">
+    <div class="field"><label>Food Name</label><input id="cfName" value="${f.name||''}" placeholder="e.g. Lauki Sabzi"></div>
+    <div class="field"><label>Serving / Portion Type</label><select id="cfUnit">${CUSTOM_PORTION_OPTIONS.map(([v,l])=>`<option value="${v}" ${f.unit===v?'selected':''}>${l}</option>`).join('')}</select></div>
+    <div class="field"><label>Portion Display</label><input id="cfPortion" value="${f.portion||''}" placeholder="e.g. 1 cup / 150g"></div>
+    <div class="field"><label>Calories</label><input id="cfCal" type="number" step="0.1" value="${f.calories??''}"></div>
+    <div class="field"><label>Protein (g)</label><input id="cfProtein" type="number" step="0.1" value="${f.protein??''}"></div>
+    <div class="field"><label>Carbs (g)</label><input id="cfCarbs" type="number" step="0.1" value="${f.carbs??''}"></div>
+    <div class="field"><label>Fats (g)</label><input id="cfFats" type="number" step="0.1" value="${f.fats??''}"></div>
+  </div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
+    <button class="btn primary" id="saveCF">${existing?'Save Changes':'Save Food'}</button>
+    <button class="btn" id="cancelCF">Cancel</button>
+  </div>`;
+  q('cancelCF').onclick=()=>{modal.classList.add('hidden');card.innerHTML=''};
+  q('saveCF').onclick=()=>{
     const food={
-      main:'Custom',
-      sub:'User Food',
+      main:'Custom', sub:'User Food',
       name:q('cfName').value.trim(),
       defaultQty:1,
-      unit:q('cfPortion').value,
-      portion:q('cfPortionText').value.trim() || q('cfPortion').selectedOptions[0].textContent,
-      calories:Number(q('cfCalories').value||0),
+      unit:q('cfUnit').value,
+      portion:q('cfPortion').value.trim()||q('cfUnit').selectedOptions[0].textContent,
+      calories:Number(q('cfCal').value||0),
       protein:Number(q('cfProtein').value||0),
       carbs:Number(q('cfCarbs').value||0),
       fats:Number(q('cfFats').value||0)
     };
-    if(!food.name){alert('Enter food name.');return}
+    if(!food.name){alert('Enter food name');return}
     data.customFoods=data.customFoods||[];
-    if(index!==null && index!==undefined) data.customFoods[index]=food; else data.customFoods.push(food);
+    if(index!==null&&index!==undefined)data.customFoods[index]=food;else data.customFoods.push(food);
     localStorage.setItem(STORE,JSON.stringify(data));
     modal.classList.add('hidden');card.innerHTML='';
-    nutritionCategory='Custom';
     render();
   };
 }
-function editCustomFood(index){customFoodForm(data.customFoods[index],index)}
 function deleteCustomFood(index){
-  if(confirm('Delete this custom food? Past logged meals will remain unchanged.')){
+  if(confirm('Delete this custom food? Past logs remain unchanged.')){
     data.customFoods.splice(index,1);
     localStorage.setItem(STORE,JSON.stringify(data));
     render();
   }
 }
-function renderFoodListOnly(){
+function renderHotfixFoodList(){
   const box=q('foodList');
-  if(!box) return;
-  const list=visibleFoodItems(currentFoodSearch).slice(0,120);
-  if(!list.length){box.innerHTML='<div class="item">No foods found.</div>';return}
-  box.innerHTML=list.map((f,i)=>{
-    const customIndex=(f.main==='Custom')?(data.customFoods||[]).findIndex(x=>x.name===f.name && x.calories===f.calories):null;
-    const manage=(f.main==='Custom'&&customIndex>=0)?`<button class="btn" data-editcustom="${customIndex}">Edit</button><button class="btn danger" data-delcustom="${customIndex}">Delete</button>`:'';
+  if(!box)return;
+  const list=hotfixFilteredFoods(nutritionSearchValue).slice(0,120);
+  box.innerHTML=list.length?list.map((f,i)=>{
+    const ci=f.main==='Custom'?(data.customFoods||[]).findIndex(x=>x.name===f.name&&x.calories===f.calories):-1;
     return `<div class="food-card-clean">
-      <div><strong>${f.name}</strong><br><span>${topCategory(f)} → ${f.sub||itemCuisine(f)||''}</span><br><small>${f.portion||''} • ${f.calories||0} kcal • P${f.protein||0} C${f.carbs||0} F${f.fats||0}</small></div>
-      <div class="food-card-actions">${isTodayView()?`<button class="btn primary" data-addfood="${i}">Add</button>`:''}${manage}</div>
+      <div><strong>${f.name}</strong><br><span>${hotfixCategory(f)} → ${f.sub||f.cuisine||''}</span><br><small>${f.portion||''} • ${f.calories||0} kcal • P${f.protein||0} C${f.carbs||0} F${f.fats||0}</small></div>
+      <div class="food-card-actions">${safeViewDate()===todayKey()?`<button class="btn primary" data-addfood="${i}">Add</button>`:''}${ci>=0?`<button class="btn" data-editcf="${ci}">Edit</button><button class="btn danger" data-delcf="${ci}">Delete</button>`:''}</div>
     </div>`;
-  }).join('');
-  document.querySelectorAll('[data-addfood]').forEach(b=>b.onclick=()=>logFood({...list[Number(b.dataset.addfood)],qty:list[Number(b.dataset.addfood)].defaultQty||1}));
-  document.querySelectorAll('[data-editcustom]').forEach(b=>b.onclick=()=>editCustomFood(Number(b.dataset.editcustom)));
-  document.querySelectorAll('[data-delcustom]').forEach(b=>b.onclick=()=>deleteCustomFood(Number(b.dataset.delcustom)));
+  }).join(''):'<div class="item">No foods found.</div>';
+  document.querySelectorAll('[data-addfood]').forEach(b=>b.onclick=()=>{
+    const f=list[Number(b.dataset.addfood)];
+    data.meals[todayKey()]=data.meals[todayKey()]||[];
+    data.meals[todayKey()].push({...f,meal:'Breakfast',qty:f.defaultQty||1,time:Date.now(),timeLabel:new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})});
+    localStorage.setItem(STORE,JSON.stringify(data));
+    render();
+  });
+  document.querySelectorAll('[data-editcf]').forEach(b=>b.onclick=()=>customFoodForm(data.customFoods[Number(b.dataset.editcf)],Number(b.dataset.editcf)));
+  document.querySelectorAll('[data-delcf]').forEach(b=>b.onclick=()=>deleteCustomFood(Number(b.dataset.delcf)));
 }
-function bindNutritionControls(){
-  bindDateSelector();
-  document.querySelectorAll('[data-meal]').forEach(b=>b.onclick=()=>{nutritionMeal=b.dataset.meal;render()});
-  document.querySelectorAll('[data-ncat]').forEach(b=>b.onclick=()=>{nutritionCategory=b.dataset.ncat;nutritionSubcategory='All';render()});
-  document.querySelectorAll('[data-cuisine]').forEach(b=>b.onclick=()=>{nutritionCuisine=b.dataset.cuisine;nutritionSubcategory='All';render()});
-  document.querySelectorAll('[data-isub]').forEach(b=>b.onclick=()=>{nutritionSubcategory=b.dataset.isub;render()});
-  const search=q('foodSearch');
-  if(search){
-    search.value=currentFoodSearch;
-    search.oninput=()=>{currentFoodSearch=search.value;renderFoodListOnly();search.focus()};
-  }
-  const addBtn=q('addCustomFoodBtn'); if(addBtn) addBtn.onclick=()=>customFoodForm();
-  const scan=q('scanBarcode'); if(scan) scan.onclick=openBarcodeScanner;
-  const manual=q('manualBarcode'); if(manual) manual.onclick=()=>{const code=prompt('Enter barcode');if(code)handleBarcodeResult(code)};
-  const customWater=q('customWaterBtn'); if(customWater) customWater.onclick=()=>{const ml=Number(prompt('Enter water amount in ml','750')||0);if(ml>0)addWater(ml)};
-  document.querySelectorAll('[data-water]').forEach(b=>b.onclick=()=>addWater(Number(b.dataset.water)));
-  renderFoodListOnly();
-}
-function hotfixStartup(){
-  // Always default to today's local date on fresh open to avoid stale yesterday view.
-  selectedDate=todayKey();
-  data.selectedDate=selectedDate;
-  localStorage.setItem(STORE,JSON.stringify(data));
-}
-hotfixStartup();
 
 // ---------- Init ----------
 function bind(){
@@ -1226,7 +1146,7 @@ function bind(){
 }
 bind();
 render();
-if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js?v=stable-1-0-3-hotfix-final').catch(()=>{}));
+if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js?v=stable-1-0-3-hotfix-2').catch(()=>{}));
 
 
 
@@ -1236,5 +1156,12 @@ function todayKey(){
   const m=String(d.getMonth()+1).padStart(2,'0');
   const day=String(d.getDate()).padStart(2,'0');
   return `${y}-${m}-${day}`;
+}
+
+
+
+
+function addCustomFood(){
+  customFoodForm();
 }
 
