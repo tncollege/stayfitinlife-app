@@ -15,5 +15,6 @@ export const SUPPLEMENT_DATABASE = [
 {main:"Supplements",sub:"Before Bed",name:"Ashwagandha",defaultQty:1,unit:"capsule",portion:"1 capsule",timing:"Evening / Before Bed",components:[{name:"Ashwagandha",amount:"500mg"}]},
 {main:"Supplements",sub:"Before Bed",name:"Melatonin",defaultQty:1,unit:"tablet",portion:"1 tablet",timing:"Before Bed",components:[{name:"Melatonin",amount:"3mg"}]},
 {main:"Supplements",sub:"Before Bed",name:"Glycine",defaultQty:3,unit:"g",portion:"3g",timing:"Before Bed",components:[{name:"Glycine",amount:"3g"}]},
-{main:"Supplements",sub:"Before Bed",name:"Chamomile Tea",defaultQty:1,unit:"cup",portion:"1 cup ≈ 150ml",timing:"Before Bed",calories:0,protein:0,carbs:0,fats:0}
+{main:"Supplements",sub:"Before Bed",name:"Chamomile Tea",defaultQty:1,unit:"cup",portion:"1 cup ≈ 150ml",timing:"Before Bed",calories:0,protein:0,carbs:0,fats:0},
+  {main:"Supplements",sub:"Fat Burners",name:"L-Carnitine",defaultQty:1,unit:"serving",portion:"1 serving ≈ 1000mg",calories:0,protein:0,carbs:0,fats:0,timing:"Pre-workout / Fat loss phase",components:[{name:"L-Carnitine",amount:"1000mg"}]}
 ];

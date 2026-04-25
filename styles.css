@@ -66,3 +66,6 @@
   .mobile-bottom-nav{z-index:80}
   body:has(.sidebar.open) .mobile-bottom-nav{opacity:0;pointer-events:none}
 }
+
+/* V14 intelligence UI */
+.insight-warning{border-left:4px solid var(--red)}.insight-good{border-left:4px solid var(--green)}.insight-info{border-left:4px solid var(--cyan)}

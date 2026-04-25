@@ -1,12 +1,13 @@
-# STAYFITINLIFE V13.1 Rebuild Fixed
+# STAYFITINLIFE V14 Logic System
 
-This build was rebuilt from the last stable V12.6 base and then upgraded carefully to V13.1.
+Built on the stable V13.1 rebuild base.
 
-## Fix
-- Fixes blank dashboard/main render bug.
-- Keeps stable onboarding.
-- Adds V13.1 Coach Engine.
-- Adds calorie ring + progress bars dashboard.
-- Adds desktop right coach panel.
-- Adds expanded food database.
-- Adds no-cache Netlify headers and clean service worker.
+Included:
+- Zero-cost rule-based intelligence engine
+- Weekly Intelligence Report
+- Nutrition/workout/recovery pattern detection
+- Adaptive goal suggestions
+- Context-aware daily suggestions
+- AI Coach cost controls: FAQ local answers, cache, 3 AI questions/day
+- L-Carnitine supplement added
+- Deployment-safe cache headers and clean service worker

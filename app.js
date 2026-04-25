@@ -2,8 +2,8 @@ import { FOOD_DATABASE } from './data/foodDatabase.js';
 import { EXERCISE_DATABASE, SPLITS } from './data/exerciseDatabase.js';
 import { SUPPLEMENT_DATABASE } from './data/supplementDatabase.js';
 
-const STORE='stayfitinlife_v13_1_rebuild_fixed';
-const APP_VERSION='V13.1';
+const STORE='stayfitinlife_v14_logic_system';
+const APP_VERSION='V14';
 const LAST_UPDATED='25 April 2026';
 
 const todayKey=()=>new Date().toISOString().slice(0,10);
@@ -21,7 +21,7 @@ const defaultData={
   coachPlans:{},
   customFoods:[],
   customSupplements:[],
-  aiCoachUsage:{date:todayKey(),count:0}
+  aiCoachUsage:{date:todayKey(),count:0},aiCache:{},intelligence:{reports:{},patterns:{}},notifications:[]
 };
 
 let data=load();
@@ -432,7 +432,7 @@ function home(){
         ${progressBar('Water',w,t.water,'L')}
       </div>
       <div class="panel"><div class="panel-title">${coachTitle}</div>${planHtml()}</div>
-      <div class="panel"><div class="panel-title">Workout Preview</div><div class="item">Suggested muscles: ${recommendMuscles().join(' + ')||'Flexible'}<br>Recovery status: ${r.status}</div></div>
+      <div class="panel"><div class="panel-title">Workout Preview</div><div class="item">Suggested muscles: ${recommendMuscles().join(' + ')||'Flexible'}<br>Recovery status: ${r.status}</div></div><div class="panel"><div class="panel-title">Context-Aware Suggestion</div><div class="item">${contextSuggestion()}</div></div>
     </div>
     <aside class="desktop-coach-panel" id="desktopCoachPanel">${desktopCoachPanelHtml()}</aside>
   </div>`);
@@ -564,6 +564,72 @@ function recommendMuscles(){
   return Object.keys(EXERCISE_DATABASE).filter(m=>!recent.includes(m)).slice(0,2);
 }
 
+
+// ---------- V14 Zero-Cost Intelligence Engine ----------
+function lastNDays(n){return [...Array(n)].map((_,i)=>{const d=new Date();d.setDate(d.getDate()-i);return d.toISOString().slice(0,10)}).reverse()}
+function avg(nums){const a=nums.filter(x=>Number.isFinite(Number(x)));return a.length?round(a.reduce((s,x)=>s+Number(x),0)/a.length,1):0}
+function nutritionPatterns(days=7){
+  const t=targets(), keys=lastNDays(days);
+  const daily=keys.map(d=>({date:d,...mealTotals(d),water:waterTotal(d),meals:meals(d).length}));
+  return {daily,avgCal:avg(daily.map(x=>x.cal)),avgProtein:avg(daily.map(x=>x.p)),avgWater:avg(daily.map(x=>x.water)),
+    lowProteinDays:daily.filter(x=>x.p<t.protein*.8).length,
+    highCalDays:daily.filter(x=>x.cal>t.calories*1.1).length,
+    lowWaterDays:daily.filter(x=>x.water<t.water*.75).length,
+    weekendHigh:daily.filter(x=>['Sat','Sun'].includes(new Date(x.date).toLocaleDateString('en-US',{weekday:'short'}))&&x.cal>t.calories*1.1).length};
+}
+function workoutPatterns(days=7){
+  const keys=lastNDays(days), daily=keys.map(d=>({date:d,workouts:workouts(d),count:workouts(d).length,muscles:workouts(d).flatMap(w=>w.muscles||[])}));
+  const muscleMap={}; daily.flatMap(d=>d.muscles).forEach(m=>muscleMap[m]=(muscleMap[m]||0)+1);
+  return {daily,total:daily.reduce((a,d)=>a+d.count,0),muscleMap,missingMuscles:Object.keys(EXERCISE_DATABASE).filter(m=>(muscleMap[m]||0)===0)};
+}
+function recoveryPatterns(days=7){const scores=lastNDays(days).map(d=>recoveryStatus(d).score);return {scores,avgScore:avg(scores),lowDays:scores.filter(s=>s<55).length}}
+function buildIntelligenceInsights(){
+  const t=targets(), n=nutritionPatterns(7), w=workoutPatterns(7), r=recoveryPatterns(7), out=[];
+  out.push(n.lowProteinDays>=3?{level:'warning',title:'Protein consistency is low',body:`Protein was below target on ${n.lowProteinDays}/7 days. Add one high-protein meal or supplement daily.`}:{level:'good',title:'Protein trend looks manageable',body:`Average protein: ${n.avgProtein}g vs target ${t.protein}g.`});
+  if(n.highCalDays>=3) out.push({level:'warning',title:'Calories are frequently high',body:`Calories exceeded target on ${n.highCalDays}/7 days. Reduce sauces, oils, snacks or portions.`});
+  if(n.lowWaterDays>=3) out.push({level:'warning',title:'Hydration needs attention',body:`Water was low on ${n.lowWaterDays}/7 days. Use a fixed morning + workout water routine.`});
+  if(n.weekendHigh>=1) out.push({level:'info',title:'Weekend calories are affecting progress',body:'Plan one flexible meal, not a full flexible day.'});
+  out.push(w.total<3?{level:'warning',title:'Workout consistency is low',body:`Only ${w.total}/7 workout days logged. Start with 3 fixed training days this week.`}:{level:'good',title:'Workout consistency is building',body:`${w.total}/7 workout days logged.`});
+  if(w.missingMuscles.length) out.push({level:'info',title:'Muscle balance opportunity',body:`Undertrained this week: ${w.missingMuscles.slice(0,3).join(', ')}.`});
+  out.push(r.lowDays>=2?{level:'warning',title:'Recovery is limiting performance',body:`Recovery was low on ${r.lowDays}/7 days. Reduce intensity or improve sleep before heavy training.`}:{level:'good',title:'Recovery trend is stable',body:`Average recovery score: ${r.avgScore}/100.`});
+  return out;
+}
+function adaptiveGoalSuggestion(){
+  const p=data.profile,t=targets(),n=nutritionPatterns(14),weights=(data.weights||[]).slice(0,6).map(w=>Number(w.weight)).filter(Boolean);
+  if(weights.length>=2){
+    const change=round(weights[0]-weights[weights.length-1],1);
+    if(p.goal==='Fat Loss'&&change>=-.3&&n.avgCal>t.calories*.95)return 'Fat loss appears slow. Reduce daily calories by 100–150 kcal or improve weekend consistency.';
+    if(p.goal==='Muscle Gain'&&change<.2)return 'Muscle gain appears slow. Increase calories by 100–150 kcal and track progressive overload.';
+  }
+  if(n.highCalDays>=4&&p.goal==='Fat Loss')return 'Calories are frequently above target. Improve logging and portion control before lowering calories.';
+  return 'Keep current targets and focus on consistency.';
+}
+function generateWeeklyIntelligenceReport(){
+  const report={date:todayKey(),generatedAt:new Date().toISOString(),nutrition:nutritionPatterns(7),workout:workoutPatterns(7),recovery:recoveryPatterns(7),insights:buildIntelligenceInsights(),adaptiveGoal:adaptiveGoalSuggestion()};
+  data.intelligence=data.intelligence||{reports:{},patterns:{}}; data.intelligence.reports[todayKey()]=report; localStorage.setItem(STORE,JSON.stringify(data)); return report;
+}
+function currentIntelligenceReport(){return (data.intelligence&&data.intelligence.reports&&data.intelligence.reports[todayKey()])||generateWeeklyIntelligenceReport()}
+function intelligenceReportHtml(){
+  const r=currentIntelligenceReport();
+  return `<div class="panel-title">Weekly Intelligence Report</div><div class="item"><strong>Adaptive Goal:</strong><br>${r.adaptiveGoal}</div>${r.insights.map(x=>`<div class="item insight-${x.level}"><strong>${x.title}</strong><br>${x.body}</div>`).join('')}`;
+}
+function contextSuggestion(){
+  const t=targets(),m=mealTotals(todayKey()),w=waterTotal(todayKey()),r=recoveryStatus(todayKey()),h=new Date().getHours();
+  if(h>=20&&m.p<t.protein)return `Evening suggestion: you still need ${Math.round(t.protein-m.p)}g protein. Choose a light protein option.`;
+  if(w<t.water*.6)return 'Hydration is low today. Add 500ml water now.';
+  if(r.score<55)return 'Recovery is low. Keep today’s training lighter.';
+  return 'You are on track. Keep logging meals and water.';
+}
+function aiCacheKey(question){return String(question||'').trim().toLowerCase().replace(/\s+/g,' ').slice(0,180)}
+function localFAQAnswer(question){
+  const qn=String(question||'').toLowerCase();
+  if(qn.includes('protein'))return 'Protein supports muscle repair and satiety. Aim for your daily target first, then distribute it across meals.';
+  if(qn.includes('fat loss')||qn.includes('lose weight'))return 'Fat loss requires a consistent calorie deficit, enough protein, resistance training, hydration and sleep.';
+  if(qn.includes('water'))return 'Hydration supports performance and recovery. Use your water target as a daily baseline and increase it on active days.';
+  if(qn.includes('creatine'))return 'Creatine is commonly taken daily, often 3–5g. Timing is less important than consistency.';
+  return '';
+}
+
 // ---------- Smart plan / recovery / profile / progress / coach ----------
 function smartPlan(){data.coachPlans[todayKey()]=generateFullCoachPlan();localStorage.setItem(STORE,JSON.stringify(data));const box=q('coachPlanBox');if(box)box.innerHTML=coachPlanCard();const side=q('desktopCoachPanel');if(side)side.innerHTML=desktopCoachPanelHtml();}
 function planHtml(){return `<div id="coachPlanBox">${coachPlanCard()}</div>`}
@@ -594,12 +660,14 @@ function recovery(){
   q('saveRec').onclick=()=>{data.recovery[viewDate]={sleep:q('sleep').value,quality:q('quality').value,energy:q('energy').value,soreness:q('sore').value};save()};
 }
 function progress(){
-  shell('Progress','Goal progress and weight trend',
-  `<div class="panel"><div class="field"><label>Weight</label><input id="weight"></div><button class="btn primary" id="addWeight">Add Weight</button></div><div class="panel">${data.weights.map((w,i)=>`<div class="log-card">${w.weight}kg • ${w.date}<button class="btn danger" data-delweight="${i}">Delete</button></div>`).join('')||'<div class="item">No logs.</div>'}</div>`);
+  shell('Progress','Goal progress, weight trend and intelligence',
+  `<div class="panel"><div class="field"><label>Weight</label><input id="weight"></div><button class="btn primary" id="addWeight">Add Weight</button></div>
+  <div class="panel">${data.weights.map((w,i)=>`<div class="log-card">${w.weight}kg • ${w.date}<button class="btn danger" data-delweight="${i}">Delete</button></div>`).join('')||'<div class="item">No logs.</div>'}</div>
+  <div class="panel">${intelligenceReportHtml()}<button class="btn primary" id="regenReport">Refresh Intelligence Report</button></div>`);
   q('addWeight').onclick=()=>{data.weights.unshift({date:todayKey(),weight:q('weight').value});save()};
+  q('regenReport').onclick=()=>{generateWeeklyIntelligenceReport();render()};
   document.querySelectorAll('[data-delweight]').forEach(b=>b.onclick=()=>{data.weights.splice(Number(b.dataset.delweight),1);save()});
 }
-
 function coach(){
   let u=data.aiCoachUsage;
   if(u.date!==todayKey())u=data.aiCoachUsage={date:todayKey(),count:0};
@@ -611,7 +679,7 @@ function coach(){
       <button class="pill active" data-coachtab="today">Today Plan</button>
       <button class="pill" data-coachtab="meal">Meal Plan</button>
       <button class="pill" data-coachtab="workout">Workout Plan</button>
-      <button class="pill" data-coachtab="ask">Ask AI</button>
+      <button class="pill" data-coachtab="ask">Ask AI</button><button class="pill" data-coachtab="intel">Intelligence</button>
     </div>
     <button class="btn primary" id="regenCoach">Regenerate Coach Plan</button>
     <div id="coachContent" class="suggestion"></div>
@@ -622,7 +690,8 @@ function coach(){
     if(ct==='today') q('coachContent').innerHTML=coachPlanCard();
     if(ct==='meal') q('coachContent').innerHTML=`<strong>Meal Plan</strong><br>${plan.mealPlan.meals.map(m=>`<h4>${m.meal} (${m.targetCalories} kcal target)</h4>${m.items.map(i=>`• ${i.name}: ${i.qty} ${i.unit} — ${i.calories} kcal, P${i.protein} C${i.carbs} F${i.fats}`).join("<br>")}`).join("<br>")}<br><br><strong>Total:</strong> ${Math.round(plan.mealPlan.totals.calories)} kcal, P${round(plan.mealPlan.totals.protein)} C${round(plan.mealPlan.totals.carbs)} F${round(plan.mealPlan.totals.fats)}`;
     if(ct==='workout') q('coachContent').innerHTML=`<strong>${plan.workoutPlan.split}</strong><br>Recovery: ${plan.workoutPlan.recovery} • ${plan.workoutPlan.decision}<br>${plan.workoutPlan.exercises.map(e=>`• ${e.name}: ${e.sets} sets x ${e.reps}, rest ${e.rest}`).join("<br>")}`;
-    if(ct==='ask') q('coachContent').innerHTML=`<div class="item">AI Coach: <strong>${u.count}/5</strong> used today</div><div class="field"><label>Question</label><textarea id="question"></textarea></div><button class="btn primary" id="ask">Ask AI Coach</button><button class="btn" id="quick">Quick Local Advice</button><div class="suggestion" id="answer"></div>`;
+    if(ct==='intel') q('coachContent').innerHTML=intelligenceReportHtml();
+    if(ct==='ask') q('coachContent').innerHTML=`<div class="item">AI Coach: <strong>${u.count}/3</strong> used today</div><div class="field"><label>Question</label><textarea id="question"></textarea></div><button class="btn primary" id="ask">Ask AI Coach</button><button class="btn" id="quick">Quick Local Advice</button><div class="suggestion" id="answer"></div>`;
     if(ct==='ask'){q('quick').onclick=()=>q('answer').innerHTML=localCoach();q('ask').onclick=askCoach;}
   };
   q('regenCoach').onclick=()=>{data.coachPlans[todayKey()]=generateFullCoachPlan();localStorage.setItem(STORE,JSON.stringify(data));renderCoachTab('today')};
@@ -630,16 +699,27 @@ function coach(){
   renderCoachTab('today');
 }
 
-function localCoach(){return`Recovery: ${recoveryStatus(todayKey()).status}<br>Recommended: ${recommendMuscles().join(' + ')||'Any fresh group'}<br>Protein remaining: ${Math.max(0,targets().protein-mealTotals(todayKey()).p)}g`}
+function localCoach(){return `${contextSuggestion()}<br><br>${buildIntelligenceInsights().slice(0,3).map(i=>`<strong>${i.title}</strong>: ${i.body}`).join('<br>')}`}
 async function askCoach(){
+  const question=q('question').value||'';
+  const faq=localFAQAnswer(question);
+  if(faq){q('answer').innerHTML=faq+'<br><span class="muted">Answered locally. No AI call used.</span>';return}
+  const key=aiCacheKey(question);
+  data.aiCache=data.aiCache||{};
+  if(data.aiCache[key]){q('answer').innerHTML=data.aiCache[key]+'<br><span class="muted">Cached response. No AI call used.</span>';return}
   const u=data.aiCoachUsage;
-  if(u.count>=5){q('answer').innerHTML='Daily limit reached.';return}
+  if(u.date!==todayKey()){u.date=todayKey();u.count=0}
+  if(u.count>=3){q('answer').innerHTML='Daily AI limit reached. Local coach insight:<br>'+localCoach();return}
   q('answer').innerHTML='Thinking...';
   try{
-    const r=await fetch('/.netlify/functions/ai-coach',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question:q('question').value,context:data})});
+    const r=await fetch('/.netlify/functions/ai-coach',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question,context:{profile:data.profile,targets:targets(),today:mealTotals(todayKey()),recovery:recoveryStatus(todayKey()),insights:buildIntelligenceInsights()}})});
     if(!r.ok)throw Error();
-    const j=await r.json();u.count++;localStorage.setItem(STORE,JSON.stringify(data));q('answer').innerHTML=j.answer;
-  }catch{q('answer').innerHTML=localCoach()+'<br><span class="muted">AI unavailable; fallback shown.</span>'}
+    const j=await r.json();
+    u.count++;
+    data.aiCache[key]=j.answer;
+    localStorage.setItem(STORE,JSON.stringify(data));
+    q('answer').innerHTML=j.answer;
+  }catch{q('answer').innerHTML=localCoach()+'<br><span class="muted">AI unavailable; local intelligence shown.</span>'}
 }
 
 // ---------- Settings / legal / modal ----------
@@ -703,4 +783,4 @@ function bind(){
 }
 bind();
 render();
-if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js?v=13.1-rebuild-fixed').catch(()=>{}));
+if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js?v=14-logic-system').catch(()=>{}));
