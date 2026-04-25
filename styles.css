@@ -98,3 +98,10 @@
 .scanner-box{width:100%;min-height:340px;border-radius:20px;background:#000;overflow:hidden;margin-top:12px}
 .scan-frame{position:absolute;left:15%;right:15%;top:42%;height:80px;border:3px solid rgba(32,228,255,.9);border-radius:16px;display:grid;place-items:center;color:#fff;font-weight:900;text-shadow:0 2px 8px #000;background:rgba(0,0,0,.12);pointer-events:none}
 @media(max-width:520px){.scanner-box{min-height:280px}.inline-fields{grid-template-columns:1fr auto 1fr auto}}
+
+/* Stable 1.0.1 clean scanner */
+#html5ScannerRoot{width:100%;min-height:320px;background:#000;border-radius:20px;overflow:hidden}
+#html5ScannerRoot video{width:100%!important;border-radius:20px}
+#html5ScannerRoot__dashboard_section{display:none!important}
+.scanner-wrap{position:relative}
+.scan-frame{position:absolute;left:15%;right:15%;top:42%;height:80px;border:3px solid rgba(32,228,255,.9);border-radius:16px;display:grid;place-items:center;color:#fff;font-weight:900;text-shadow:0 2px 8px #000;background:rgba(0,0,0,.12);pointer-events:none}

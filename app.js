@@ -2,8 +2,8 @@ import { FOOD_DATABASE } from './data/foodDatabase.js';
 import { EXERCISE_DATABASE, SPLITS } from './data/exerciseDatabase.js';
 import { SUPPLEMENT_DATABASE } from './data/supplementDatabase.js';
 
-const STORE='stayfitinlife_stable_1_0_1';
-const APP_VERSION='Stable Version 1.0';
+const STORE='stayfitinlife_stable_1_0_1_clean';
+const APP_VERSION='Stable Version 1.0.1';
 const LAST_UPDATED='25 April 2026';
 
 const todayKey=()=>new Date().toISOString().slice(0,10);
@@ -23,7 +23,7 @@ const defaultData={
   coachPlans:{},
   customFoods:[],
   customSupplements:[],
-  aiCoachUsage:{date:todayKey(),count:0},aiCache:{},intelligence:{reports:{},patterns:{}},notifications:[]
+  aiCoachUsage:{date:todayKey(),count:0},aiCache:{},barcodeCache:{},intelligence:{reports:{},patterns:{}},notifications:[]
 };
 
 let data=load();
@@ -48,7 +48,7 @@ let restSeconds=0;
 let restInt=null;
 let restPaused=false;
 
-let scannerStream=null;
+
 let barcodeDetector=null;
 let scannerLoop=null;
 let scannerFacingMode='environment';
@@ -402,76 +402,6 @@ function showAppGuide(){
 }
 
 
-// ---------- Stable 1.0 Barcode Scanner ----------
-let html5QrScanner=null;
-async function openScanner(){
-  const modal=document.createElement('div');
-  modal.className='modal';
-  modal.innerHTML=`<div class="modal-card">
-    <h2>Scan Barcode</h2>
-    <p class="muted">Rear camera opens by default. Align the barcode inside the frame.</p>
-    <div class="scanner-wrap">
-      <div id="scannerVideo" class="scanner-box"></div>
-      <div class="scan-frame">Align barcode here</div>
-    </div>
-    <div class="field"><label>Mode</label><select id="scanMode"><option value="environment">Rear Camera</option><option value="user">Front Camera</option></select></div>
-    <div class="suggestion" id="scannerStatus">Starting scanner...</div>
-    <div style="display:flex;gap:10px;flex-wrap:wrap">
-      <button class="btn" id="switchCam">Switch Camera</button>
-      <button class="btn" id="manualBarcode">Enter Barcode</button>
-      <button class="btn primary" id="closeScanner">Close</button>
-    </div>
-  </div>`;
-  document.body.appendChild(modal);
-
-  const stop=async()=>{
-    try{ if(html5QrScanner){await html5QrScanner.stop(); await html5QrScanner.clear(); html5QrScanner=null;} }catch(e){}
-  };
-  const close=async()=>{await stop();modal.remove()};
-
-  async function start(mode='environment'){
-    await stop();
-    q('scannerStatus').innerHTML='Scanning... move barcode inside the frame.';
-    if(window.Html5Qrcode){
-      html5QrScanner=new Html5Qrcode("scannerVideo");
-      html5QrScanner.start(
-        {facingMode:mode},
-        {fps:10,qrbox:{width:260,height:110},formatsToSupport:[
-          Html5QrcodeSupportedFormats.EAN_13,
-          Html5QrcodeSupportedFormats.EAN_8,
-          Html5QrcodeSupportedFormats.UPC_A,
-          Html5QrcodeSupportedFormats.UPC_E,
-          Html5QrcodeSupportedFormats.CODE_128,
-          Html5QrcodeSupportedFormats.CODE_39
-        ]},
-        async decodedText=>{
-          q('scannerStatus').innerHTML='✔ Barcode detected: '+decodedText;
-          if(navigator.vibrate) navigator.vibrate(120);
-          const search=q('foodSearch'); if(search){search.value=decodedText; search.dispatchEvent(new Event('input'));}
-          await stop();
-          setTimeout(()=>modal.remove(),650);
-        },
-        err=>{}
-      ).catch(e=>{
-        q('scannerStatus').innerHTML='Scanner could not start. Use Enter Barcode below.';
-      });
-    }else{
-      q('scannerStatus').innerHTML='Scanner library unavailable. Use Enter Barcode below.';
-    }
-  }
-
-  q('closeScanner').onclick=close;
-  q('manualBarcode').onclick=async()=>{
-    const code=prompt('Enter barcode number');
-    if(code){
-      const search=q('foodSearch'); if(search){search.value=code; search.dispatchEvent(new Event('input'));}
-      await close();
-    }
-  };
-  q('switchCam').onclick=()=>{const s=q('scanMode');s.value=s.value==='environment'?'user':'environment';start(s.value)};
-  q('scanMode').onchange=()=>start(q('scanMode').value);
-  start('environment');
-}
 
 // ---------- Core calculations ----------
 function targets(){
@@ -929,15 +859,8 @@ function settings(){
 }
 
 // ---------- Barcode scanner ----------
-function stopScannerStream(){if(scannerLoop)cancelAnimationFrame(scannerLoop);scannerLoop=null;if(scannerStream){scannerStream.getTracks().forEach(t=>t.stop());scannerStream=null}}
-async function openBarcodeScanner(){
-  openModal(`<div class="panel-title">Scan Barcode</div><div class="muted">Rear camera opens by default. You can switch or close camera.</div><div class="scanner-wrap"><video id="scannerVideo" autoplay playsinline muted style="width:100%;max-height:55vh;border-radius:20px;background:#000;margin-top:12px"></video><div class="scan-frame">Align barcode here</div></div><div class="field"><label>Mode</label><select id="cameraFacingSelect"><option value="environment">Rear Camera</option><option value="user">Front Camera</option></select></div><div class="suggestion" id="scannerStatus">Starting rear camera...</div><button class="btn" id="switchCameraBtn">Switch Camera</button> <button class="btn" id="manualScannerEntry">Enter Barcode</button>`);
-  q('closeModal').onclick=()=>{stopScannerStream();closeModal()};
-  q('manualScannerEntry').onclick=()=>{stopScannerStream();closeModal();manualBarcodeEntry()};
-  q('switchCameraBtn').onclick=()=>{scannerFacingMode=scannerFacingMode==='environment'?'user':'environment';startBarcodeCamera()};
-  q('cameraFacingSelect').onchange=()=>{scannerFacingMode=q('cameraFacingSelect').value;startBarcodeCamera()};
-  startBarcodeCamera();
-}
+
+
 async function startBarcodeCamera(){
   try{
     stopScannerStream();
@@ -953,13 +876,147 @@ async function detectBarcodeLoop(){
   scannerLoop=requestAnimationFrame(detectBarcodeLoop);
 }
 function manualBarcodeEntry(){const code=prompt('Enter barcode number');if(code)handleBarcodeResult(code.trim())}
-function handleBarcodeResult(code){
-  const match=foodList().find(f=>String(f.barcode||'')===String(code));
-  if(match){mainCat=match.main;subCat=match.sub;selectedFood=match.name;alert('Found: '+match.name);nutrition();return}
-  const name=prompt('Barcode not found. Enter product/supplement name:','Custom Product');if(!name)return;
-  const isSupp=confirm('Is this a supplement? OK = Supplement, Cancel = Food');
-  const item={main:isSupp?'Supplements':'Custom',sub:'Barcode',name,barcode:code,defaultQty:1,unit:'serving',portion:'1 serving',calories:Number(prompt('Calories:','0')||0),protein:Number(prompt('Protein:','0')||0),carbs:Number(prompt('Carbs:','0')||0),fats:Number(prompt('Fats:','0')||0)};
-  if(isSupp){data.customSupplements.push(item);mainCat='Supplements'}else{data.customFoods.push(item);mainCat='Custom'}subCat='Barcode';selectedFood=name;save();
+
+
+
+// ---------- Stable 1.0.1 Scanner + OpenFoodFacts ----------
+let sflHtml5Scanner=null;
+
+function normalizeOffNumber(v){
+  const n=Number(v);
+  return Number.isFinite(n)?round(n,1):0;
+}
+
+async function fetchFoodFromAPI(barcode){
+  try{
+    if(!barcode) return null;
+    data.barcodeCache=data.barcodeCache||{};
+    if(data.barcodeCache[barcode]) return data.barcodeCache[barcode];
+
+    const res=await fetch(`https://world.openfoodfacts.org/api/v0/product/${encodeURIComponent(barcode)}.json`);
+    const json=await res.json();
+    if(!json || json.status!==1 || !json.product) return null;
+
+    const p=json.product;
+    const n=p.nutriments||{};
+    const food={
+      main:"Barcode",
+      sub:"OpenFoodFacts",
+      name:p.product_name || p.generic_name || `Barcode ${barcode}`,
+      barcode:String(barcode),
+      defaultQty:1,
+      unit:"serving",
+      portion:p.serving_size || "1 serving",
+      calories:normalizeOffNumber(n["energy-kcal_serving"] ?? n["energy-kcal_100g"]),
+      protein:normalizeOffNumber(n["proteins_serving"] ?? n["proteins_100g"]),
+      carbs:normalizeOffNumber(n["carbohydrates_serving"] ?? n["carbohydrates_100g"]),
+      fats:normalizeOffNumber(n["fat_serving"] ?? n["fat_100g"])
+    };
+    data.barcodeCache[barcode]=food;
+    localStorage.setItem(STORE,JSON.stringify(data));
+    return food;
+  }catch(e){
+    console.error("OpenFoodFacts error:",e);
+    return null;
+  }
+}
+
+function addFoodFromBarcode(food){
+  selectedFood=food;
+  selectedMeal=selectedMeal||'Breakfast';
+  render();
+  setTimeout(()=>{
+    const search=q('foodSearch');
+    if(search) search.value=food.name;
+  },50);
+}
+
+async function handleBarcodeResult(code){
+  try{
+    const clean=String(code||'').trim();
+    if(!clean) return;
+    const status=q('scannerStatus');
+    if(status) status.innerHTML='Fetching food data...';
+
+    const food=await fetchFoodFromAPI(clean);
+    if(!food){
+      alert('Product not found in OpenFoodFacts. Please add manually.');
+      return;
+    }
+    addFoodFromBarcode(food);
+  }catch(e){
+    console.error("Barcode handler error:",e);
+    alert('Could not fetch food data. Please use manual entry.');
+  }
+}
+
+async function stopStableScanner(){
+  try{
+    if(sflHtml5Scanner){
+      await sflHtml5Scanner.stop().catch(()=>{});
+      await sflHtml5Scanner.clear().catch(()=>{});
+      sflHtml5Scanner=null;
+    }
+  }catch(e){}
+}
+
+async function openBarcodeScanner(){
+  const modal=q('modal'), card=q('modalCard');
+  modal.classList.remove('hidden');
+  card.innerHTML=`<div class="panel-title">Scan Barcode</div>
+    <div class="muted">Rear camera opens by default. Align the barcode inside the frame.</div>
+    <div class="scanner-wrap">
+      <div id="html5ScannerRoot" class="scanner-box"></div>
+      <div class="scan-frame">Align barcode here</div>
+    </div>
+    <div class="suggestion" id="scannerStatus">Starting scanner...</div>
+    <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">
+      <button class="btn" id="manualScannerEntry">Enter Barcode</button>
+      <button class="btn primary" id="closeScanner">Close</button>
+    </div>`;
+
+  const close=async()=>{await stopStableScanner();modal.classList.add('hidden');card.innerHTML=''};
+  q('closeScanner').onclick=close;
+  q('manualScannerEntry').onclick=async()=>{
+    const code=prompt('Enter barcode number');
+    if(code){await close();handleBarcodeResult(code)}
+  };
+
+  const status=q('scannerStatus');
+  if(!window.Html5Qrcode){
+    status.innerHTML='Scanner engine unavailable. Use Enter Barcode.';
+    return;
+  }
+
+  try{
+    sflHtml5Scanner=new Html5Qrcode("html5ScannerRoot");
+    const config={fps:10,qrbox:{width:260,height:120},aspectRatio:1.777};
+    if(window.Html5QrcodeSupportedFormats){
+      config.formatsToSupport=[
+        Html5QrcodeSupportedFormats.EAN_13,
+        Html5QrcodeSupportedFormats.EAN_8,
+        Html5QrcodeSupportedFormats.UPC_A,
+        Html5QrcodeSupportedFormats.UPC_E,
+        Html5QrcodeSupportedFormats.CODE_128,
+        Html5QrcodeSupportedFormats.CODE_39
+      ];
+    }
+    await sflHtml5Scanner.start(
+      {facingMode:"environment"},
+      config,
+      async decodedText=>{
+        status.innerHTML='✔ Barcode detected: '+decodedText;
+        if(navigator.vibrate) navigator.vibrate(120);
+        await close();
+        handleBarcodeResult(decodedText);
+      },
+      ()=>{}
+    );
+    status.innerHTML='Scanning... move barcode inside the frame.';
+  }catch(e){
+    console.error("Scanner start error:",e);
+    status.innerHTML='Camera scanner could not start. Use Enter Barcode.';
+  }
 }
 
 // ---------- Init ----------
@@ -970,45 +1027,4 @@ function bind(){
 }
 bind();
 render();
-if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js?v=1.0.1').catch(()=>{}));
-
-// ---------- OpenFoodFacts Integration ----------
-async function fetchFoodFromAPI(barcode){
-  if(!barcode) return null;
-  if(data.barcodeCache && data.barcodeCache[barcode]){
-    return data.barcodeCache[barcode];
-  }
-  try{
-    const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
-    const json = await res.json();
-    if(json.status !== 1) return null;
-    const p = json.product;
-    const n = p.nutriments || {};
-    const food = {
-      name: p.product_name || "Unknown Food",
-      calories: n["energy-kcal_serving"] || n["energy-kcal_100g"] || 0,
-      protein: n.proteins_serving || n.proteins_100g || 0,
-      carbs: n.carbohydrates_serving || n.carbohydrates_100g || 0,
-      fats: n.fat_serving || n.fat_100g || 0,
-      portion: p.serving_size || "1 serving"
-    };
-    data.barcodeCache = data.barcodeCache || {};
-    data.barcodeCache[barcode] = food;
-    save();
-    return food;
-  }catch(e){
-    return null;
-  }
-}
-
-async function handleBarcodeResult(code){
-  const status = document.getElementById("scannerStatus");
-  if(status) status.innerHTML = "Fetching food data...";
-  const food = await fetchFoodFromAPI(code);
-  if(!food){
-    alert("Food not found. You can add manually.");
-    return;
-  }
-  alert(`Added: ${food.name}`);
-  // Hook into existing food add logic if present
-}
+if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js?v=stable-1-0-1-clean').catch(()=>{}));
