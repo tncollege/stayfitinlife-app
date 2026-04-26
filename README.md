@@ -1,18 +1,20 @@
-# STAYFITINLIFE Stable Version 1.0.2
+# STAYFITINLIFE — Stable Version 1.0.4 Clean
 
-Deployment-ready build with critical logic fixes and workout expansion.
+Complete clean build. No legacy app.js logic.
 
-Included:
-- Dashboard calories adjusted by workout calories burned
-- Calories burned + deficit/surplus shown
-- Workout preview shows today’s activity or Workout Missing
-- Context-aware food suggestions for remaining macros
-- Finish Day feature
-- Custom food option
-- Water logging: +250ml, +500ml, +1L, custom input
-- Strength workout fixes: user-selected workout name, warmup/working set retained, set type visible
-- Cardio section with duration, distance, intensity, auto-calories
-- Sports section with duration, intensity, auto-calories
-- Rest timer alert + vibration
-- Intelligence nutrition data sync
-- Netlify cache headers and clean service worker
+Includes:
+- Preserved onboarding
+- Local date-safe todayKey
+- Dashboard / Nutrition / Workout / Recovery history selector
+- Clean Nutrition UI: meal tabs, category grid, cuisines, Indian subcategories
+- Custom Food one-screen form with serving dropdown
+- Custom Food Add/Edit/Delete
+- Search updates only food list and keeps cursor focus
+- Barcode scanner + OpenFoodFacts
+- Water: +250ml, +500ml, +1L, custom
+- Workout: Strength, Cardio, Sports, Custom Exercise
+- Auto rest timer with skip/+15/-15/sound/vibration/notification
+- Finish Day + auto finish old days
+- Coach suggestions and protein gap reminder
+- Mobile bottom nav safe-area fix
+- Legal updated with version and last updated
